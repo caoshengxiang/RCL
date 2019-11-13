@@ -14,6 +14,7 @@ class PortItem(scrapy.Item):
     port = scrapy.Field()
     date = scrapy.Field()
 
+
 class GroupItem(scrapy.Item):
     # define the fields for your item here like:
     pol = scrapy.Field()
@@ -34,3 +35,15 @@ class GroupItem(scrapy.Item):
     FLAG = scrapy.Field()
     TransferCode = scrapy.Field()
     TransferName = scrapy.Field()
+
+
+class PortGroupItem(scrapy.Item):
+    # define the fields for your item here like:
+    date = scrapy.Field()
+    portPol = scrapy.Field()
+    portNamePol = scrapy.Field()
+    portPod = scrapy.Field()
+    portNamePod = scrapy.Field()
+    content = scrapy.Field()
+    status = scrapy.Field()
+    userTime = scrapy.Field()

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime
 
 # Scrapy settings for RCL project
 #
@@ -19,8 +20,10 @@ MONGO_URI = '49.235.131.71:27017'
 MONGO_DB = 'rcltest'
 
 # 日志
-# LOG_LEVEL = 'WARRNING'
-# LOG_FILE =
+today = datetime.datetime.now()
+log_file_path = 'scrapy_{}_{}_{}.log'.format(today.year, today.month, today.day)
+LOG_LEVEL = 'DEBUG'
+LOG_FILE = log_file_path
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = 'RCL (+http://www.yourdomain.com)'
@@ -71,8 +74,8 @@ DEFAULT_REQUEST_HEADERS = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   # 'RCL.pipelines.PortMongoPipeline': 300,
-   'RCL.pipelines.GroupMongoPipeline': 300,
+    # 'RCL.pipelines.PortMongoPipeline': 300,
+    'RCL.pipelines.GroupMongoPipeline': 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
