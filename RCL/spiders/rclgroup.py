@@ -88,7 +88,8 @@ class RclgroupSpider(scrapy.Spider):
         logging.info('港口数据获取完成, 开始请求港口组合')
         for cn in CNARR:
             for other in OTHERARR:
-            # for other in [OTHERARR[0]]:
+                #
+                # for other in [OTHERARR[0]]:
                 logging.info('开始一个请求' + cn['code'] + '-' + other['code'])
                 self.data['ctl00$ContentPlaceHolder1$vsLoading'] = cn['code']
                 self.data['ctl00$ContentPlaceHolder1$vsDischarge'] = other['code']

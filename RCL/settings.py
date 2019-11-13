@@ -24,7 +24,8 @@ today = datetime.datetime.now()
 log_file_path = 'log/scrapy_{}_{}_{}.log'.format(today.year, today.month, today.day)
 LOG_LEVEL = 'DEBUG'
 LOG_FILE = log_file_path
-
+LOG_ENCODING = 'utf-8'
+LOG_STDOUT = True
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = 'RCL (+http://www.yourdomain.com)'
 
@@ -76,6 +77,7 @@ DEFAULT_REQUEST_HEADERS = {
 ITEM_PIPELINES = {
     # 'RCL.pipelines.PortMongoPipeline': 300,
     # 'RCL.pipelines.GroupMongoPipeline': 300,
+    'RCL.pipelines.MysqlPipeline': 300
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
