@@ -54,17 +54,17 @@ class RclgroupSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        yield Request(url=self.start_urls[0], callback=self.parse_port, headers=self.headers)
-        # yield scrapy.FormRequest(url=self.groupUrl, method='POST',
-        #                          meta={
-        #                              'pol': self.data['ctl00$ContentPlaceHolder1$vsLoading'],
-        #                              'pod': self.data['ctl00$ContentPlaceHolder1$vsDischarge'],
-        #                              'polName': '',
-        #                              'podName': ''
-        #                          },
-        #                          formdata=self.data,
-        #                          callback=self.parse_group,
-        #                          headers=self.headers)
+        # yield Request(url=self.start_urls[0], callback=self.parse_port, headers=self.headers)
+        yield scrapy.FormRequest(url=self.groupUrl, method='POST',
+                                 meta={
+                                     'pol': self.data['ctl00$ContentPlaceHolder1$vsLoading'],
+                                     'pod': self.data['ctl00$ContentPlaceHolder1$vsDischarge'],
+                                     'polName': '',
+                                     'podName': ''
+                                 },
+                                 formdata=self.data,
+                                 callback=self.parse_group,
+                                 headers=self.headers)
 
     def parse_port(self, response):
         doc = pq(response.text)
@@ -88,7 +88,6 @@ class RclgroupSpider(scrapy.Spider):
         logging.info('港口数据获取完成, 开始请求港口组合')
         for cn in CNARR:
             for other in OTHERARR:
-            # for other in [OTHERARR[0]]:
                 logging.info('开始一个请求' + cn['code'] + '-' + other['code'])
                 self.data['ctl00$ContentPlaceHolder1$vsLoading'] = cn['code']
                 self.data['ctl00$ContentPlaceHolder1$vsDischarge'] = other['code']
@@ -114,7 +113,7 @@ class RclgroupSpider(scrapy.Spider):
         portItem['portNamePol'] = response.meta['polName']
         portItem['portPod'] = response.meta['pod']
         portItem['portNamePod'] = response.meta['podName']
-        portItem['content'] = doc
+        portItem['content'] = response.text
         portItem['status'] = 1 if trs.length else 2
         portItem['userTime'] = ''
         yield portItem
