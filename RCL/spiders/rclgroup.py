@@ -128,7 +128,6 @@ class RclgroupSpider(scrapy.Spider):
     #     return row
 
     def parse_group(self, response):
-        logging.warning(response)
         doc = pq(response.text)
         trs = doc('#vesseltable tr')
         portItem = PortGroupItem()
