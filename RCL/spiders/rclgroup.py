@@ -54,17 +54,17 @@ class RclgroupSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        # yield Request(url=self.start_urls[0], callback=self.parse_port, headers=self.headers)
-        yield scrapy.FormRequest(url=self.groupUrl, method='POST',
-                                 meta={
-                                     'pol': self.data['ctl00$ContentPlaceHolder1$vsLoading'],
-                                     'pod': self.data['ctl00$ContentPlaceHolder1$vsDischarge'],
-                                     'polName': '',
-                                     'podName': ''
-                                 },
-                                 formdata=self.data,
-                                 callback=self.parse_group,
-                                 headers=self.headers)
+        yield Request(url=self.start_urls[0], callback=self.parse_port, headers=self.headers)
+        # yield scrapy.FormRequest(url=self.groupUrl, method='POST',
+        #                          meta={
+        #                              'pol': self.data['ctl00$ContentPlaceHolder1$vsLoading'],
+        #                              'pod': self.data['ctl00$ContentPlaceHolder1$vsDischarge'],
+        #                              'polName': '',
+        #                              'podName': ''
+        #                          },
+        #                          formdata=self.data,
+        #                          callback=self.parse_group,
+        #                          headers=self.headers)
 
     def parse_port(self, response):
         doc = pq(response.text)
