@@ -21,7 +21,7 @@ MONGO_DB = 'rcltest'
 
 # 日志
 today = datetime.datetime.now()
-log_file_path = 'scrapy_{}_{}_{}.log'.format(today.year, today.month, today.day)
+log_file_path = 'log/scrapy_{}_{}_{}.log'.format(today.year, today.month, today.day)
 LOG_LEVEL = 'DEBUG'
 LOG_FILE = log_file_path
 
