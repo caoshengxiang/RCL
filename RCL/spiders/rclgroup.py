@@ -42,8 +42,8 @@ class RclgroupSpider(scrapy.Spider):
         'ctl00$ContentPlaceHolder1$cCaptcha': '',
         'ctl00$ContentPlaceHolder1$vsdate': currentDate,
         'ctl00$ContentPlaceHolder1$vsduration': '42',
-        'ctl00$ContentPlaceHolder1$vsLoading': 'AEDXB',
-        'ctl00$ContentPlaceHolder1$vsDischarge': 'AEKLF',
+        'ctl00$ContentPlaceHolder1$vsLoading': 'CNDLC',  # AEKLF
+        'ctl00$ContentPlaceHolder1$vsDischarge': 'AEDXB',  # CNDCB
         'ctl00$ContentPlaceHolder1$sCaptcha': '9ba',
         'ctl00$ContentPlaceHolder1$submitVS': 'Submit',
         'ctl00$ContentPlaceHolder1$ltService': 'ALO',
@@ -54,17 +54,17 @@ class RclgroupSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        yield Request(url=self.start_urls[0], callback=self.parse_port, headers=self.headers)
-        # yield scrapy.FormRequest(url=self.groupUrl, method='POST',
-        #                          meta={
-        #                              'pol': self.data['ctl00$ContentPlaceHolder1$vsLoading'],
-        #                              'pod': self.data['ctl00$ContentPlaceHolder1$vsDischarge'],
-        #                              'polName': '',
-        #                              'podName': ''
-        #                          },
-        #                          formdata=self.data,
-        #                          callback=self.parse_group,
-        #                          headers=self.headers)
+        # yield Request(url=self.start_urls[0], callback=self.parse_port, headers=self.headers)
+        yield scrapy.FormRequest(url=self.groupUrl, method='POST',
+                                 meta={
+                                     'pol': self.data['ctl00$ContentPlaceHolder1$vsLoading'],
+                                     'pod': self.data['ctl00$ContentPlaceHolder1$vsDischarge'],
+                                     'polName': 'DALIAN',
+                                     'podName': 'JEBEL ALI, U.A.E'
+                                 },
+                                 formdata=self.data,
+                                 callback=self.parse_group,
+                                 headers=self.headers)
 
     def parse_port(self, response):
         doc = pq(response.text)
@@ -88,7 +88,6 @@ class RclgroupSpider(scrapy.Spider):
         logging.info('港口数据获取完成, 开始请求港口组合')
         for cn in CNARR:
             for other in OTHERARR:
-                logging.info('开始一个请求' + cn['code'] + '-' + other['code'])
                 self.data['ctl00$ContentPlaceHolder1$vsLoading'] = cn['code']
                 self.data['ctl00$ContentPlaceHolder1$vsDischarge'] = other['code']
                 # logging.info(self.data)
@@ -103,11 +102,36 @@ class RclgroupSpider(scrapy.Spider):
                                          callback=self.parse_group,
                                          headers=self.headers)
 
+    def get_row(self, ele):
+        tds = ele.find('td')
+        row = {}
+        for td in tds.items():
+            dataLabel = td.attr('data-label')
+            if dataLabel == 'Vessel Name':
+                row['VESSEL'] = td.text()
+            if dataLabel == 'Voy No':
+                row['VOYAGE'] = td.text()
+            if dataLabel == 'Port of Loading':
+                row['POL_NAME_EN'] = td.text()
+            if dataLabel == 'Loading Port(Arrival)':
+                row['LPA'] = td.text()
+            if dataLabel == 'Loading Port(Departure)':
+                row['ETD'] = td.text()
+            if dataLabel == 'Port of Discharge':
+                row['POD_NAME_EN'] = td.text()
+            if dataLabel == 'Destination Arrival':
+                row['ETA'] = td.text()
+            if dataLabel == 'Transit Time':
+                row['TRANSIT_TIME'] = td.text()
+            if dataLabel == 'Vessel Flag':
+                row['FLAG'] = td.text()
+        return row
+
     def parse_group(self, response):
+        logging.warning(response)
         doc = pq(response.text)
         trs = doc('#vesseltable tr')
         portItem = PortGroupItem()
-
         portItem['date'] = self.currentDate
         portItem['portPol'] = response.meta['pol']
         portItem['portNamePol'] = response.meta['polName']
@@ -118,53 +142,88 @@ class RclgroupSpider(scrapy.Spider):
         portItem['userTime'] = ''
         yield portItem
 
+        logging.info('港口组合：' + response.meta['pol'] + '-' + response.meta['pod'])
+
+        gArr = []
+        gIndex = -1
         for index, tr in enumerate(trs.items()):  # 使用 enumerate 函数 获取索引
-            item = GroupItem()
-            groupObj = {
-                'pol': response.meta['pol'],
-                'pod': response.meta['pod'],
-                'polName': response.meta['polName'],
-                'podName': response.meta['podName'],
-                'useTime': '',
-                'date': self.currentDate,
-                'IS_TRANSIT': 0  # 确认为中转为1，直达为0
-            }
-            # logging.info(str(index) + '列数据')
             className = tr.attr('class')
-            nextClassName = tr.next().attr('class')
-            prevClassName = tr.prev().attr('class')
-            # logging.info(className)
-            # logging.info(prevClassName)
-            # logging.info(nextClassName)
             if className == 'rowg' or className == 'rowb':
+                resPolName = tr.find('td[data-label="Port of Loading"]').text()
+                resPodName = tr.find('td[data-label="Port of Discharge"]').text()
+                logging.info('查询到起止点名')
+                logging.warning(resPolName)
+                logging.warning(response.meta['polName'])
 
-                if className == prevClassName:
-                    groupObj['IS_TRANSIT'] = 1
-                if className == nextClassName:
-                    groupObj['IS_TRANSIT'] = 1
+                if resPolName == response.meta['polName']:
+                    # 起点
+                    gArr.append([])
+                    gIndex += 1
+                    gArr[gIndex].append(self.get_row(tr))
 
-                tds = tr.find('td')
-                for td in tds.items():
-                    dataLabel = td.attr('data-label')
-                    if dataLabel == 'Vessel Name':
-                        groupObj['VESSEL'] = td.text()
-                    if dataLabel == 'Voy No':
-                        groupObj['VOYAGE'] = td.text()
-                    if dataLabel == 'Port of Loading':
-                        groupObj['POL_NAME_EN'] = td.text()
-                    if dataLabel == 'Loading Port(Arrival)':
-                        groupObj['LPA'] = td.text()
-                    if dataLabel == 'Loading Port(Departure)':
-                        groupObj['ETD'] = td.text()
-                    if dataLabel == 'Port of Discharge':
-                        groupObj['POD_NAME_EN'] = td.text()
-                    if dataLabel == 'Destination Arrival':
-                        groupObj['ETA'] = td.text()
-                    if dataLabel == 'Transit Time':
-                        groupObj['TRANSIT_TIME'] = td.text()
-                    if dataLabel == 'Vessel Flag':
-                        groupObj['FLAG'] = td.text()
-                for field in item.fields:
-                    if field in groupObj.keys():
-                        item[field] = groupObj.get(field)
-                yield item
+                    # if resPodName == response.meta['podName']:
+                    #     # 终点
+                    #     gArr[gIndex].append({'pol': resPolName})
+                    # else:
+                    #     # 中转
+                    #     gArr[gIndex].append({'pol': resPolName})
+                else:
+                    gArr[gIndex].append(self.get_row(tr))
+
+                    # 非起点
+                    # if resPodName == response.meta['podName']:
+                    #     # 终点
+                    #     gArr[gIndex].append({'pol': resPolName})
+                    # else:
+                    #     # 中转
+                    #     gArr[gIndex].append({'pol': resPolName})
+
+        logging.warning('中转')
+        logging.info(gArr)
+
+        # for index, tr in enumerate(trs.items()):  # 使用 enumerate 函数 获取索引
+        #     item = GroupItem()
+        #     groupObj = {
+        #         'pol': response.meta['pol'],
+        #         'pod': response.meta['pod'],
+        #         'polName': response.meta['polName'],
+        #         'podName': response.meta['podName'],
+        #         'useTime': '',
+        #         'date': self.currentDate,
+        #         'IS_TRANSIT': 0  # 确认为中转为1，直达为0
+        #     }
+        #     className = tr.attr('class')
+        #     nextClassName = tr.next().attr('class')
+        #     prevClassName = tr.prev().attr('class')
+        #     if className == 'rowg' or className == 'rowb':
+        #
+        #         if className == prevClassName:
+        #             groupObj['IS_TRANSIT'] = 1
+        #         if className == nextClassName:
+        #             groupObj['IS_TRANSIT'] = 1
+        #
+        #         tds = tr.find('td')
+        #         for td in tds.items():
+        #             dataLabel = td.attr('data-label')
+        #             if dataLabel == 'Vessel Name':
+        #                 groupObj['VESSEL'] = td.text()
+        #             if dataLabel == 'Voy No':
+        #                 groupObj['VOYAGE'] = td.text()
+        #             if dataLabel == 'Port of Loading':
+        #                 groupObj['POL_NAME_EN'] = td.text()
+        #             if dataLabel == 'Loading Port(Arrival)':
+        #                 groupObj['LPA'] = td.text()
+        #             if dataLabel == 'Loading Port(Departure)':
+        #                 groupObj['ETD'] = td.text()
+        #             if dataLabel == 'Port of Discharge':
+        #                 groupObj['POD_NAME_EN'] = td.text()
+        #             if dataLabel == 'Destination Arrival':
+        #                 groupObj['ETA'] = td.text()
+        #             if dataLabel == 'Transit Time':
+        #                 groupObj['TRANSIT_TIME'] = td.text()
+        #             if dataLabel == 'Vessel Flag':
+        #                 groupObj['FLAG'] = td.text()
+        #         for field in item.fields:
+        #             if field in groupObj.keys():
+        #                 item[field] = groupObj.get(field)
+        #         yield item

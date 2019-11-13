@@ -78,6 +78,8 @@ class RclDownloaderMiddleware(object):
         # - or return a Request object
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
+
+        # request.meta['proxy'] = ''  # 设置requst 代理
         return None
 
     def process_response(self, request, response, spider):
