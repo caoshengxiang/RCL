@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import math
+
 import scrapy
 from scrapy import Request
 from pyquery import PyQuery as pq
@@ -138,91 +140,49 @@ class RclgroupSpider(scrapy.Spider):
         portItem['portNamePod'] = response.meta['podName']
         portItem['content'] = response.text
         portItem['status'] = 1 if trs.length else 2
-        portItem['userTime'] = ''
+        # portItem['userTime'] = ''
         yield portItem
 
         logging.info('港口组合：' + response.meta['pol'] + '-' + response.meta['pod'])
 
-        gArr = []
-        gIndex = -1
+        itemObj = {}
+        gitem = GroupItem()
         for index, tr in enumerate(trs.items()):  # 使用 enumerate 函数 获取索引
             className = tr.attr('class')
             if className == 'rowg' or className == 'rowb':
-                resPolName = tr.find('td[data-label="Port of Loading"]').text()
-                resPodName = tr.find('td[data-label="Port of Discharge"]').text()
+                currentRowPolName = tr.find('td[data-label="Port of Loading"]').text()
+                currentRowPodName = tr.find('td[data-label="Port of Discharge"]').text()
                 logging.info('查询到起止点名')
-                logging.warning(resPolName)
-                logging.warning(response.meta['polName'])
-
-                if resPolName == response.meta['polName']:
-                    # 起点
-                    gArr.append([])
-                    gIndex += 1
-                    gArr[gIndex].append(self.get_row(tr))
-
-                    # if resPodName == response.meta['podName']:
-                    #     # 终点
-                    #     gArr[gIndex].append({'pol': resPolName})
-                    # else:
-                    #     # 中转
-                    #     gArr[gIndex].append({'pol': resPolName})
+                logging.debug(currentRowPolName)
+                logging.debug(response.meta['polName'])
+                row = self.get_row(tr)
+                if currentRowPolName == response.meta['polName']:
+                    itemObj = {
+                        'pol': response.meta['pol'],
+                        'pod': response.meta['pod'],
+                        'polName': response.meta['polName'],
+                        'podName': response.meta['podName'],
+                        'date': self.currentDate,
+                        'VESSEL': row['VESSEL'],
+                        'VOYAGE': row['VOYAGE'],
+                        'ETD': row['ETD'],
+                        'TRANSIT_TIME': float(row['TRANSIT_TIME']),
+                        'TRANSIT_LIST': [],
+                        'IS_TRANSIT': 0  # 确认为中转为1，直达为0, 默认为0
+                    }
                 else:
-                    gArr[gIndex].append(self.get_row(tr))
-
-                    # 非起点
-                    # if resPodName == response.meta['podName']:
-                    #     # 终点
-                    #     gArr[gIndex].append({'pol': resPolName})
-                    # else:
-                    #     # 中转
-                    #     gArr[gIndex].append({'pol': resPolName})
-
-        logging.warning('中转')
-        logging.info(gArr)
-
-        # for index, tr in enumerate(trs.items()):  # 使用 enumerate 函数 获取索引
-        #     item = GroupItem()
-        #     groupObj = {
-        #         'pol': response.meta['pol'],
-        #         'pod': response.meta['pod'],
-        #         'polName': response.meta['polName'],
-        #         'podName': response.meta['podName'],
-        #         'useTime': '',
-        #         'date': self.currentDate,
-        #         'IS_TRANSIT': 0  # 确认为中转为1，直达为0
-        #     }
-        #     className = tr.attr('class')
-        #     nextClassName = tr.next().attr('class')
-        #     prevClassName = tr.prev().attr('class')
-        #     if className == 'rowg' or className == 'rowb':
-        #
-        #         if className == prevClassName:
-        #             groupObj['IS_TRANSIT'] = 1
-        #         if className == nextClassName:
-        #             groupObj['IS_TRANSIT'] = 1
-        #
-        #         tds = tr.find('td')
-        #         for td in tds.items():
-        #             dataLabel = td.attr('data-label')
-        #             if dataLabel == 'Vessel Name':
-        #                 groupObj['VESSEL'] = td.text()
-        #             if dataLabel == 'Voy No':
-        #                 groupObj['VOYAGE'] = td.text()
-        #             if dataLabel == 'Port of Loading':
-        #                 groupObj['POL_NAME_EN'] = td.text()
-        #             if dataLabel == 'Loading Port(Arrival)':
-        #                 groupObj['LPA'] = td.text()
-        #             if dataLabel == 'Loading Port(Departure)':
-        #                 groupObj['ETD'] = td.text()
-        #             if dataLabel == 'Port of Discharge':
-        #                 groupObj['POD_NAME_EN'] = td.text()
-        #             if dataLabel == 'Destination Arrival':
-        #                 groupObj['ETA'] = td.text()
-        #             if dataLabel == 'Transit Time':
-        #                 groupObj['TRANSIT_TIME'] = td.text()
-        #             if dataLabel == 'Vessel Flag':
-        #                 groupObj['FLAG'] = td.text()
-        #         for field in item.fields:
-        #             if field in groupObj.keys():
-        #                 item[field] = groupObj.get(field)
-        #         yield item
+                    itemObj['IS_TRANSIT'] = 1
+                    itemObj['TRANSIT_TIME'] += float(row['TRANSIT_TIME'])
+                    itemObj['TRANSIT_LIST'].append({
+                        'TRANSIT_PORT_EN': row['POL_NAME_EN'],
+                        'TRANS_VESSEL': row['VESSEL'],
+                        'TRANS_VOYAGE': row['VOYAGE'],
+                    })
+                    if currentRowPodName == response.meta['podName']:
+                        itemObj['ETA'] = row['ETA']
+                        itemObj['TRANSIT_TIME'] = math.ceil(itemObj['TRANSIT_TIME'])
+                        for field in gitem.fields:
+                            if field in itemObj.keys():
+                                gitem[field] = itemObj.get(field)
+                        yield gitem
+                        itemObj = {}

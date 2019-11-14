@@ -35,6 +35,7 @@ class GroupItem(scrapy.Item):
     FLAG = scrapy.Field()
     TransferCode = scrapy.Field()
     TransferName = scrapy.Field()
+    TRANSIT_LIST = scrapy.Field()
 
 
 class PortGroupItem(scrapy.Item):
