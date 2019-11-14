@@ -44,8 +44,8 @@ class RclgroupSpider(scrapy.Spider):
         'ctl00$ContentPlaceHolder1$cCaptcha': '',
         'ctl00$ContentPlaceHolder1$vsdate': currentDate,
         'ctl00$ContentPlaceHolder1$vsduration': '42',
-        'ctl00$ContentPlaceHolder1$vsLoading': 'AEDXB',  # CNDLC
-        'ctl00$ContentPlaceHolder1$vsDischarge': 'CNDCB',  # AEDXB
+        'ctl00$ContentPlaceHolder1$vsLoading': 'HKHKG',  # CNDLC
+        'ctl00$ContentPlaceHolder1$vsDischarge': 'PKQCT',  # AEDXB
         'ctl00$ContentPlaceHolder1$sCaptcha': '9ba',
         'ctl00$ContentPlaceHolder1$submitVS': 'Submit',
         'ctl00$ContentPlaceHolder1$ltService': 'ALO',
@@ -63,8 +63,8 @@ class RclgroupSpider(scrapy.Spider):
                                      # 'podName': 'JEBEL ALI, U.A.E'
                                      'pol': self.data['ctl00$ContentPlaceHolder1$vsLoading'],
                                      'pod': self.data['ctl00$ContentPlaceHolder1$vsDischarge'],
-                                     'polName': 'JEBEL ALI, U.A.E',
-                                     'podName': 'DA CHAN BAY'
+                                     'polName': 'HONG KONG',
+                                     'podName': 'QASIM'
                                  },
                                  formdata=self.data,
                                  callback=self.parse_group,
@@ -140,7 +140,7 @@ class RclgroupSpider(scrapy.Spider):
         pgItem['portNamePol'] = response.meta['polName']
         pgItem['portPod'] = response.meta['pod']
         pgItem['portNamePod'] = response.meta['podName']
-        # pgItem['content'] = response.text
+        pgItem['content'] = response.text
         pgItem['status'] = 1 if trs.length else 2
         # pgItem['userTime'] = ''
         logging.info('港口组合：')
@@ -149,40 +149,49 @@ class RclgroupSpider(scrapy.Spider):
         itemObj = {}
         gItem = GroupItem()
         for index, tr in enumerate(trs.items()):  # 使用 enumerate 函数 获取索引
-            className = tr.attr('class')
-            if className == 'rowg' or className == 'rowb':
-                currentRowPolName = tr.find('td[data-label="Port of Loading"]').text()
-                currentRowPodName = tr.find('td[data-label="Port of Discharge"]').text()
-                logging.debug('当前行起点：' + currentRowPolName)
-                logging.debug('查询起点：' + response.meta['polName'])
-                row = self.get_row(tr)
-                if currentRowPolName == response.meta['polName']:
-                    itemObj = {
-                        'pol': response.meta['pol'],
-                        'pod': response.meta['pod'],
-                        'polName': response.meta['polName'],
-                        'podName': response.meta['podName'],
-                        'date': self.currentDate,
-                        'VESSEL': row['VESSEL'],
-                        'VOYAGE': row['VOYAGE'],
-                        'ETD': row['ETD'],
-                        'TRANSIT_TIME': float(row['TRANSIT_TIME']),
-                        'TRANSIT_LIST': [],
-                        'IS_TRANSIT': 0  # 确认为中转为1，直达为0, 默认为0
-                    }
-                else:
-                    itemObj['IS_TRANSIT'] = 1
-                    itemObj['TRANSIT_TIME'] += float(row['TRANSIT_TIME'])
-                    itemObj['TRANSIT_LIST'].append({
-                        'TRANSIT_PORT_EN': row['POL_NAME_EN'],
-                        'TRANS_VESSEL': row['VESSEL'],
-                        'TRANS_VOYAGE': row['VOYAGE'],
-                    })
-                if currentRowPodName == response.meta['podName']:
-                    itemObj['ETA'] = row['ETA']
-                    itemObj['TRANSIT_TIME'] = math.ceil(itemObj['TRANSIT_TIME'])
-                    for field in gItem.fields:
-                        if field in itemObj.keys():
-                            gItem[field] = itemObj.get(field)
-                    yield gItem
-                    itemObj = {}
+            try:
+                className = tr.attr('class')
+                if className == 'rowg' or className == 'rowb':
+                    currentRowPolName = tr.find('td[data-label="Port of Loading"]').text()
+                    currentRowPodName = tr.find('td[data-label="Port of Discharge"]').text()
+                    logging.debug('查询起止：' + response.meta['polName'] + ' - ' + response.meta['podName'])
+                    logging.debug('当前行起止：' + currentRowPolName + ' - ' + currentRowPodName)
+                    row = self.get_row(tr)
+                    if currentRowPolName == response.meta['polName']:
+                        # 处理异常数据
+                        if itemObj['polName']:
+                            pass
+                        itemObj = {
+                            'pol': response.meta['pol'],
+                            'pod': response.meta['pod'],
+                            'polName': response.meta['polName'],
+                            'podName': response.meta['podName'],
+                            'date': self.currentDate,
+                            'VESSEL': row['VESSEL'],
+                            'VOYAGE': row['VOYAGE'],
+                            'ETD': row['ETD'],
+                            'TRANSIT_TIME': float(row['TRANSIT_TIME']),
+                            'TRANSIT_LIST': [],
+                            'IS_TRANSIT': 0  # 确认为中转为1，直达为0, 默认为0
+                        }
+                    else:
+                        itemObj['IS_TRANSIT'] = 1
+                        itemObj['TRANSIT_TIME'] += float(row['TRANSIT_TIME'])
+                        itemObj['TRANSIT_LIST'].append({
+                            'TRANSIT_PORT_EN': row['POL_NAME_EN'],
+                            'TRANS_VESSEL': row['VESSEL'],
+                            'TRANS_VOYAGE': row['VOYAGE'],
+                        })
+                    if currentRowPodName == response.meta['podName']:
+                        itemObj['ETA'] = row['ETA']
+                        itemObj['TRANSIT_TIME'] = math.ceil(itemObj['TRANSIT_TIME'])
+                        for field in gItem.fields:
+                            if field in itemObj.keys():
+                                gItem[field] = itemObj.get(field)
+                        yield gItem
+                        itemObj = {}
+            except Exception as e:
+                logging.error('错误组合：' + response.meta['polName'] + ' - ' + response.meta['podName'])
+                logging.error(e)
+                logging.error(doc('#vesseltable'))
+                continue
