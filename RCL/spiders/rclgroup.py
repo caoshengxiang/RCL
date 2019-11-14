@@ -44,8 +44,8 @@ class RclgroupSpider(scrapy.Spider):
         'ctl00$ContentPlaceHolder1$cCaptcha': '',
         'ctl00$ContentPlaceHolder1$vsdate': currentDate,
         'ctl00$ContentPlaceHolder1$vsduration': '42',
-        'ctl00$ContentPlaceHolder1$vsLoading': 'CNDLC',  # AEKLF
-        'ctl00$ContentPlaceHolder1$vsDischarge': 'AEDXB',  # CNDCB
+        'ctl00$ContentPlaceHolder1$vsLoading': 'AEDXB',  # CNDLC
+        'ctl00$ContentPlaceHolder1$vsDischarge': 'CNDCB',  # AEDXB
         'ctl00$ContentPlaceHolder1$sCaptcha': '9ba',
         'ctl00$ContentPlaceHolder1$submitVS': 'Submit',
         'ctl00$ContentPlaceHolder1$ltService': 'ALO',
@@ -59,10 +59,12 @@ class RclgroupSpider(scrapy.Spider):
         # yield Request(url=self.start_urls[0], callback=self.parse_port, headers=self.headers)
         yield scrapy.FormRequest(url=self.groupUrl, method='POST',
                                  meta={
+                                     # 'polName': 'DALIAN',
+                                     # 'podName': 'JEBEL ALI, U.A.E'
                                      'pol': self.data['ctl00$ContentPlaceHolder1$vsLoading'],
                                      'pod': self.data['ctl00$ContentPlaceHolder1$vsDischarge'],
-                                     'polName': 'DALIAN',
-                                     'podName': 'JEBEL ALI, U.A.E'
+                                     'polName': 'JEBEL ALI, U.A.E',
+                                     'podName': 'DA CHAN BAY'
                                  },
                                  formdata=self.data,
                                  callback=self.parse_group,
@@ -132,29 +134,27 @@ class RclgroupSpider(scrapy.Spider):
     def parse_group(self, response):
         doc = pq(response.text)
         trs = doc('#vesseltable tr')
-        portItem = PortGroupItem()
-        portItem['date'] = self.currentDate
-        portItem['portPol'] = response.meta['pol']
-        portItem['portNamePol'] = response.meta['polName']
-        portItem['portPod'] = response.meta['pod']
-        portItem['portNamePod'] = response.meta['podName']
-        portItem['content'] = response.text
-        portItem['status'] = 1 if trs.length else 2
-        # portItem['userTime'] = ''
-        yield portItem
-
-        logging.info('港口组合：' + response.meta['pol'] + '-' + response.meta['pod'])
+        pgItem = PortGroupItem()
+        pgItem['date'] = self.currentDate
+        pgItem['portPol'] = response.meta['pol']
+        pgItem['portNamePol'] = response.meta['polName']
+        pgItem['portPod'] = response.meta['pod']
+        pgItem['portNamePod'] = response.meta['podName']
+        # pgItem['content'] = response.text
+        pgItem['status'] = 1 if trs.length else 2
+        # pgItem['userTime'] = ''
+        logging.info('港口组合：')
+        yield pgItem
 
         itemObj = {}
-        gitem = GroupItem()
+        gItem = GroupItem()
         for index, tr in enumerate(trs.items()):  # 使用 enumerate 函数 获取索引
             className = tr.attr('class')
             if className == 'rowg' or className == 'rowb':
                 currentRowPolName = tr.find('td[data-label="Port of Loading"]').text()
                 currentRowPodName = tr.find('td[data-label="Port of Discharge"]').text()
-                logging.info('查询到起止点名')
-                logging.debug(currentRowPolName)
-                logging.debug(response.meta['polName'])
+                logging.debug('当前行起点：' + currentRowPolName)
+                logging.debug('查询起点：' + response.meta['polName'])
                 row = self.get_row(tr)
                 if currentRowPolName == response.meta['polName']:
                     itemObj = {
@@ -178,11 +178,11 @@ class RclgroupSpider(scrapy.Spider):
                         'TRANS_VESSEL': row['VESSEL'],
                         'TRANS_VOYAGE': row['VOYAGE'],
                     })
-                    if currentRowPodName == response.meta['podName']:
-                        itemObj['ETA'] = row['ETA']
-                        itemObj['TRANSIT_TIME'] = math.ceil(itemObj['TRANSIT_TIME'])
-                        for field in gitem.fields:
-                            if field in itemObj.keys():
-                                gitem[field] = itemObj.get(field)
-                        yield gitem
-                        itemObj = {}
+                if currentRowPodName == response.meta['podName']:
+                    itemObj['ETA'] = row['ETA']
+                    itemObj['TRANSIT_TIME'] = math.ceil(itemObj['TRANSIT_TIME'])
+                    for field in gItem.fields:
+                        if field in itemObj.keys():
+                            gItem[field] = itemObj.get(field)
+                    yield gItem
+                    itemObj = {}
