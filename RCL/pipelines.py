@@ -8,11 +8,13 @@
 import time
 from datetime import datetime
 
+import math
+
 from RCL.items import PortItem, PortGroupItem
 from RCL.items import GroupItem
 from RCL.model.dao import CommonDao
 from RCL.model.models import NewCity, NewSchedulesSpiderPort, NewSchedulesStatic, NewSchedulesDynamic, \
-    NewSchedulesStaticDocking
+    NewSchedulesStaticDocking, NewSchedulesDynamicTransit
 from RCL.model.models import NewSchedulesSpiderPortCollectScac
 
 # class RclPipeline(object):
@@ -161,9 +163,11 @@ class MysqlPipeline(object):
                 insert into new_schedules_static_p2p values('%s','%s','%s','%s') on duplicate key update id=values(ID)
                 """ % (insert_rel_sql_key, 'RCLC', port_res.ID, md5_key)
                 CommonDao.native_update(sql=insert_rel_sql)
+
+                transit_id = EncrptUtils.md5_str(str(item['TRANSIT_LIST']))
                 now_time_str = DateTimeUtils.now().strftime('%Y-%m-%d %H:%M:%S')
                 support_vessl_sql_key = '%s,%s,%s,%s' % (insert_rel_sql_key, item['VESSEL'], item['VOYAGE'], route_code)
-                support_vessl_sql_key = EncrptUtils.md5_str(support_vessl_sql_key)
+                support_vessl_sql_key = EncrptUtils.md5_str(support_vessl_sql_key + transit_id)
                 vessl_sql = """
                 insert into new_schedules_support_vessel(ID,RELATION_ID,VESSEL,VOYAGE,DYNAMIC_ROUTE_CODE,UPDATE_TIME)
                 values ('%s','%s','%s','%s','%s','%s') on  duplicate key update UPDATE_TIME=values(UPDATE_TIME)
@@ -187,6 +191,22 @@ class MysqlPipeline(object):
                 nsd.TRANSIT_TIME = item['TRANSIT_TIME']
                 CommonDao.add_one_normal(nsd)
 
+                for transit_info in item['TRANSIT_LIST']:
+                    transit_key = '%s,%s,%s,%s' % (transit_id, transit_info['TRANSIT_PORT_EN'],
+                                                   transit_info['TRANS_VESSEL'],
+                                                   transit_info['TRANS_VOYAGE']
+                                                   )
+                    transit_key = EncrptUtils.md5_str(transit_key)
+                    nddt = NewSchedulesDynamicTransit()
+                    nddt.ID = transit_key
+                    nddt.TRANSIT_ID = transit_id
+                    nddt.TRANSIT_PORT_EN = transit_info['TRANSIT_PORT_EN']
+                    nddt.TRANSIT_VESSEL = transit_info['TRANSIT_VESSEL']
+                    nddt.TRANSIT_VOYAGE = transit_info['TRANSIT_VOYAGE']
+                    try:
+                        CommonDao.add_one_normal(nddt)
+                    except Exception as e:
+                        pass
                 if res is None or res.FLAG == '1':
                     nssd = NewSchedulesStaticDocking()
                     nssd.STATIC_ID = md5_key
@@ -195,7 +215,7 @@ class MysqlPipeline(object):
                     nssd.PORT_CODE = item['pod']
                     nssd.ETD = item['ETD']
                     nssd.ETA = item['ETA']
-                    # nssd.TRANSIT_TIME = int(self._covert_special_time(item['TRANSIT_TIME']).timestamp())
+                    nssd.TRANSIT_TIME = int(self._covert_value(item['TRANSIT_TIME']))
                     nssd.IS_TRANSI = nsd.IS_TRANSIT
                     CommonDao.add_one_normal(nssd)
 
@@ -206,7 +226,7 @@ class MysqlPipeline(object):
                     nssd.PORT_CODE = item['pol']
                     nssd.ETD = item['ETD']
                     nssd.ETA = item['ETA']
-                    # nssd.TRANSIT_TIME = int(self._covert_special_time(item['TRANSIT_TIME']).timestamp())
+                    nssd.TRANSIT_TIME = int(self._covert_value(item['TRANSIT_TIME']))
                     nssd.IS_TRANSI = nsd.IS_TRANSIT
                     CommonDao.add_one_normal(nssd)
             except Exception as e:
@@ -229,15 +249,5 @@ class MysqlPipeline(object):
         """
         return datetime.strptime(param, '%d/%m/%Y')
 
-    def _covert_special_time(self, param):
-        """
-        格式化下时间
-        :param param:
-        :return:
-        """
-        if '.' in param:
-            return datetime.strptime(param, '%m.%d')
-        else:
-            return datetime.strptime(param, '%d')
-
-
+    def _covert_value(self, param):
+        return round(float(param))
