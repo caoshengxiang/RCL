@@ -3,17 +3,18 @@
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
-from RCL import settings
+
+from RCL.settings import DB_TYPE, USER, HOST, DB_NAME, PASSWORD, PORT
 
 
 def get_engine():
     args = {
-        'db_type': settings.DB_TYPE,
-        'user': settings.USER,
-        'password': settings.PASSWORD,
-        'host': settings.HOST,
-        'port': settings.PORT,
-        'db_name': settings.DB_NAME,
+        'db_type': DB_TYPE[0],
+        'user': USER[0],
+        'password': PASSWORD[0],
+        'host': HOST[0],
+        'port': PORT[0],
+        'db_name': DB_NAME[0],
     }
     connect_str = "{}+pymysql://{}:{}@{}:{}/{}?charset=utf8mb4".format(args['db_type'], args['user'], args['password'],
                                                                        args['host'], args['port'], args['db_name'])

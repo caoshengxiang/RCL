@@ -27,7 +27,7 @@ class MysqlPipeline(object):
         handlers = {
             PortItem: self._handle_portitem,
             PortGroupItem: self._handle_port_group_item,
-            GroupItem: self._handle_group_item,
+            GroupItem: self._handle_group_item
         }
         handlers[item.__class__](item, spider)
 
@@ -46,13 +46,16 @@ class MysqlPipeline(object):
         """
         return datetime.strptime(param, '%d/%m/%Y')
 
+    def _covert_time2weekday(self, param):
+        return self._covert_time(param).weekday() + 1
+
     def _covert_value(self, param):
         return round(float(param))
 
     def _handle_portitem(self, item, spider):
         log.info('收到portitem 开始处理')
         code_ = item['portCode']
-        rows = CommonDao.check_repaet(NewSchedulesSpiderPortCollectScac, PORT_CODE=code_, SCAC=self.SCAC)
+        rows = CommonDao.check_repaet(NewSchedulesSpiderPortCollectScac, PORT_CODE=code_, SCAC=self.SCAC, DEL_FLAG=0)
         if rows > 0:
             log.info('此portitem[%s]已存在', item)
             return
@@ -75,6 +78,7 @@ class MysqlPipeline(object):
         _end_name = item['portNamePod']
         rows = CommonDao.check_repaet(NewSchedulesSpiderPort,
                                       START_BASIC_CODE=_start_code,
+                                      DEL_FLAG=0,
                                       END_BASIC_CODE=_end_code, SCAC=self.SCAC)
         if rows > 0:
             log.info('此port_group_item[%s]已存在', item)
@@ -99,21 +103,22 @@ class MysqlPipeline(object):
             route_code = 'UNDEFINED'
             log.info('查询静态航线')
             rclc = self.SCAC
-            res = CommonDao.get(NewSchedulesStatic, ROUTE_CODE=route_code, SCAC=('%s' % rclc))
+            res = CommonDao.get(NewSchedulesStatic, DEL_FLAG=0, ROUTE_CODE=route_code, SCAC=rclc)
             if res is None:
                 mdd = '%s,%s,%s,%s' % (rclc, "NULL", "NULL", route_code)
                 md5_key = EncrptUtils.md5_str(mdd)
                 insert_static_sql = """
-                           insert into  new_schedules_static(ID,SCAC,ROUTE_PARENT,ROUTE_NAME_EN,ROUTE_CODE,FLAG)
-                           values ('%s','%s','%s','%s','%s','%s')
-                           """ % (md5_key, rclc, None, None, route_code, 1)
+                           insert into  new_schedules_static(ID,SCAC,ROUTE_CODE,FLAG)
+                           values ('%s','%s','%s','%s')
+                           """ % (md5_key, rclc, route_code, 1)
                 CommonDao.native_update(sql=insert_static_sql)
             else:
                 md5_key = res.ID
             start_code = item['pol']
             end_code = item['pod']
             log.info('获取组合数据id')
-            port_res = CommonDao.get(NewSchedulesSpiderPort, START_BASIC_CODE=start_code, END_BASIC_CODE=end_code,
+            port_res = CommonDao.get(NewSchedulesSpiderPort, DEL_FLAG=0, START_BASIC_CODE=start_code,
+                                     END_BASIC_CODE=end_code,
                                      SCAC=rclc)
             insert_rel_sql_key = '%s,%s,%s' % (rclc, port_res.ID, md5_key)
             insert_rel_sql_key = EncrptUtils.md5_str(insert_rel_sql_key)
@@ -137,24 +142,33 @@ class MysqlPipeline(object):
 
             CommonDao.native_update(vessl_sql)
             log.info('录船名船次信息成功')
-
+            from RCL.model.basic import db_session
             log.info('写入动态数据')
             new_schedules_dynamic_key = self._get_indenty(item)
             nsd = NewSchedulesDynamic()
-            nsd.ID = new_schedules_dynamic_key
-            nsd.SCAC = rclc
-            nsd.VESSEL_RELATION_ID = support_vessl_sql_key
-            nsd.TRANSIT_ID = EncrptUtils.md5_str('')
-            nsd.POD_TERMINAL = item['podName']
-            nsd.POL_TERMINAL = item['polName']
-            nsd.ETA = self._covert_time(item['ETA'])
-            nsd.ETD = self._covert_time(item['ETD'])
-            nsd.IS_TRANSIT = str(item['IS_TRANSIT'])
-            nsd.TRANSIT_TIME = item['TRANSIT_TIME']
-            CommonDao.add_one_normal(nsd)
-            log.info('写入动态数据成功')
+            dynamic_res = CommonDao.get(NewSchedulesDynamic, ID=new_schedules_dynamic_key, DEL_FLAG=0)
+            if dynamic_res is None:
+                nsd.ID = new_schedules_dynamic_key
+                nsd.SCAC = rclc
+                nsd.VESSEL_RELATION_ID = support_vessl_sql_key
+                nsd.TRANSIT_ID = transit_id
+                # 没有码头数据 空着
+                # nsd.POD_TERMINAL = item['podName']
+                # nsd.POL_TERMINAL = item['polName']
+                nsd.ETA = self._covert_time(item['ETA'])
+                nsd.ETD = self._covert_time(item['ETD'])
+                nsd.IS_TRANSIT = str(item['IS_TRANSIT'])
+                nsd.TRANSIT_TIME = item['TRANSIT_TIME']
+                CommonDao.add_one_normal(nsd)
+                log.info('写入动态数据成功')
+            else:
+                dynamic_res.UPDATE_TIME = DateTimeUtils.now()
+                dynamic_res.VERSION_NUMBER = dynamic_res.VERSION_NUMBER + 1
+                dynamic_res.update()
+                db_session.commit()
+                log.info('重复 dynamic_res 更新成功')
 
-            for transit_info in item['TRANSIT_LIST']:
+            for index, transit_info in enumerate(item['TRANSIT_LIST'], start=1):
                 try:
                     log.info('写入中转数据')
                     transit_key = '%s,%s,%s,%s' % (transit_id, transit_info['TRANSIT_PORT_EN'],
@@ -162,8 +176,19 @@ class MysqlPipeline(object):
                                                    transit_info['TRANS_VOYAGE']
                                                    )
                     transit_key = EncrptUtils.md5_str(transit_key)
+
+                    dynamic_trainst = CommonDao.get(NewSchedulesDynamicTransit, ID=transit_key, DEL_FLAG=0)
+                    if dynamic_trainst:
+                        dynamic_trainst.UPDATE_TIME = DateTimeUtils.now()
+                        dynamic_trainst.TRANSIT_SORT = index
+                        dynamic_trainst.update()
+                        db_session.commit()
+                        log.info('重复 dynamic_trainst 更新成功')
+                        continue
+
                     nddt = NewSchedulesDynamicTransit()
                     nddt.ID = transit_key
+                    nddt.TRANSIT_SORT = index
                     nddt.TRANSIT_ID = transit_id
                     nddt.TRANSIT_PORT_EN = transit_info['TRANSIT_PORT_EN']
                     nddt.TRANSIT_VESSEL = transit_info['TRANS_VESSEL']
@@ -172,84 +197,41 @@ class MysqlPipeline(object):
                     log.info('写入中转数据成功')
                 except Exception as e:
                     log.error("添加中转数据错误 item[%s]出错e[%s]", str(transit_info), e)
-            if res is None or res.FLAG == '1':
-                log.info('写入挂靠港口数据')
+            # if res is None or res.FLAG == '1':
+            log.info('写入挂靠港口数据')
+            docking_res_1 = CommonDao.check_repaet(NewSchedulesStaticDocking,
+                                                   STATIC_ID=md5_key,
+                                                   DEL_FLAG=0,
+                                                   PORT_CODE=item['pod'])
+            if docking_res_1 <= 0:
                 nssd = NewSchedulesStaticDocking()
                 nssd.STATIC_ID = md5_key
                 nssd.PORT = item['podName']
                 nssd.IS_POL = 0
                 nssd.PORT_CODE = item['pod']
-                nssd.ETD = item['ETD']
-                nssd.ETA = item['ETA']
+                nssd.ETD = self._covert_time2weekday(item['ETD'])
+                nssd.ETA = self._covert_time2weekday(item['ETA'])
+                nssd.FLAG = 1
                 nssd.TRANSIT_TIME = int(self._covert_value(item['TRANSIT_TIME']))
                 nssd.IS_TRANSI = nsd.IS_TRANSIT
                 CommonDao.add_one_normal(nssd)
                 log.info('写入挂靠港口数据成功')
 
+            docking_res_2 = CommonDao.check_repaet(NewSchedulesStaticDocking,
+                                                   STATIC_ID=md5_key,
+                                                   PORT_CODE=item['pol'])
+            if docking_res_2 <= 0:
                 nssd = NewSchedulesStaticDocking()
                 nssd.STATIC_ID = md5_key
                 nssd.PORT = item['polName']
                 nssd.IS_POL = 1
+                nssd.FLAG = 1
                 nssd.PORT_CODE = item['pol']
-                nssd.ETD = item['ETD']
-                nssd.ETA = item['ETA']
+                nssd.ETD = self._covert_time2weekday(item['ETD'])
+                nssd.ETA = self._covert_time2weekday(item['ETA'])
                 nssd.TRANSIT_TIME = int(self._covert_value(item['TRANSIT_TIME']))
                 nssd.IS_TRANSI = nsd.IS_TRANSIT
                 CommonDao.add_one_normal(nssd)
                 log.info('写入挂靠港口数据成功')
         except Exception as e:
             log.error("处理group_item[%s] 出错e[%s]", str(item), e)
-
-# class RclPipeline(object):
-#     def process_item(self, item, spider):
-#         return item
-
-
-# class PortMongoPipeline(object):
-#     def __init__(self, mongo_uri, mongo_db):
-#         self.mongo_uri = mongo_uri
-#         self.mongo_db = mongo_db
-#
-#     @classmethod
-#     def from_crawler(cls, crawler):  # 获取settings.py配置
-#         return cls(
-#             mongo_uri=crawler.settings.get('MONGO_URI'),
-#             mongo_db=crawler.settings.get('MONGO_DB')
-#         )
-#
-#     def open_spider(self, spider):
-#         self.client = pymongo.MongoClient(self.mongo_uri)
-#         self.db = self.client[self.mongo_db]
-#
-#     def process_item(self, item, spider):
-#         name = item.__class__.__name__
-#         self.db[name].insert(dict(item))
-#         return item
-#
-#     def close_spider(self, spider):
-#         self.client.close()
-
-#
-# class GroupMongoPipeline(object):
-#     def __init__(self, mongo_uri, mongo_db):
-#         self.mongo_uri = mongo_uri
-#         self.mongo_db = mongo_db
-#
-#     @classmethod
-#     def from_crawler(cls, crawler):  # 获取settings.py配置
-#         return cls(
-#             mongo_uri=crawler.settings.get('MONGO_URI'),
-#             mongo_db=crawler.settings.get('MONGO_DB')
-#         )
-#
-#     def open_spider(self, spider):
-#         self.client = pymongo.MongoClient(self.mongo_uri)
-#         self.db = self.client[self.mongo_db]
-#
-#     def process_item(self, item, spider):
-#         name = item.__class__.__name__
-#         self.db[name].insert(dict(item))
-#         return item
-#
-#     def close_spider(self, spider):
-#         self.client.close()
