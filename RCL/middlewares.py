@@ -4,7 +4,7 @@
 #
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
-
+import faker
 from scrapy import signals
 
 
@@ -56,6 +56,9 @@ class RclSpiderMiddleware(object):
         spider.logger.info('Spider opened: %s' % spider.name)
 
 
+fake = faker.Faker("zh_CN")
+
+
 class RclDownloaderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the downloader middleware does not modify the
@@ -69,6 +72,7 @@ class RclDownloaderMiddleware(object):
         return s
 
     def process_request(self, request, spider):
+        request.headers['User-Agent'] = fake.user_agent()
         # Called for each request that goes through the downloader
         # middleware.
 
