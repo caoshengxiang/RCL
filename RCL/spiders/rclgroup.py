@@ -56,19 +56,19 @@ class RclgroupSpider(scrapy.Spider):
     }
 
     def start_requests(self):
-        # yield Request(url=self.start_urls[0], callback=self.parse_port, headers=self.headers)
-        yield scrapy.FormRequest(url=self.groupUrl, method='POST',
-                                 meta={
-                                     'polName': 'DALIAN',
-                                     'podName': 'JEBEL ALI, U.A.E',
-                                     'pol': self.data['ctl00$ContentPlaceHolder1$vsLoading'],
-                                     'pod': self.data['ctl00$ContentPlaceHolder1$vsDischarge'],
-                                     # 'polName': 'HONG KONG',
-                                     # 'podName': 'QASIM'
-                                 },
-                                 formdata=self.data,
-                                 callback=self.parse_group,
-                                 headers=self.headers)
+        yield Request(url=self.start_urls[0], callback=self.parse_port, headers=self.headers)
+        # yield scrapy.FormRequest(url=self.groupUrl, method='POST',
+        #                          meta={
+        #                              'polName': 'DALIAN',
+        #                              'podName': 'JEBEL ALI, U.A.E',
+        #                              'pol': self.data['ctl00$ContentPlaceHolder1$vsLoading'],
+        #                              'pod': self.data['ctl00$ContentPlaceHolder1$vsDischarge'],
+        #                              # 'polName': 'HONG KONG',
+        #                              # 'podName': 'QASIM'
+        #                          },
+        #                          formdata=self.data,
+        #                          callback=self.parse_group,
+        #                          headers=self.headers)
 
     def parse_port(self, response):
         doc = pq(response.text)
@@ -90,21 +90,33 @@ class RclgroupSpider(scrapy.Spider):
                 OTHERARR.append({'code': arr[0], 'name': arr[1]})
             yield pitem
         logging.info('港口数据获取完成, 开始请求港口组合')
-        for cn in CNARR:
-            for other in OTHERARR:
-                self.data['ctl00$ContentPlaceHolder1$vsLoading'] = cn['code']
-                self.data['ctl00$ContentPlaceHolder1$vsDischarge'] = other['code']
-                # logging.info(self.data)
-                yield scrapy.FormRequest(url=self.groupUrl, method='POST',
-                                         meta={
-                                             'pol': cn['code'],
-                                             'pod': other['code'],
-                                             'polName': cn['name'],
-                                             'podName': other['name']
-                                         },
-                                         formdata=self.data,
-                                         callback=self.parse_group,
-                                         headers=self.headers)
+        # for cn in CNARR:
+        #     for other in OTHERARR:
+        #         self.data['ctl00$ContentPlaceHolder1$vsLoading'] = cn['code']
+        #         self.data['ctl00$ContentPlaceHolder1$vsDischarge'] = other['code']
+        #         # logging.info(self.data)
+        #         yield scrapy.FormRequest(url=self.groupUrl, method='POST',
+        #                                  meta={
+        #                                      'pol': cn['code'],
+        #                                      'pod': other['code'],
+        #                                      'polName': cn['name'],
+        #                                      'podName': other['name']
+        #                                  },
+        #                                  formdata=self.data,
+        #                                  callback=self.parse_group,
+        #                                  headers=self.headers)
+        yield scrapy.FormRequest(url=self.groupUrl, method='POST',
+                                 meta={
+                                     'polName': 'DALIAN',
+                                     'podName': 'JEBEL ALI, U.A.E',
+                                     'pol': self.data['ctl00$ContentPlaceHolder1$vsLoading'],
+                                     'pod': self.data['ctl00$ContentPlaceHolder1$vsDischarge'],
+                                     # 'polName': 'HONG KONG',
+                                     # 'podName': 'QASIM'
+                                 },
+                                 formdata=self.data,
+                                 callback=self.parse_group,
+                                 headers=self.headers)
 
     def get_row(self, ele):
         tds = ele.find('td')

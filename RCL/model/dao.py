@@ -25,7 +25,6 @@ class CommonDao:
             db_session.add(data)
             db_session.commit()
         except Exception as e:
-            print(e)
             db_session.rollback()
 
     @classmethod
@@ -137,7 +136,6 @@ class CommonDao:
         p = "like(\s*)'%'.(.*?).'%' "
         if 'like' in sql:
             sql = re.sub(p, cls._patch_handle_like, sql)
-        print(sql)
         params = None
         return sql, params
 

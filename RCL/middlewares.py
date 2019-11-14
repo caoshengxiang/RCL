@@ -73,6 +73,7 @@ class RclDownloaderMiddleware(object):
 
     def process_request(self, request, spider):
         request.headers['User-Agent'] = fake.user_agent()
+        request.headers['Referer'] = 'https://www.rclgroup.com'
         # Called for each request that goes through the downloader
         # middleware.
 

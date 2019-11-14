@@ -3,16 +3,17 @@
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
+from RCL import settings
 
 
 def get_engine():
     args = {
-        'db_type': 'mysql',
-        'user': 'a111222',
-        'password': '!@#123QWEqwe',
-        'host': 'rm-bp19hl3624ib44ai5o.mysql.rds.aliyuncs.com',
-        'port': 3306,
-        'db_name': 'sp_out',
+        'db_type': settings.DB_TYPE,
+        'user': settings.USER,
+        'password': settings.PASSWORD,
+        'host': settings.HOST,
+        'port': settings.PORT,
+        'db_name': settings.DB_NAME,
     }
     connect_str = "{}+pymysql://{}:{}@{}:{}/{}?charset=utf8mb4".format(args['db_type'], args['user'], args['password'],
                                                                        args['host'], args['port'], args['db_name'])
@@ -26,4 +27,5 @@ session_factory = sessionmaker(bind=eng)
 Session = scoped_session(session_factory)
 db_session = Session()
 metadata = MetaData(get_engine())
+
 __all__ = ['eng', 'Base', 'db_session', 'metadata', 'Session']

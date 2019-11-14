@@ -39,7 +39,7 @@ CONCURRENT_REQUESTS = 1
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
 RANDOMIZE_DOWNLOAD_DELAY = True
-DOWNLOAD_DELAY = 0.25
+DOWNLOAD_DELAY = 0.5
 
 # The download delay setting will honor only one of:
 CONCURRENT_REQUESTS_PER_DOMAIN = 1  # 默认： 8 将对任何单个域执行的并发（即，并发）请求的最大数量。
@@ -69,7 +69,7 @@ DEFAULT_REQUEST_HEADERS = {
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-   'RCL.middlewares.RclDownloaderMiddleware': 543,
+    'RCL.middlewares.RclDownloaderMiddleware': 543,
 }
 
 # Enable or disable extensions
@@ -106,3 +106,11 @@ ITEM_PIPELINES = {
 # HTTPCACHE_DIR = 'httpcache'
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+
+DB_TYPE = 'mysql',
+USER = 'a111222',
+PASSWORD = '!@#123QWEqwe',
+HOST= 'rm-bp19hl3624ib44ai5o.mysql.rds.aliyuncs.com',
+PORT= 3306,
+DB_NAME= 'sp_out',
