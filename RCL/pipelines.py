@@ -85,6 +85,7 @@ class MysqlPipeline(object):
             PortGroupItem: self._handle_port_group_item,
             GroupItem: self._handle_group_item,
         }
+
         handlers[item.__class__](item, spider)
 
     def _get_indenty(self, item):

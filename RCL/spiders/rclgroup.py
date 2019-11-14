@@ -44,8 +44,8 @@ class RclgroupSpider(scrapy.Spider):
         'ctl00$ContentPlaceHolder1$cCaptcha': '',
         'ctl00$ContentPlaceHolder1$vsdate': currentDate,
         'ctl00$ContentPlaceHolder1$vsduration': '42',
-        'ctl00$ContentPlaceHolder1$vsLoading': 'HKHKG',  # CNDLC
-        'ctl00$ContentPlaceHolder1$vsDischarge': 'PKQCT',  # AEDXB
+        'ctl00$ContentPlaceHolder1$vsLoading': 'CNDLC',  # CNDLC  #HKHKG
+        'ctl00$ContentPlaceHolder1$vsDischarge': 'AEDXB',  # AEDXB #PKQCT
         'ctl00$ContentPlaceHolder1$sCaptcha': '9ba',
         'ctl00$ContentPlaceHolder1$submitVS': 'Submit',
         'ctl00$ContentPlaceHolder1$ltService': 'ALO',
@@ -59,12 +59,12 @@ class RclgroupSpider(scrapy.Spider):
         # yield Request(url=self.start_urls[0], callback=self.parse_port, headers=self.headers)
         yield scrapy.FormRequest(url=self.groupUrl, method='POST',
                                  meta={
-                                     # 'polName': 'DALIAN',
-                                     # 'podName': 'JEBEL ALI, U.A.E'
+                                     'polName': 'DALIAN',
+                                     'podName': 'JEBEL ALI, U.A.E',
                                      'pol': self.data['ctl00$ContentPlaceHolder1$vsLoading'],
                                      'pod': self.data['ctl00$ContentPlaceHolder1$vsDischarge'],
-                                     'polName': 'HONG KONG',
-                                     'podName': 'QASIM'
+                                     # 'polName': 'HONG KONG',
+                                     # 'podName': 'QASIM'
                                  },
                                  formdata=self.data,
                                  callback=self.parse_group,
@@ -140,7 +140,7 @@ class RclgroupSpider(scrapy.Spider):
         pgItem['portNamePol'] = response.meta['polName']
         pgItem['portPod'] = response.meta['pod']
         pgItem['portNamePod'] = response.meta['podName']
-        pgItem['content'] = response.text
+        # pgItem['content'] = response.text
         pgItem['status'] = 1 if trs.length else 2
         # pgItem['userTime'] = ''
         logging.info('港口组合：')
@@ -158,9 +158,6 @@ class RclgroupSpider(scrapy.Spider):
                     logging.debug('当前行起止：' + currentRowPolName + ' - ' + currentRowPodName)
                     row = self.get_row(tr)
                     if currentRowPolName == response.meta['polName']:
-                        # 处理异常数据
-                        if itemObj['polName']:
-                            pass
                         itemObj = {
                             'pol': response.meta['pol'],
                             'pod': response.meta['pod'],
@@ -193,5 +190,5 @@ class RclgroupSpider(scrapy.Spider):
             except Exception as e:
                 logging.error('错误组合：' + response.meta['polName'] + ' - ' + response.meta['podName'])
                 logging.error(e)
-                logging.error(doc('#vesseltable'))
+                # logging.error(doc('#vesseltable'))
                 continue
