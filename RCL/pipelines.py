@@ -164,7 +164,7 @@ class MysqlPipeline(object):
             else:
                 dynamic_res.UPDATE_TIME = DateTimeUtils.now()
                 dynamic_res.VERSION_NUMBER = dynamic_res.VERSION_NUMBER + 1
-                dynamic_res.update()
+                # dynamic_res.update()
                 db_session.commit()
                 log.info('重复 dynamic_res 更新成功')
 
@@ -181,7 +181,7 @@ class MysqlPipeline(object):
                     if dynamic_trainst:
                         dynamic_trainst.UPDATE_TIME = DateTimeUtils.now()
                         dynamic_trainst.TRANSIT_SORT = index
-                        dynamic_trainst.update()
+                        # dynamic_trainst.update()
                         db_session.commit()
                         log.info('重复 dynamic_trainst 更新成功')
                         continue
@@ -203,7 +203,7 @@ class MysqlPipeline(object):
                                                    STATIC_ID=md5_key,
                                                    DEL_FLAG=0,
                                                    PORT_CODE=item['pod'])
-            if docking_res_1 <= 0:
+            if docking_res_1 <= 0 and int(item['IS_TRANSIT']) == 0:
                 nssd = NewSchedulesStaticDocking()
                 nssd.STATIC_ID = md5_key
                 nssd.PORT = item['podName']
@@ -213,14 +213,14 @@ class MysqlPipeline(object):
                 nssd.ETA = self._covert_time2weekday(item['ETA'])
                 nssd.FLAG = 1
                 nssd.TRANSIT_TIME = int(self._covert_value(item['TRANSIT_TIME']))
-                nssd.IS_TRANSI = nsd.IS_TRANSIT
+                nssd.IS_TRANSI = item['IS_TRANSIT']
                 CommonDao.add_one_normal(nssd)
                 log.info('写入挂靠港口数据成功')
 
             docking_res_2 = CommonDao.check_repaet(NewSchedulesStaticDocking,
                                                    STATIC_ID=md5_key,
                                                    PORT_CODE=item['pol'])
-            if docking_res_2 <= 0:
+            if docking_res_2 <= 0 and int(item['IS_TRANSIT']) == 0:
                 nssd = NewSchedulesStaticDocking()
                 nssd.STATIC_ID = md5_key
                 nssd.PORT = item['polName']
@@ -230,7 +230,7 @@ class MysqlPipeline(object):
                 nssd.ETD = self._covert_time2weekday(item['ETD'])
                 nssd.ETA = self._covert_time2weekday(item['ETA'])
                 nssd.TRANSIT_TIME = int(self._covert_value(item['TRANSIT_TIME']))
-                nssd.IS_TRANSI = nsd.IS_TRANSIT
+                nssd.IS_TRANSI = item['IS_TRANSIT']
                 CommonDao.add_one_normal(nssd)
                 log.info('写入挂靠港口数据成功')
         except Exception as e:
