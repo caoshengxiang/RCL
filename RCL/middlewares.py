@@ -4,8 +4,13 @@
 #
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+import logging
+import random
+
 import faker
+import requests
 from scrapy import signals
+from scrapy.exceptions import IgnoreRequest
 
 
 class RclSpiderMiddleware(object):
@@ -72,8 +77,6 @@ class RclDownloaderMiddleware(object):
         return s
 
     def process_request(self, request, spider):
-        request.headers['User-Agent'] = fake.user_agent()
-        request.headers['Referer'] = 'https://www.rclgroup.com'
         # Called for each request that goes through the downloader
         # middleware.
 
@@ -84,7 +87,20 @@ class RclDownloaderMiddleware(object):
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
 
-        # request.meta['proxy'] = ''  # 设置requst 代理
+        request.headers['User-Agent'] = fake.user_agent()
+        request.headers['Referer'] = 'https://www.rclgroup.com'
+
+        # try:
+        #     xdaili_url = spider.settings.get('XDAILI_URL')
+        #     r = requests.get(xdaili_url)
+        #     proxy_ip_ports = r.text.split(',')
+        #     proxy_ip_port = random.choice(proxy_ip_ports)
+        #     logging.info('代理ip:{}'.format(proxy_ip_port))
+        #     request.meta['proxy'] = 'http://' + proxy_ip_port
+        # except Exception as e:
+        #     logging.error('获取代理ip失败！e  %s', e)
+        #     spider.logger.error('获取代理ip失败！')
+        #     raise IgnoreRequest()
         return None
 
     def process_response(self, request, response, spider):
@@ -94,6 +110,8 @@ class RclDownloaderMiddleware(object):
         # - return a Response object
         # - return a Request object
         # - or raise IgnoreRequest
+        if response.status == 500:
+            logging.error('500组合: {} - {}'.format(request.meta.get('pol', ''), request.meta.get('pod', '')))
         return response
 
     def process_exception(self, request, exception, spider):
@@ -104,7 +122,7 @@ class RclDownloaderMiddleware(object):
         # - return None: continue processing this exception
         # - return a Response object: stops process_exception() chain
         # - return a Request object: stops process_exception() chain
-        pass
+        logging.error('e%s', exception)
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)

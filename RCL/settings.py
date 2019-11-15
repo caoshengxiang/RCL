@@ -33,8 +33,7 @@ LOG_STDOUT = True
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 16
-
+CONCURRENT_REQUESTS = 32
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -43,12 +42,13 @@ RANDOMIZE_DOWNLOAD_DELAY = True
 DOWNLOAD_DELAY = 0.5
 
 # The download delay setting will honor only one of:
-CONCURRENT_REQUESTS_PER_DOMAIN = 16  # 默认： 8 将对任何单个域执行的并发（即，并发）请求的最大数量。
-CONCURRENT_REQUESTS_PER_IP = 16  # 默认： 0,将对任何单个IP执行的并发（即，并发）请求的最大数量
+# CONCURRENT_REQUESTS_PER_DOMAIN = 16  # 默认： 8 将对任何单个域执行的并发（即，并发）请求的最大数量。
+# CONCURRENT_REQUESTS_PER_IP = 16  # 默认： 0,将对任何单个IP执行的并发（即，并发）请求的最大数量
 
-RETRY_ENABLED = True  # 是否开启retry
-RETRY_TIMES = 3  # 重试次数
-RETRY_HTTP_CODECS = [500, 502, 503, 504, 408]  # 遇到什么http code时需要重试，默认是500,502,503,504,408,网络连接超时等
+RETRY_ENABLED = False  # 是否开启retry
+RETRY_TIMES = 2  # 重试次数
+RETRY_HTTP_CODECS = [500, 502, 503, 504, 408, 401, 400, 403, 505,
+                     302]  # 遇到什么http code时需要重试，默认是500,502,503,504,408,网络连接超时等
 
 # Disable cookies (enabled by default)
 # COOKIES_ENABLED = False
@@ -108,10 +108,13 @@ ITEM_PIPELINES = {
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-
+# mysql
 DB_TYPE = 'mysql',
 USER = 'a111222',
 PASSWORD = '!@#123QWEqwe',
-HOST= 'rm-bp19hl3624ib44ai5o.mysql.rds.aliyuncs.com',
-PORT= 3306,
-DB_NAME= 'sp_out',
+HOST = 'rm-bp19hl3624ib44ai5o.mysql.rds.aliyuncs.com',
+PORT = 3306,
+DB_NAME = 'sp_out',
+
+# 代理
+XDAILI_URL = 'http://dec.ip3366.net/api/?key=22249951182224995118&getnum=50&area=1&order=2&splits=%2C'

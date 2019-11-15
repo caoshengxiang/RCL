@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
+import logging
 import math
+import time
 
 import scrapy
-from scrapy import Request
 from pyquery import PyQuery as pq
-import time
+from scrapy import Request
+
 from RCL.items import PortItem, GroupItem, PortGroupItem
-import logging
 
 
 class RclgroupSpider(scrapy.Spider):
     name = 'rclgroup'
     allowed_domains = ['rclgroup.com']
     start_urls = ['https://www.rclgroup.com/Home']
+
+    group_ocunt = 0
 
     headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
@@ -88,7 +91,7 @@ class RclgroupSpider(scrapy.Spider):
                                              'pod': other['code'],
                                              'polName': cn['name'],
                                              'podName': other['name'],
-                                             'progress': '完成进度：{}/{}'.format(cnIndex * len(CNARR) + otIndex + 1, len(CNARR) * len(OTHERARR))
+                                             'allGroup': '全部组合：{}'.format(len(CNARR) * len(OTHERARR))
                                          },
                                          formdata=self.data,
                                          callback=self.parse_group,
@@ -133,6 +136,8 @@ class RclgroupSpider(scrapy.Spider):
         return row
 
     def parse_group(self, response):
+        self.group_ocunt += 1
+        logging.info('已爬第{}个组合,{}'.format(self.group_ocunt, response.meta['allGroup']))
         doc = pq(response.text)
         trs = doc('#vesseltable tr')
         pgItem = PortGroupItem()
@@ -142,7 +147,7 @@ class RclgroupSpider(scrapy.Spider):
         pgItem['portPod'] = response.meta['pod']
         pgItem['portNamePod'] = response.meta['podName']
         # pgItem['content'] = response.text
-        pgItem['status'] = 1 if trs.length else 2
+        pgItem['status'] = 2 if response.status == 500 else 1
         # pgItem['userTime'] = ''
         logging.info('港口组合：')
         yield pgItem
@@ -193,4 +198,3 @@ class RclgroupSpider(scrapy.Spider):
                 logging.error(e)
                 # logging.error(doc('#vesseltable'))
                 continue
-        logging.info(response.meta['progress'])
