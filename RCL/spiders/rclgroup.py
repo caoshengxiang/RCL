@@ -196,5 +196,4 @@ class RclgroupSpider(scrapy.Spider):
             except Exception as e:
                 logging.error('错误组合：' + response.meta['polName'] + ' - ' + response.meta['podName'])
                 logging.error(e)
-                # logging.error(doc('#vesseltable'))
                 continue

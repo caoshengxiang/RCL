@@ -7,13 +7,10 @@
 # ------------------------------------------------------------------
 import hashlib
 import time
-from concurrent.futures.thread import ThreadPoolExecutor
 from functools import wraps
-from inspect import isfunction
 from threading import RLock
 
 
-# default_thread_pool = ThreadPoolExecutor(max_workers=30, thread_name_prefix='default_thread_pool_')
 
 
 class Retry(object):

@@ -5,12 +5,9 @@
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 import logging
-import random
 
 import faker
-import requests
 from scrapy import signals
-from scrapy.exceptions import IgnoreRequest
 
 
 class RclSpiderMiddleware(object):
@@ -20,7 +17,6 @@ class RclSpiderMiddleware(object):
 
     @classmethod
     def from_crawler(cls, crawler):
-        # This method is used by Scrapy to create your spiders.
         s = cls()
         crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
         return s
