@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-# import pymongo
+
 from datetime import datetime
 from RCL.items import PortItem, PortGroupItem
 from RCL.items import GroupItem
@@ -164,7 +160,6 @@ class MysqlPipeline(object):
             else:
                 dynamic_res.UPDATE_TIME = DateTimeUtils.now()
                 dynamic_res.VERSION_NUMBER = dynamic_res.VERSION_NUMBER + 1
-                # dynamic_res.update()
                 db_session.commit()
                 log.info('重复 dynamic_res 更新成功')
 
@@ -181,7 +176,6 @@ class MysqlPipeline(object):
                     if dynamic_trainst:
                         dynamic_trainst.UPDATE_TIME = DateTimeUtils.now()
                         dynamic_trainst.TRANSIT_SORT = index
-                        # dynamic_trainst.update()
                         db_session.commit()
                         log.info('重复 dynamic_trainst 更新成功')
                         continue
@@ -197,7 +191,6 @@ class MysqlPipeline(object):
                     log.info('写入中转数据成功')
                 except Exception as e:
                     log.error("添加中转数据错误 item[%s]出错e[%s]", str(transit_info), e)
-            # if res is None or res.FLAG == '1':
             log.info('写入挂靠港口数据')
             docking_res_1 = CommonDao.check_repaet(NewSchedulesStaticDocking,
                                                    STATIC_ID=md5_key,
