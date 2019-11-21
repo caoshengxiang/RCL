@@ -102,7 +102,9 @@ class IalSpider(scrapy.Spider):
         logging.info(countrys)
         for country in countrys:
             logging.info('请求国家:{}-港口数据'.format(country['name']))
-            res = requests.post(self.start_urls[0], data=self.formData) # ??????????????
+            self.formData['ctl00$CPHContent$ddlDepartureC'] = country['value']
+            res = requests.post(self.start_urls[0], data=self.formData)
+            logging.info(pq(res.text)('#ctl00_CPHContent_ddlDepartureL').find('option'))
             self.parse_port(res, country)
 
         logging.info('完成所有港口请求')
@@ -121,7 +123,10 @@ class IalSpider(scrapy.Spider):
                 self.data2['ctl00$CPHContent$ddlDepartureL'] = cn['value']
                 self.data2['ctl00$CPHContent$ddlDestinationC'] = other['countryVa']
                 self.data2['ctl00$CPHContent$ddlDestinationL'] = other['value']
-                logging.info(self.data2)
+                logging.info(cn['countryVa'])
+                logging.info(cn['value'])
+                logging.info(other['countryVa'])
+                logging.info(other['value'])
                 # 注意formData value 不能是数字
                 yield FormRequest(url=self.start_urls[0],
                                   method='POST',
