@@ -10,8 +10,8 @@ import scrapy
 
 class PortItem(scrapy.Item):
     # define the fields for your item here like:
-    portCode = scrapy.Field()
-    port = scrapy.Field()
+    portCode = scrapy.Field()  # 船公司港口五字码
+    port = scrapy.Field()  # 船公司港口英文名
     date = scrapy.Field()
 
 
@@ -23,17 +23,15 @@ class GroupItem(scrapy.Item):
     podName = scrapy.Field()
     useTime = scrapy.Field()
     date = scrapy.Field()
-    IS_TRANSIT = scrapy.Field()
-    VESSEL = scrapy.Field()
-    VOYAGE = scrapy.Field()
+    IS_TRANSIT = scrapy.Field()  # 是否中转 确认为中转为1，直达为0
+    VESSEL = scrapy.Field()  # 船名
+    VOYAGE = scrapy.Field()  # 航次
     LPA = scrapy.Field()
-    ETD = scrapy.Field()
-    ETA = scrapy.Field()
-    TRANSIT_TIME = scrapy.Field()
+    ETD = scrapy.Field()  # 离港时间
+    ETA = scrapy.Field()  # 到港时间
+    TRANSIT_TIME = scrapy.Field()  # 航程
     FLAG = scrapy.Field()
-    TransferCode = scrapy.Field()
-    TransferName = scrapy.Field()
-    TRANSIT_LIST = scrapy.Field()
+    TRANSIT_LIST = scrapy.Field()  # 中转
 
 
 class PortGroupItem(scrapy.Item):

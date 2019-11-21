@@ -84,7 +84,7 @@ class RclDownloaderMiddleware(object):
         #   installed downloader middleware will be called
 
         request.headers['User-Agent'] = fake.user_agent()
-        request.headers['Referer'] = 'https://www.rclgroup.com'
+        # request.headers['Referer'] = 'https://www.rclgroup.com'
 
         # try:
         #     xdaili_url = spider.settings.get('XDAILI_URL')

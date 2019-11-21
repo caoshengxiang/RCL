@@ -2,6 +2,9 @@
 
 
 from datetime import datetime
+
+import pymongo
+
 from RCL.items import PortItem, PortGroupItem
 from RCL.items import GroupItem
 from RCL.model.dao import CommonDao
@@ -12,8 +15,36 @@ import logging as log
 from RCL.utils.utils import EncrptUtils, DateTimeUtils
 
 
+class MongoPipeline(object):
+    def __init__(self, mongo_uri, mongo_db):
+        self.mongo_uri = mongo_uri
+        self.mongo_db = mongo_db
+
+    @classmethod
+    def from_crawler(cls, crawler):  # 获取settings.py配置
+        return cls(
+            mongo_uri=crawler.settings.get('MONGO_URI'),
+            mongo_db=crawler.settings.get('MONGO_DB')
+        )
+
+    def open_spider(self, spider):
+        log.info('MongoPipeline')
+        self.client = pymongo.MongoClient(self.mongo_uri)
+        self.db = self.client[self.mongo_db]
+
+    def process_item(self, item, spider):
+        name = item.__class__.__name__
+        self.db[name].insert(dict(item))
+        return item
+
+    def close_spider(self, spider):
+        self.client.close()
+
 class MysqlPipeline(object):
     SCAC = 'RCLC'
+
+    def open_spider(self, spider):
+        log.info('MysqlPipeline')
 
     def process_item(self, item, spider):
         self._parse_and_save(item, spider)

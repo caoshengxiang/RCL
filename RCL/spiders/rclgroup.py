@@ -14,6 +14,11 @@ class RclgroupSpider(scrapy.Spider):
     name = 'rclgroup'
     allowed_domains = ['rclgroup.com']
     start_urls = ['https://www.rclgroup.com/Home']
+    custom_settings = {  # 指定配置的通道, 要对应找到每个爬虫指定的管道,settings里也要进行管道配置
+        'ITEM_PIPELINES': {
+            'RCL.pipelines.MysqlPipeline': 301
+        }
+    }
 
     group_ocunt = 0
 
@@ -31,6 +36,7 @@ class RclgroupSpider(scrapy.Spider):
         'Upgrade-Insecure-Requests': 1,
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.62 Safari/537.36'
     }
+
     currentDate = time.strftime('%d/%m/%Y', time.localtime())
     groupUrl = 'https://www.rclgroup.com/210Sailing_Schedule019'
 
@@ -90,8 +96,7 @@ class RclgroupSpider(scrapy.Spider):
                                              'pol': cn['code'],
                                              'pod': other['code'],
                                              'polName': cn['name'],
-                                             'podName': other['name'],
-                                             'allGroup': '全部组合：{}'.format(len(CNARR) * len(OTHERARR))
+                                             'podName': other['name']
                                          },
                                          formdata=self.data,
                                          callback=self.parse_group,
@@ -137,7 +142,6 @@ class RclgroupSpider(scrapy.Spider):
 
     def parse_group(self, response):
         self.group_ocunt += 1
-        logging.info('已爬第{}个组合,{}'.format(self.group_ocunt, response.meta['allGroup']))
         doc = pq(response.text)
         trs = doc('#vesseltable tr')
         pgItem = PortGroupItem()
@@ -146,9 +150,6 @@ class RclgroupSpider(scrapy.Spider):
         pgItem['portNamePol'] = response.meta['polName']
         pgItem['portPod'] = response.meta['pod']
         pgItem['portNamePod'] = response.meta['podName']
-        # pgItem['content'] = response.text
-        pgItem['status'] = 2 if response.status == 500 else 1
-        # pgItem['userTime'] = ''
         logging.info('港口组合：')
         yield pgItem
 
