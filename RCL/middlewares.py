@@ -97,6 +97,9 @@ class RclDownloaderMiddleware(object):
         #     logging.error('获取代理ip失败！e  %s', e)
         #     spider.logger.error('获取代理ip失败！')
         #     raise IgnoreRequest()
+
+        logging.info('正在请求：{}({}) - {}({})'.format(request.meta.get('polName', ''), request.meta.get('polVal', ''),
+                                                   request.meta.get('podName', ''), request.meta.get('podVal', '')))
         return None
 
     def process_response(self, request, response, spider):
@@ -106,8 +109,12 @@ class RclDownloaderMiddleware(object):
         # - return a Response object
         # - return a Request object
         # - or raise IgnoreRequest
+        logging.info('状态码：{}, val: {}-{}'.format(response.status, request.meta.get('polVal', ''),
+                                                 request.meta.get('podVal', '')))
         if response.status == 500:
             logging.error('500组合: {} - {}'.format(request.meta.get('pol', ''), request.meta.get('pod', '')))
+        if response.status == 302:
+            logging.error('302组合: {} - {}'.format(request.meta.get('polName', ''), request.meta.get('podName', '')))
         return response
 
     def process_exception(self, request, exception, spider):

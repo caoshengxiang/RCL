@@ -1,0 +1,329 @@
+
+
+<html>
+<head>
+<title></title>
+<meta http-equiv="content-type" content="text/html;charset=euc-kr">
+<meta http-equiv="Expires" content="0">
+<meta http-equiv="Pragma" content="No-cache">
+<meta http-equiv="Cache-Control" , content="private">
+<link rel="StyleSheet" href="/dj/common/css/style_Frame.css" type="text/css" />
+<script type="text/javascript" src="/dj/common/js/public.js"></script>
+<link rel="StyleSheet" href="/dj/common/css/style.css" type="text/css" />
+
+<script language="Javascript">
+    function getForm() {
+        return document.Frm;
+        
+    }
+    
+    function nextMove() {
+    	var INLAND_NAME = "";
+    	
+    	
+    	
+    	
+    	
+    	parent.document.Frm.PROGRAM_ID.value 	= "sub3_7";
+    		    		
+    	ROUTE_CODE	 		= getForm().TMP_ROUTE_CODE.value;
+    	VESSEL_CODE			= getForm().TMP_VESSEL_CODE.value;
+    	VOYAGE	 			= getForm().TMP_VOYAGE.value;
+    	LD_TERMINAL_CODE	= getForm().TMP_LD_TERMINAL_CODE.value;
+    	VESSEL_NAME			= getForm().TMP_VESSEL_NAME.value;
+    	LD_PORT 			= getForm().TMP_LD_PORT.value;
+    	LD_DATE				= getForm().TMP_LD_DATE.value;
+    	DC_PORT				= getForm().TMP_DC_PORT.value;
+    	VSLVOY				= getForm().TMP_VSLVOY.value;
+    	    		
+    	if(parent.document.Frm.pod_cd.value.substring(0,1)=="V") {
+    		if(parent.document.Frm.pod_cd.value == "VHP" || parent.document.Frm.pod_cd.value == "VHC") {
+    			INLAND_NAME = "";
+    		} else {
+    			INLAND_NAME = parent.document.Frm.pod_cd.value;
+    		}
+    	} else if(parent.document.Frm.pod_cd.value.substring(0,1)=="T") {
+    		if(parent.document.Frm.pod_cd.value == "TLC" || parent.document.Frm.pod_cd.value == "TBK") {
+    			INLAND_NAME = "";
+    		} else {
+    			INLAND_NAME = parent.document.Frm.pod_cd.value;
+    		}
+    	}
+    	    		
+    	if(getForm().TMP_DC_PORT2.value == "") {
+    		TS_PORT = "";
+    	} else {
+    		DC_PORT				= getForm().TMP_DC_PORT2.value;
+    		TS_PORT				= getForm().TMP_LD_PORT2.value;	
+    	}
+    	
+   	    parent.document.Frm.action="/dj/servlet/cn.support.action.sub3_1_Action?mode=R2&ROUTE_CODE="+ROUTE_CODE
+   	    		+"&VESSEL_CODE="+VESSEL_CODE+"&VOYAGE="+VOYAGE+"&LD_PORT="+LD_PORT+"&LD_DATE="+LD_DATE+"&DC_PORT="+DC_PORT
+   	    		+"&VESSEL_NAME="+VESSEL_NAME+"&LD_TERMINAL_CODE="+LD_TERMINAL_CODE+"&TS_PORT="+TS_PORT+"&VSLVOY="+VSLVOY+"&INLAND_NAME="+INLAND_NAME;
+   	    parent.document.Frm.submit();
+    	
+    	
+    }
+    
+	function nextFrm() {
+		
+    	var VSL = getForm().TMP_VESSEL_NAME.value;
+    	var VOY = getForm().TMP_VOYAGE.value;
+    	
+    	var POLPOD =  'SHANGHAI/HONGKONG';
+    	var VSLVOY = 'MS' + VOY;
+    	    	
+    	if(getForm().TMP_DC_PORT2.value == "") {
+			TS_PORT = "";
+		} else {
+			DC_PORT	= getForm().TMP_DC_PORT2.value;
+			TS_PORT	= getForm().TMP_LD_PORT2.value;
+			
+		}
+    	
+    	var DJ_VOY				= getForm().TMP_VSLVOY.value;
+    	
+    	parent.opener.document.Frm.VSLVOY.value = VSLVOY;
+    	parent.opener.document.Frm.VSLVOY_NAME.value = VSL + " " + VOY;
+    	parent.opener.document.Frm.LD_DATE.value = getForm().TMP_LD_DATE.value;
+    	parent.opener.document.Frm.POLPOD.value = POLPOD;
+    	parent.opener.document.Frm.PICKUP_IN.value = 'WAI GAO QIAO 5 (Shanghai Mingdong Container Terminal)';
+    	parent.opener.document.Frm.TER_CD.value = '';
+    	parent.opener.document.Frm.POL.value = 'CSH';
+    	parent.opener.document.Frm.POD.value = 'HHG';
+    	parent.opener.document.Frm.EXPORT_DT.value = '20191123';
+    	parent.opener.document.Frm.TS_PORT_NAME.value = '';
+    	parent.opener.document.Frm.TS_PORT_CODE.value = '';
+    	parent.opener.document.Frm.DJ_VOY.value = DJ_VOY;
+   		parent.close();
+    	    	
+    }
+	    
+	
+</script>
+
+</head>
+<body>
+<form name="Frm" method="post">
+	<input type='hidden' name='PROGRAM_ID' value='sub3_1_0'></input>
+	<input type='hidden' name='mode' value=''>
+	<input type='hidden' name='remode' value=''>
+	<input type='hidden' name='ROUTE_CODE' value=''>
+	<input type='hidden' name='VESSEL_CODE' value=''>
+	<input type='hidden' name='VOYAGE' value=''>
+	<input type='hidden' name='BOUND' value=''>
+	<input type='hidden' name='LD_PORT' value=''>
+	<input type='hidden' name='DC_PORT' value=''>
+	<input type='hidden' name='ETD' value=''>
+	<input type='hidden' name='VESSEL_NAME' value=''>
+	<input type='hidden' name='TS_GBN' value=''>
+	<input type='hidden' name='LD_TERMINAL' value=''>
+	<input type='hidden' name='DC_TERMINAL' value=''>
+	<input type='hidden' name='TS_PORT' value=''>
+	<input type='hidden' name='cargoGbn' value=''>
+	<input type='hidden' name='CLOSE_YN' value=''>
+	
+	
+	<input type='hidden' name='TMP_ETD' value='201911230630'>
+	<br>
+	<table cellspacing="0" cellpadding="0" border="0" width="100%">
+		<tr>
+			<td class=sttl_txt1 align="left" width="35%">
+			<script language="javascript">
+				var close_yn = 'N'
+				
+				if(close_yn == "Y") {
+					document.write("<font color='red' size='2'><b>※ BOOKING 마감된 항차입니다.</b></font>");
+				}
+				
+				
+			</script>
+			</td>
+			<td class=sttl_txt1 align="center" width="30%">SCHEDULE INFORMATION</td>
+			<td class=sttl_txt1 align="center" width="35%">&nbsp;</td>
+		</tr>
+	</table>
+	<p class="p10"></p>
+	<table cellspacing="1" cellpadding="0" border="0" width="100%" class="tb_color1">
+		<tr>
+			<td align="center" colspan="2" class="tb_st16" width="20%">VESSEL / VOYAGE</td>
+			<td align="center" colspan="2" class="tb_st16" width="40%">DEPARTURE</td>
+			<td align="center" colspan="2" class="tb_st16" width="40%" >ARRIVAL</td>
+		</tr>
+					
+		<tr>
+			<td align="center" rowspan="6" class="tb_st16" width="5%">1st</td>
+			<td align="center" rowspan="6" class="tb_st17" width="15%">PANCON SUNSHINE&nbsp;1924E</td>
+			<td align="center" class="tb_st16" width="10%" >PORT</td>
+			<td align="center" class="tb_st17" width="30%" >SHANGHAI, CHINA</td>
+			<td align="center" class="tb_st16" width="10%" >PORT</td>
+			<td align="center" class="tb_st17" width="30%" >BUSAN , KOREA</td>
+		</tr>
+		
+		<tr>
+			<td align="center" class="tb_st16" width="10%" >TERMINAL</td>
+			<td align="center" class="tb_st17" width="30%" >WAI GAO QIAO 5 (Shanghai Mingdong Container Terminal)</td>
+			<td align="center" class="tb_st16" width="10%" >TERMINAL</td>
+			<td align="center" class="tb_st17" width="30%" >BPT GAMMAN</td>
+		</tr>
+		
+		<tr>
+			<td align="center" class="tb_st16" width="10%" >E.T.D</td>
+			<td align="center" class="tb_st17" width="30%" >2019-11-23 06:30(SAT)</td>
+			<td align="center" class="tb_st16" width="10%" >E.T.A</td>
+			<td align="center" class="tb_st17" width="30%" >2019-11-24 14:00(SUN)</td>
+		</tr>
+				
+		<tr>
+			<td align="center" class="tb_st16" width="10%" >A.T.D</td>
+			<td align="center" class="tb_st17" width="30%" ></td>
+			<td align="center" class="tb_st16" width="10%" >A.T.A</td>
+			<td align="center" class="tb_st17" width="30%" ></td>
+		</tr>
+		
+		<tr>
+			<td align="center" class="tb_st16" width="10%" >MRN</td>
+			<td align="center" class="tb_st17" width="30%" >19PCLUHK47I</td>
+			<td align="center" class="tb_st16" width="10%" >CALL SIGN</td>
+			<td align="center" class="tb_st17" width="30%" >D7CO</td>
+		</tr>
+		
+		<tr>
+			<td align="center" class="tb_st16" width="10%" >DOCU CLOSING</td>
+			<td align="center" class="tb_st17" width="30%" ></td>
+			<td align="center" class="tb_st16" width="10%" >CARGO CLOSING</td>
+			<td align="center" class="tb_st17" width="30%" >
+			
+			
+				<input type="hidden" name="TMP_ROUTE_CODE" 	value = "CJ1">
+				<input type="hidden" name="TMP_VESSEL_CODE" value = "MS">
+				<input type="hidden" name="TMP_VESSEL_NAME" value = "PANCON SUNSHINE">
+				<input type="hidden" name="TMP_VOYAGE" 		value = "1924E">
+				<input type="hidden" name="TMP_BOUND" 		value = "">
+				<input type="hidden" name="TMP_LD_PORT" 	value = "SHANGHAI, CHINA">
+				<input type="hidden" name="TMP_LD_TERMINAL"	value = "WAI GAO QIAO 5 (Shanghai Mingdong Container Terminal)">
+				<input type="hidden" name="TMP_LD_DATE" 	value = "2019-11-23 06:30(SAT)">
+				<input type="hidden" name="TMP_DC_PORT" 	value = "BUSAN , KOREA">
+				<input type="hidden" name="TMP_DC_DATE" 	value = "2019-11-24 14:00(SUN)">
+				<input type="hidden" name="TMP_DC_TERMINAL" 	value = "BPT GAMMAN">
+				<input type="hidden" name="TMP_LD_TERMINAL_CODE"	value = "WGQ5">
+				<input type="hidden" name="TMP_LD_A_ETA"	value = "">
+				<input type="hidden" name="TMP_LD_A_ETD"	value = "">
+				<input type="hidden" name="TMP_VSLVOY"	value = "MS1924E">
+				
+				<input type="hidden" name="TMP_ROUTE_CODE2" 	value = "">
+				<input type="hidden" name="TMP_VESSEL_CODE2" 	value = "">
+				<input type="hidden" name="TMP_VESSEL_NAME2" 	value = "">
+				<input type="hidden" name="TMP_VOYAGE2" 		value = "">
+				<input type="hidden" name="TMP_BOUND2" 			value = "">
+				<input type="hidden" name="TMP_LD_PORT2" 		value = "">
+				<input type="hidden" name="TMP_LD_TERMINAL2"	value = "">
+				<input type="hidden" name="TMP_LD_DATE2" 		value = "">
+				<input type="hidden" name="TMP_DC_PORT2" 		value = "">
+				<input type="hidden" name="TMP_DC_DATE2" 		value = "">
+				<input type="hidden" name="TMP_DC_TERMINAL2" 	value = "">
+				<input type="hidden" name="TMP_LD_TERMINAL_CODE2"	value = "">
+				<input type="hidden" name="TMP_LD_A_ETA2"		value = "">
+				<input type="hidden" name="TMP_LD_A_ETD2"		value = "">
+			
+			
+			
+			
+			</td>
+		</tr>
+					
+		<tr>
+			<td align="center" rowspan="6" class="tb_st16" width="5%">2nd</td>
+			<td align="center" rowspan="6" class="tb_st17" width="15%">STARSHIP URSA&nbsp;0105S</td>
+			<td align="center" class="tb_st16" width="10%" >PORT</td>
+			<td align="center" class="tb_st17" width="30%" >BUSAN , KOREA</td>
+			<td align="center" class="tb_st16" width="10%" >PORT</td>
+			<td align="center" class="tb_st17" width="30%" >HONGKONG, CHINA</td>
+		</tr>
+		
+		<tr>
+			<td align="center" class="tb_st16" width="10%" >TERMINAL</td>
+			<td align="center" class="tb_st17" width="30%" >BPT SINSEONDAE</td>
+			<td align="center" class="tb_st16" width="10%" >TERMINAL</td>
+			<td align="center" class="tb_st17" width="30%" >HIT  (HONKONG INTERNATIONAL TERMINAL)</td>
+		</tr>
+		
+		<tr>
+			<td align="center" class="tb_st16" width="10%" >E.T.D</td>
+			<td align="center" class="tb_st17" width="30%" >2019-11-26 21:30(TUE)</td>
+			<td align="center" class="tb_st16" width="10%" >E.T.A</td>
+			<td align="center" class="tb_st17" width="30%" >2019-11-29 17:30(FRI)</td>
+		</tr>
+				
+		<tr>
+			<td align="center" class="tb_st16" width="10%" >A.T.D</td>
+			<td align="center" class="tb_st17" width="30%" ></td>
+			<td align="center" class="tb_st16" width="10%" >A.T.A</td>
+			<td align="center" class="tb_st17" width="30%" ></td>
+		</tr>
+		
+		<tr>
+			<td align="center" class="tb_st16" width="10%" >MRN</td>
+			<td align="center" class="tb_st17" width="30%" >19NSSLK061E</td>
+			<td align="center" class="tb_st16" width="10%" >CALL SIGN</td>
+			<td align="center" class="tb_st17" width="30%" >V7ZR2</td>
+		</tr>
+		
+		<tr>
+			<td align="center" class="tb_st16" width="10%" >DOCU CLOSING</td>
+			<td align="center" class="tb_st17" width="30%" >2019-11-22 15:00(FRI)</td>
+			<td align="center" class="tb_st16" width="10%" >CARGO CLOSING</td>
+			<td align="center" class="tb_st17" width="30%" >2019-11-24 10:00(SUN)
+			
+			
+			
+			
+			
+			</td>
+		</tr>
+			
+		
+	</table>
+	
+	
+		
+	<BR>
+	
+	
+	
+	
+
+	
+</form>
+</body>
+</html>
+<script language="javascript">
+	var booleanValue = false;
+	try {
+		if (window.parent!=null) {
+			if(window.parent.content!=null) {
+				booleanValue = true;
+			}
+		}
+	
+		if (booleanValue){
+			//parent.content.setXWebSubmit(false);
+			parent.content.divProg.style.left = ( parent.content.document.body.offsetWidth  / 2 ) - 135
+			parent.content.divProg.style.top  = ( parent.content.document.body.offsetHeight / 2 ) - 65
+			parent.content.divProg.style.display = 'none';		
+		}else{
+			try {
+				//setXWebSubmit(false);
+				divProg.style.left = ( document.body.offsetWidth  / 2 ) - 135
+				divProg.style.top  = ( document.body.offsetHeight / 2 ) - 65
+				divProg.style.display = 'none';            
+			} catch(e) {
+				///parent.setXWebSubmit(false);
+				parent.divProg.style.left = ( parent.document.body.offsetWidth  / 2 ) - 135
+				parent.divProg.style.top  = ( parent.document.body.offsetHeight / 2 ) - 65
+				parent.divProg.style.display = 'none';		
+			}
+		}
+	} catch(e) {
+	}
+</script>
