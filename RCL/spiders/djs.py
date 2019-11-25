@@ -7,6 +7,8 @@ from pyquery import PyQuery as pq
 import scrapy
 from scrapy import FormRequest
 
+from RCL.items import PortItem, PortGroupItem, GroupItem
+
 
 class DjsSpider(scrapy.Spider):
     name = 'djs'
@@ -21,41 +23,41 @@ class DjsSpider(scrapy.Spider):
 
     # js死数据
     cn_port = [
-        {'value': 'CSH', name: 'SHANGHAI'},
-        {'value': 'CXG', name: 'XINGANG'},
-        {'value': 'CNB', name: 'NINGBO'},
-        {'value': 'CDL', name: 'DALIAN'},
-        {'value': 'CQD', name: 'QINGDAO'},
-        {'value': 'HHG', name: 'HONGKONG'},
+        {'value': 'CSH', 'name': 'SHANGHAI'},
+        {'value': 'CXG', 'name': 'XINGANG'},
+        {'value': 'CNB', 'name': 'NINGBO'},
+        {'value': 'CDL', 'name': 'DALIAN'},
+        {'value': 'CQD', 'name': 'QINGDAO'},
+        {'value': 'HHG', 'name': 'HONGKONG'},
     ]
     other_port = [
-        {'value': 'HHG', name: 'HONGKONG'},
-        {'value': 'KBS', name: 'BUSAN'},
-        {'value': 'KUL', name: 'ULSAN'},
-        {'value': 'KIN', name: 'INCHEON'},
-        {'value': 'VHC', name: 'HOCHIMINH'},
-        {'value': 'VHP', name: 'HAIPONG'},
-        {'value': 'VHP', name: 'HAIPONG'},
-        {'value': 'TBK', name: 'BANGKOK'},
-        {'value': 'TLC', name: 'LAEM CHABANG'},
-        {'value': 'JTK', name: 'TOKYO'},
-        {'value': 'JYH', name: 'YOKOHAMA'},
-        {'value': 'JNG', name: 'NAGOYA'},
-        {'value': 'JKB', name: 'KOBE'},
-        {'value': 'JOS', name: 'OSAKA'},
-        {'value': 'JMJ', name: 'MOJI'},
-        {'value': 'JSZ', name: 'SHIMIZU'},
-        {'value': 'JHT', name: 'HAKATA'},
-        {'value': 'JKR', name: 'KURE'},
-        {'value': 'JHB', name: 'HIBIKI'},
-        {'value': 'JIY', name: 'IYOMISHIMA'},
-        {'value': 'JTY', name: 'TOKUYAMA'},
-        {'value': 'JIB', name: 'IMABARI'},
-        {'value': 'JMZ', name: 'MIZUSHIMA'},
-        {'value': 'JYK', name: 'YOKKAICHI'},
-        {'value': 'JKZ', name: 'KANAZAWA'},
-        {'value': 'JTH', name: 'TOYOHASHI'},
-        {'value': 'JNT', name: 'NIIGATA'},
+        {'value': 'HHG', 'name': 'HONGKONG'},
+        {'value': 'KBS', 'name': 'BUSAN'},
+        {'value': 'KUL', 'name': 'ULSAN'},
+        {'value': 'KIN', 'name': 'INCHEON'},
+        {'value': 'VHC', 'name': 'HOCHIMINH'},
+        {'value': 'VHP', 'name': 'HAIPONG'},
+        {'value': 'VHP', 'name': 'HAIPONG'},
+        {'value': 'TBK', 'name': 'BANGKOK'},
+        {'value': 'TLC', 'name': 'LAEM CHABANG'},
+        {'value': 'JTK', 'name': 'TOKYO'},
+        {'value': 'JYH', 'name': 'YOKOHAMA'},
+        {'value': 'JNG', 'name': 'NAGOYA'},
+        {'value': 'JKB', 'name': 'KOBE'},
+        {'value': 'JOS', 'name': 'OSAKA'},
+        {'value': 'JMJ', 'name': 'MOJI'},
+        {'value': 'JSZ', 'name': 'SHIMIZU'},
+        {'value': 'JHT', 'name': 'HAKATA'},
+        {'value': 'JKR', 'name': 'KURE'},
+        {'value': 'JHB', 'name': 'HIBIKI'},
+        {'value': 'JIY', 'name': 'IYOMISHIMA'},
+        {'value': 'JTY', 'name': 'TOKUYAMA'},
+        {'value': 'JIB', 'name': 'IMABARI'},
+        {'value': 'JMZ', 'name': 'MIZUSHIMA'},
+        {'value': 'JYK', 'name': 'YOKKAICHI'},
+        {'value': 'JKZ', 'name': 'KANAZAWA'},
+        {'value': 'JTH', 'name': 'TOYOHASHI'},
+        {'value': 'JNT', 'name': 'NIIGATA'},
     ]
     url = 'http://korea.djship.co.kr/dj/servlet/cn.support.action.sub3_1_Action'
 
@@ -80,14 +82,15 @@ class DjsSpider(scrapy.Spider):
     def get_calendar(self, y, m):
         for cn in self.cn_port:
             for other in self.other_port:
+                logging.info(cn)
                 logging.debug('时间；pol-pod:{}-{}; {}-{}'.format(y, m, cn['value'], other['value']))
                 yield FormRequest(url=self.url,
                                   method='POST',
                                   meta={
                                       'pol': '',
-                                      'polName': 'SHANGHAI',
+                                      'polName': cn['name'],
                                       'pod': '',
-                                      'podName': 'HONGKONG',
+                                      'podName': other['name'],
                                   },
                                   formdata={
                                       'mode': 'R',
@@ -103,6 +106,17 @@ class DjsSpider(scrapy.Spider):
                                   callback=self.parse)
 
     def parse(self, response):
+        pItem = PortItem()
+        pgItem = PortGroupItem()
+        pItem['port'] = response.meta['polName']
+        pItem['portCode'] = ''
+        yield pItem
+        pgItem['portPol'] = ''
+        pgItem['portNamePol'] = response.meta['polName']
+        pgItem['portPod'] = ''
+        pgItem['portNamePod'] = response.meta['podName']
+        yield pgItem
+
         doc = pq(response.text)
         table = doc('body > form > table:nth-child(11) > tr > td > table')
         trs = table.children('tr[height!="30"]')
@@ -128,6 +142,7 @@ class DjsSpider(scrapy.Spider):
                                                       'polName': 'SHANGHAI',
                                                       'pod': '',
                                                       'podName': 'HONGKONG',
+                                                      'ROUTE_CODE': param[2]
                                                   },
                                                   # ['', 'CJ1', 'MS', '1924', 'E', 'CNSHA', 'HKHKG', '201911230630', 'Y', 'WGQ5', '', '', 'N']
                                                   formdata={
@@ -157,4 +172,38 @@ class DjsSpider(scrapy.Spider):
     def parse_detail(self, response):
         doc = pq(response.text)
         table = doc('body > form > table.tb_color1')
-        logging.info(table)
+        # logging.info(table)
+        gItem = GroupItem()
+        vv = table.find('tr:nth-child(2) > td:nth-child(2)').text().split(' ')
+        # logging.info(vv)
+        row = {
+            'ROUTE_CODE': response.meta['ROUTE_CODE'],
+            'ETD': table.find('tr:nth-child(4) > td:nth-child(2)').text(),
+            'VESSEL': vv[-1],
+            'VOYAGE': ' '.join(vv[:-1]),
+            'ETA': '',
+            'TRANSIT_TIME': '',  # 无
+            'TRANSIT_LIST': [],
+            'IS_TRANSIT': 0,  # 确认为中转为1，直达为0, 默认为0
+            'pol': response.meta['pol'],
+            'pod': response.meta['pod'],
+            'polName': response.meta['polName'],
+            'podName': response.meta['podName'],
+        }
+        transit = table.find('tr:nth-child(2) > td:nth-child(6)').text()
+        if transit:
+            row['IS_TRANSIT'] = 1
+            row['ETA'] = table.find('tr:nth-child(10) > td:nth-child(4)').text()
+            transit_vv = table.find('tr:nth-child(8) > td:nth-child(2)').text().split(' ')
+            row['TRANSIT_LIST'].append({
+                'TRANSIT_PORT_EN': table.find('tr:nth-child(2) > td:nth-child(6)').text(),
+                'TRANS_VESSEL': transit_vv[-1],
+                'TRANS_VOYAGE': ' '.join(transit_vv[:-1]),
+            })
+        else:
+            row['ETA'] = table.find('tr:nth-child(4) > td:nth-child(4)').text()
+        logging.info(row)
+        for field in gItem.fields:
+            if field in row.keys():
+                gItem[field] = row.get(field)
+        yield gItem

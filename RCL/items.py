@@ -17,7 +17,7 @@ class PortItem(scrapy.Item):
 
 class GroupItem(scrapy.Item):
     # define the fields for your item here like:
-    pol = scrapy.Field()
+    pol = scrapy.Field()  # code
     pod = scrapy.Field()
     polName = scrapy.Field()
     podName = scrapy.Field()
@@ -32,6 +32,7 @@ class GroupItem(scrapy.Item):
     TRANSIT_TIME = scrapy.Field()  # 航程
     FLAG = scrapy.Field()
     TRANSIT_LIST = scrapy.Field()  # 中转
+    ROUTE_CODE = scrapy.Field()  # 航线代码，没有就不存
 
 
 class PortGroupItem(scrapy.Item):
