@@ -75,6 +75,8 @@ class DjsSpider(scrapy.Spider):
         if int(month) + 1 > 12:
             nextYear = str(int(nextYear) + 1)
             nextMonth = '1'
+        else:
+            nextMonth = str(int(month) + 1)
 
         for request in self.get_calendar(nextYear, nextMonth):
             yield request

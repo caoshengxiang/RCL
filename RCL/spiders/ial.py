@@ -70,27 +70,27 @@ class IalSpider(scrapy.Spider):
     global_cn_port = []
     global_other_port = []
 
-    def start_requests(self):
-        # 测试
-        self.data2['ctl00$CPHContent$ddlDepartureC'] = '11'
-        self.data2['ctl00$CPHContent$ddlDepartureL'] = '12'
-        self.data2['ctl00$CPHContent$ddlDestinationC'] = '13'
-        self.data2['ctl00$CPHContent$ddlDestinationL'] = '15'
-        yield FormRequest(url=self.start_urls[0],
-                          method='POST',
-                          meta={
-                              'dont_redirect': True,
-                              'handle_httpstatus_list': [302],
-                              'pol': '',
-                              'polName': 'HONG KONG',
-                              'polVal': '12',
-                              'pod': '',
-                              'podName': 'DA NANG',
-                              'podVal': '15',
-                          },
-                          formdata=self.data2,
-                          headers=self.headers,
-                          callback=self.parse_group)
+    # def start_requests(self):
+    #     # 测试
+    #     self.data2['ctl00$CPHContent$ddlDepartureC'] = '11'
+    #     self.data2['ctl00$CPHContent$ddlDepartureL'] = '12'
+    #     self.data2['ctl00$CPHContent$ddlDestinationC'] = '13'
+    #     self.data2['ctl00$CPHContent$ddlDestinationL'] = '15'
+    #     yield FormRequest(url=self.start_urls[0],
+    #                       method='POST',
+    #                       meta={
+    #                           'dont_redirect': True,
+    #                           'handle_httpstatus_list': [302],
+    #                           'pol': '',
+    #                           'polName': 'HONG KONG',
+    #                           'polVal': '12',
+    #                           'pod': '',
+    #                           'podName': 'DA NANG',
+    #                           'podVal': '15',
+    #                       },
+    #                       formdata=self.data2,
+    #                       headers=self.headers,
+    #                       callback=self.parse_group)
 
     def parse(self, response):
         doc = pq(response.text)
