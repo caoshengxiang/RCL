@@ -33,6 +33,8 @@ class GroupItem(scrapy.Item):
     FLAG = scrapy.Field()
     TRANSIT_LIST = scrapy.Field()  # 中转
     ROUTE_CODE = scrapy.Field()  # 航线代码，没有就不存
+    POL_TERMINAL = scrapy.Field()  # 起始码头 ，没有就不存
+    POD_TERMINAL = scrapy.Field()  # 目的港码头，没有就不存
 
 
 class PortGroupItem(scrapy.Item):

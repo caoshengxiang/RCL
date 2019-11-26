@@ -7,6 +7,7 @@
 # ------------------------------------------------------------------
 import hashlib
 import time
+from datetime import timedelta
 from functools import wraps
 from threading import RLock
 
@@ -105,13 +106,115 @@ class EncrptUtils:
 
 
 class DateTimeUtils:
+    """
+    主要是日期时间相关的工具类
+    """
+    FORMATER_DATE = '%Y-%m-%d'
+    FORMATER = '%Y-%m-%d %H:%M:%S'
+    FORMATER_TIME = '%H:%M:%S'
+
     @classmethod
     def now(cls, tz_str='Asia/Shanghai'):
+        """
+        获取当前时间 默认 时区 上海
+        :param tz_str:
+        :return:
+        """
         from datetime import datetime
         from dateutil.tz import tz
         now = datetime.now(tz=tz.gettz(tz_str))
         now = now.replace(tzinfo=None)
         return now
+
+    @classmethod
+    def now_str(cls, tz_str='Asia/Shanghai', format=FORMATER):
+        """
+        获取当前时间 字符串默认 时区 上海
+        :param tz_str:
+        :return:
+        """
+        res = cls.format(cls.now(tz_str=tz_str), format=format)
+        return res
+
+    @classmethod
+    def format(cls, datetime_instance, format=FORMATER):
+        """
+        将datetime类型转换成str
+        :param datetime_instance:
+        :param format:
+        :return:
+        """
+        from datetime import datetime
+        if isinstance(datetime_instance, datetime):
+            return datetime_instance.strftime(format)
+        else:
+            raise Exception('需要datetime类型')
+
+    @classmethod
+    def parse2datetime(cls, datetime_str, format=FORMATER):
+        """
+        将字符串转成datetime类型
+        :param datetime_str:
+        :param format:
+        :return:
+        """
+        from datetime import datetime
+        return datetime.strptime(datetime_str, format)
+
+    @classmethod
+    def parse2seconds(cls, datetime_str, format=FORMATER):
+        """
+        将字符串转成秒
+        :param datetime_str:
+        :param format:
+        :return:
+        """
+        datetime_intance = cls.parse2datetime(datetime_str, format)
+        return cls.get_time_seconds(datetime_intance)
+
+    @classmethod
+    def get_time_seconds(cls, datetime_instance=None):
+        """
+        获取时间的秒数 默认当前时间
+        :param datetime_instance:
+        :return:
+        """
+        from datetime import datetime
+        if datetime_instance is None:
+            datetime_instance = datetime.now()
+        if isinstance(datetime_instance, datetime):
+            return int(datetime_instance.timestamp())
+
+    @classmethod
+    def get_time_millseconds(cls, datetime_instance=None):
+        """
+        获取时间的毫秒数
+        :param datetime_instance:
+        :return:
+        """
+        return cls.get_time_seconds(datetime_instance) * 1000
+
+    @classmethod
+    def seconds2datetime(cls, seconds):
+        """
+        秒数转成时间类型
+        :param seconds:
+        :return:
+        """
+        from datetime import datetime
+        return datetime.fromtimestamp(seconds)
+
+    @classmethod
+    def seconds2datetime_str(cls, seconds, format=FORMATER):
+        """
+        秒数转成时间类型的字符串
+        :param seconds:
+        :param format:
+        :return:
+        """
+        from datetime import datetime
+        datetime_instance = datetime.fromtimestamp(seconds)
+        return cls.format(datetime_instance, format)
 
 
 if __name__ == '__main__':
