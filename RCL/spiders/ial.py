@@ -122,7 +122,7 @@ class IalSpider(scrapy.Spider):
             yield pItem
             for other in self.global_other_port:
                 # 港口
-                pItem['port'] = cn['name']
+                pItem['port'] = other['name']
                 pItem['portCode'] = ''
                 yield pItem
                 # 港口组合

@@ -76,6 +76,7 @@ class EasSpider(scrapy.Spider):
                     pgItem['portNamePol'] = item
                     pgItem['portPod'] = ''
                     pgItem['portNamePod'] = jItem
+                    yield pgItem
 
                     if self.__VIEWSTATE == '' or self.__EVENTVALIDATION == '':
                         logging.error('参数 未正确获取')

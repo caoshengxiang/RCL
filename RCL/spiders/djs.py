@@ -89,9 +89,9 @@ class DjsSpider(scrapy.Spider):
                 yield FormRequest(url=self.url,
                                   method='POST',
                                   meta={
-                                      'pol': '',
+                                      'pol': cn['value'],
                                       'polName': cn['name'],
-                                      'pod': '',
+                                      'pod': other['value'],
                                       'podName': other['name'],
                                   },
                                   formdata={
@@ -111,11 +111,11 @@ class DjsSpider(scrapy.Spider):
         pItem = PortItem()
         pgItem = PortGroupItem()
         pItem['port'] = response.meta['polName']
-        pItem['portCode'] = ''
+        pItem['portCode'] = response.meta['pol']
         yield pItem
-        pgItem['portPol'] = ''
+        pgItem['portPol'] = response.meta['pol']
         pgItem['portNamePol'] = response.meta['polName']
-        pgItem['portPod'] = ''
+        pgItem['portPod'] = response.meta['pod']
         pgItem['portNamePod'] = response.meta['podName']
         yield pgItem
 
@@ -140,10 +140,10 @@ class DjsSpider(scrapy.Spider):
                                 yield FormRequest(url=self.url,
                                                   method='POST',
                                                   meta={
-                                                      'pol': '',
-                                                      'polName': 'SHANGHAI',
-                                                      'pod': '',
-                                                      'podName': 'HONGKONG',
+                                                      'pol': param[5],
+                                                      'polName': response.meta['polName'],
+                                                      'pod': param[6],
+                                                      'podName': response.meta['podName'],
                                                       'ROUTE_CODE': param[2]
                                                   },
                                                   # ['', 'CJ1', 'MS', '1924', 'E', 'CNSHA', 'HKHKG', '201911230630', 'Y', 'WGQ5', '', '', 'N']
