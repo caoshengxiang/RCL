@@ -1,1415 +1,786 @@
-<html lang="ko">
-<head>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-    <title>남성해운 E-Service</title>
-    <meta charset="utf-8"/>
-    <meta name="description" content="Namsung Shipping"/>
-    <meta name="author" content="INJEINC"/>
-    <meta name="viewport"
-          content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width"/>
-    <link rel="shortcut icon" href="/favicon.ico"/>
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
-    <link rel="stylesheet" href="/css/eng/com/reset.css"/> <!-- CSS 초기화 -->
-    <link rel="stylesheet" href="/css/eng/com/board.css"/>
-    <link rel="stylesheet" href="/css/eng/com/data.css"/>
-    <link rel="stylesheet" href="/css/eng/eservice.css"/>
-    <link rel="stylesheet" href="/css/eng/eservice_respond.css"/>
-    <link rel="stylesheet" href="/css/site/perfect-scrollbar-0.4.8.min.css"/>
-    <!--[if lte IE 7]>
-    <link rel="stylesheet" href="/css/site/IE7.css"/><![endif]-->
-    <!--[if lt IE 9]>
-    <script src="/js/site/html5shiv.js"></script><![endif]-->
-    <!--[if lt IE 8]>
-    <script src="/js/site/IE8.js"></script><![endif]-->
-    <script src="/js/site/jquery.1.10.2.js"/>
-    <script src="/js/site/jquery.lazyload.js"/>
-    <script src="/js/site/perfect-scrollbar-0.4.8.min.js"/>
-    <script src="/js/site/perfect-scrollbar-0.4.8.with-mousewheel.min.js"/>
-</head>
-<body>
-<div class="blind"/>
-<div id="wrap">
+<html>&#13;
+<head>&#13;
+	<meta charset="utf-8"/>&#13;
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>&#13;
+	<title>범주 해운 (주)</title>&#13;
+	<link rel="stylesheet" type="text/css" href="resources/css/common.css"/>&#13;
+	<link rel="stylesheet" type="text/css" href="resources/css/layout.css"/>&#13;
+	<link rel="stylesheet" href="resources/js/poshytip/tip-yellow/tip-yellow.css" type="text/css"/>&#13;
+	<!-- jquery -->&#13;
+	<script src="resources/js/jqGrid-4.7.0/jquery-1.11.0.js"/>&#13;
+	<!-- <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script> -->&#13;
+	<script src="resources/js/jquery-ui.min.js"/>&#13;
+	<!-- <script src="resources/js/plugins.js"></script> -->&#13;
+		&#13;
+	<!--  jqGrid -->&#13;
+	<link rel="stylesheet" type="text/css" media="screen" href="resources/js/jqGrid-4.7.0/css/jquery-ui.css"/>&#13;
+	<link rel="stylesheet" type="text/css" href="resources/js/jqGrid-4.7.0/css/ui.jqgrid.css"/>	&#13;
+	<script src="resources/js/jqGrid-4.7.0/js/i18n/grid.locale-en.js" type="text/javascript"/>&#13;
+	<script src="resources/js/jqGrid-4.7.0/js/jquery.jqGrid.min.js" type="text/javascript"/> 	&#13;
+	<script src="resources/js/jquery-migrate-1.4.1.min.js"/>&#13;
+	&#13;
+	<script src="resources/js/jquery.table2excel.js"/>&#13;
+	&#13;
+	<script type="text/javascript" src="resources/js/poshytip/jquery.poshytip.js"/>&#13;
+	&#13;
+	<!-- Common -->&#13;
+	<script src="js/cmm/common.js" type="text/javascript"/>&#13;
+	<script src="js/cmm/date.js" type="text/javascript"/>&#13;
+	<script src="js/cmm/string.js" type="text/javascript"/>&#13;
+	<script src="js/cmm/PopupUtil.js" type="text/javascript"/>&#13;
+	<script src="js/cmm/message.js" type="text/javascript"/>&#13;
+</head>&#13;
+&#13;
+<script type="text/javascript" src="/pan/js/COM/WEB201.js;JSESSIONID_13=6D701939AF494CC71FF43232BACDE259"/> &#13;
+&#13;
+<body>&#13;
+<input type="hidden" id="I_AS_CTR_CD" value="null"/>&#13;
+<input type="hidden" id="I_AS_AGT_NO" value="null"/>&#13;
+<input type="hidden" id="I_AS_AGT_CD" value=""/>&#13;
+<input type="hidden" id="I_AS_USR_NO" value="null"/>&#13;
+<input type="hidden" id="I_AS_PLC_CD" value="null"/>&#13;
+<input type="hidden" id="IS_CUST_ONE_ID_YN" value="null"/>&#13;
+<input type="hidden" id="I_PROGRESS_GUID" value="ecb06a30-b2f9-4770-ab9a-78dbd5beb95b"/>&#13;
+<input type="hidden" id="I_REQUEST_USER_ID" value="ANYUSER"/>&#13;
+<input type="hidden" id="I_REQUEST_IP_ADDRESS" value="10.4.1.13"/>&#13;
+<input type="hidden" id="I_REQUEST_PROGRAM_ID" value="WEB_00"/>&#13;
+	&#13;
+&#13;
+&#13;
+<div class="wrap">&#13;
+<noscript class="noScriptTitle">자바스크립트를 지원하지 않는 브라우저에서는 일부 기능을 사용하실 수 없습니다.</noscript>&#13;
+	<div class="wrapper close">&#13;
+		<!-- 상단 -->&#13;
+		&#13;
+   &#13;
+&#13;
+&#13;
+&#13;
+&#13;
+<script type="text/javascript">
+function natChange() {&#13;
+	var lang = $("#NAT").val();&#13;
+	if(lang != "") {&#13;
+		var links = 'cmm/menuTop,cmm/top,COM/WEB_201';&#13;
+		var link = links.indexOf(",") == -1? links : links.substring(links.lastIndexOf(",")+1) ;&#13;
+		var location = "/pan/pageLink.pcl?link="+link+"&amp;nationals="+lang;&#13;
+		window.location = location;&#13;
+		/* var inde = location.indexOf("&amp;nationals");&#13;
+		if(inde == -1 )&#13;
+			window.location = location + "&amp;nationals="+lang;&#13;
+		else &#13;
+			window.location = location.substring(0, inde) + "&amp;nationals="+lang; */&#13;
+	}&#13;
+};&#13;
+&#13;
+getMenu = function() {&#13;
+	var params = {};&#13;
+	params.I_AS_CTR_CD = 'EN' || "KR";&#13;
+	&#13;
+	$.ajax({&#13;
+	    type : 'POST',&#13;
+	    url : 'selectCmmMenuList.pcl',&#13;
+	    contentType : "application/json",&#13;
+	    data : JSON.stringify(params),&#13;
+	    dataType : 'jsonp',&#13;
+	    async : true,&#13;
+	    error: function(xhr, status, error){&#13;
+	        alert("error : "+error);&#13;
+	    },&#13;
+	    success : function(data){&#13;
+	    	var preScrnId = "";&#13;
+	    	var src = "";&#13;
+	    	var path = "";&#13;
+	    	var Web201_NM = "";&#13;
+	    	var ctr_cd = "KR";&#13;
+	    	for (var i = 0; i &lt; data.rows.length; i++) {&#13;
+	    		var row = data.rows[i];&#13;
+	    		//row.SCRN_ID&#13;
+	    		/* if(row.ITEM_CD=='SVC_RTE') continue; */&#13;
+	    		if(row.ITEM_CD == 'WEB_REMOTE'){&#13;
+    				src += '&lt;li&gt;&lt;a href="http://113366.com/pancon" target="_blank"&gt;'+row.ITEM_NM+'&lt;/li&gt;'&#13;
+    				continue;&#13;
+    			}&#13;
+	    		if(preScrnId != row.SCRN_ID) {&#13;
+	    			preScrnId = row.SCRN_ID;&#13;
+	    			src += '&lt;/ul&gt;&lt;/li&gt;&lt;li&gt;&lt;a href="#" class="menu"&gt;'+ row.MENU_NM +'&lt;/a&gt;'&#13;
+	    			     + '&lt;ul class="sub-menu area1"&gt;';&#13;
+	    			if (row.SCRN_ID == 'EXP'){&#13;
+	    				src += '&lt;li&gt;&lt;a href="pageLink.pcl?link='+'COM'+'/WEB_201"&gt;'+Web201_NM+'&lt;/a&gt;&lt;/li&gt;';&#13;
+	    			}&#13;
+	    		}&#13;
+	    		//if(row.ITEM_CD == 'WEB_201' || row.ITEM_CD == 'WEB_001' || row.ITEM_CD == 'WEB_002' || row.ITEM_CD == 'WEB_226' || row.ITEM_CD == 'WEB_006') {&#13;
+	    			&#13;
+	    		var img_lock = '';&#13;
+	    		if ((row.LINK_ID=='EXP' &amp;&amp; (row.ITEM_CD!='WEB_006' &amp;&amp; row.ITEM_CD!='WEB_014')) || (row.LINK_ID=='IMP' &amp;&amp; (row.ITEM_CD!='WEB_108' &amp;&amp; row.ITEM_CD!='WEB_109' &amp;&amp; row.ITEM_CD!='WEB_110')) || row.ITEM_CD=='WEB_207' || row.ITEM_CD=='WEB_208' || row.ITEM_CD=='WEB_214' || row.ITEM_CD=='WEB_215' || row.ITEM_CD=='WEB_225' || row.ITEM_CD=='WEB_226' || row.ITEM_CD=='WEB_227' || row.ITEM_CD=='WEB_232'){&#13;
+	    			img_lock = '&lt;img class="mg-l5" src="resources/images/icon_lock.png" style="width:17px;height:17px"/&gt;';&#13;
+	    		}&#13;
+	    			if (ctr_cd!='KR' &amp;&amp; (row.ITEM_CD == 'WEB_224'||row.ITEM_CD == 'WEB_108'||row.ITEM_CD == 'WEB_229'||row.ITEM_CD == 'WEB_230')) continue;&#13;
+	    			src += '&lt;li&gt;&lt;a href='+((row.LINK_ID=='EXP' &amp;&amp; (row.ITEM_CD!='WEB_006' &amp;&amp; row.ITEM_CD!='WEB_014') &amp;&amp; 'I' == '')?'"javascript:getExpMsg();"':('"pageLink.pcl?link='+util_nvl(row.LINK_ID, preScrnId)+'/'+row.ITEM_CD+'&amp;SCRN_ID='+preScrnId+'"'))+'&gt;'+row.ITEM_NM+img_lock+'&lt;/a&gt;&lt;/li&gt;';&#13;
+	    		&#13;
+	    			/*if (preScrnId=='EXP' &amp;&amp; 'I' == ''){&#13;
+	    				src += '&lt;li&gt;&lt;a href="javascript:getExpMsg();"&gt;'+row.ITEM_NM+' &lt;img class="mg-l5" src="resources/images/icon_lock.png" style="width:17px;height:17px"/&gt;&lt;/a&gt;&lt;/li&gt;';&#13;
+	    			}else{&#13;
+	    				src += '&lt;li&gt;&lt;a href="pageLink.pcl?link='+util_nvl(row.LINK_ID, preScrnId)+'/'+row.ITEM_CD+'&amp;SCRN_ID='+preScrnId+'"&gt;'+row.ITEM_NM+' &lt;img class="mg-l5" src="resources/images/icon_lock.png" style="width:17px;height:17px"/&gt;&lt;/a&gt;&lt;/li&gt;';&#13;
+	    			}*/	&#13;
+	    			&#13;
+	    			if (row.ITEM_CD == 'WEB_201') Web201_NM = row.ITEM_NM;&#13;
+	    		//} else {&#13;
+	    			&#13;
+	    			/*if (location.host.indexOf('211.174.239.226')&gt;-1 || location.host.indexOf('localhost')&gt;-1){&#13;
+	    				src += '&lt;li&gt;&lt;a href="pageLink.pcl?link='+util_nvl(row.LINK_ID, preScrnId)+'/'+row.ITEM_CD+'&amp;SCRN_ID='+preScrnId+'" class="desave"&gt;'+row.ITEM_NM+'&lt;/a&gt;&lt;/li&gt;';&#13;
+	    			}else if (location.host.indexOf('210.222.64.12')&gt;-1){&#13;
+	    				src += '&lt;li&gt;&lt;a href="pageLink.pcl?link='+util_nvl(row.LINK_ID, preScrnId)+'/'+row.ITEM_CD+'&amp;SCRN_ID='+preScrnId+'" class="desave"&gt;'+row.ITEM_NM+'&lt;/a&gt;&lt;/li&gt;';&#13;
+	    			}else src += '&lt;li&gt;&lt;a href="#none" class="desave"&gt;'+row.ITEM_NM+'&lt;/a&gt;&lt;/li&gt;';*/&#13;
+	    		//}&#13;
+	    		//src += '&lt;li&gt;&lt;a href="pageLink.pcl?link='+preScrnId+'/'+row.ITEM_CD+'"&gt;'+row.ITEM_NM+'&lt;/a&gt;&lt;/li&gt;';&#13;
+			}&#13;
+	    	&#13;
+	    	src = src.substring(10);&#13;
+	    	&#13;
+	    	//console.log("src="+src);&#13;
+	    	$("#topMenu").html(src);&#13;
+	    	&#13;
+	    	gnb.init();&#13;
+/* 	    	for (var i = 0; i &lt; data.rows.length; i++) {&#13;
+	    		var ob = data.rows[i];&#13;
+	    		if($("#"+ob.ITEM_CD).length &gt; 0) {&#13;
+	    			$("#"+ob.ITEM_CD).text(ob.ITEM_NM);&#13;
+	    		}&#13;
+	    	} */&#13;
+	    },&#13;
+	});			&#13;
+};&#13;
+&#13;
+&#13;
+getMenu();&#13;
+&#13;
+function getExpMsg(){&#13;
+	comLib.messageOut('4014', 'EN'||'KR');&#13;
+}&#13;
+&#13;
+/* 네비게이션 */&#13;
+var gnb = {&#13;
+	init : function(){&#13;
+		this.action();&#13;
+	},&#13;
+&#13;
+	action : function(){&#13;
+		var nav = $('.gnb-section');&#13;
+		var gnb = nav.find('.gnb &gt; li &gt; a');&#13;
+		var H = [71,500];&#13;
+		var spd = 600;&#13;
+		var ani = 'easeInOutExpo';&#13;
+&#13;
+		gnb.on({&#13;
+			'mouseenter' : function(){&#13;
+				if(!nav.hasClass('on')){&#13;
+					nav.addClass('on').animate({'height':H[1]},spd, ani);&#13;
+				}&#13;
+			}&#13;
+		});&#13;
+&#13;
+		nav.on({&#13;
+			'mouseleave' : function(){&#13;
+				if(nav.hasClass('on')){&#13;
+					nav.stop().removeClass('on').animate({'height':H[0]},spd, ani);&#13;
+				}&#13;
+			}&#13;
+		})&#13;
+	}&#13;
+};&#13;
+&#13;
+var login = function(){&#13;
+	window.location = "login.pcl";&#13;
+};&#13;
+&#13;
+var logout = function(){&#13;
+	comLib.messageOut("-210","","", null,function(message){&#13;
+		if (confirm(message)){&#13;
+			window.location = "logout.pcl?link=index";&#13;
+		}&#13;
+	});&#13;
+};&#13;
+&#13;
+var register = function(){&#13;
+	var params = {};&#13;
+	var locale = '';&#13;
+	switch($("#hidLang").val()){&#13;
+	case "KR":locale="ko";break;&#13;
+	case "EN":&#13;
+	case "JP":&#13;
+	case "CH":locale="en";break;&#13;
+	 default:locale="ko";break;&#13;
+	}&#13;
+	$.getJSON(&#13;
+ 			"/common/locale/change?locale=" + locale&#13;
+			, function(data, status) {&#13;
+ 				if ($("#hidLang").val()!="KR" &amp;&amp; $("#hidLang").val()!="") window.location = "/member/users/create";&#13;
+ 		    	else window.location = "/member/agree";&#13;
+			}&#13;
+		);&#13;
+	&#13;
+};&#13;
+&#13;
+</script>&#13;
+		<!-- 상단 -->&#13;
+		<div class="header">&#13;
+			<h1><a href="pageLink.pcl?link=index"><img src="resources/images/logo.gif" alt="범주해운"/></a></h1>&#13;
+&#13;
+			<div class="gnb-section">&#13;
+				<ul class="gnb" id="topMenu">&#13;
+				<!--
+					<li><a href="#" class="menu">Common</a>
+						<ul class="sub-menu area1">
+							<li><a href="#">Agent &amp; Representative</a></li>
+							<li><a href="#">Contact Us</a></li>
+							<li><a href="#">Sales &amp; Doc P.I.C</a></li>
+							<li><a href="#">Service Route</a></li>
+							<li><a href="http://210.222.64.12/pan/schedule.pcl">Schedule</a></li>
+							<li><a href="#">Freight Invoice Inquiry</a></li>
+							<li><a href="#">Official Receipt Inquiry</a></li>
+							<li><a href="#">Cargo Tracking Inquiry</a></li>
+							<li><a href="#">Port/ CY &amp; Terminal</a></li>
+							<li><a href="#">Request Inquiry</a></li>
+							<li><a href="#">Surcharge &amp; Local Charges</a></li>
+							<li><a href="#">Freetime Tariff</a></li>
+							<li><a href="#">MRN / MSN / Call Sign</a></li>
+							<li><a href="#">Bank Receipt Information</a></li>
+							<li><a href="#">My Template</a></li>
+							<li><a href="#">My Menu</a></li>
+						</ul>
+					</li>
+					<li><a href="#" class="menu">Export</a>
+						<ul class="sub-menu area2">
+							<li><a href="pageLink.pcl?link=outbound/WEB001">Booking Inquiry</a></li>
+							<li><a href="#">Tare Weight Inquiry</a></li>
+							<li><a href="#">V.G.M Inquiry</a></li>
+							<li><a href="#">B/L Creation</a></li>
+							<li><a href="#">B/L Issue Inquiry</a></li>
+							<li><a href="#">B/L Inquiry</a></li>
+						</ul>
+					</li>
+					<li><a href="#" class="menu">Import</a>
+						<ul class="sub-menu area3">
+							<li><a href="#">Import B/L Inquiry</a></li>
+							<li><a href="#">Arrival Notice Inquiry</a></li>
+							<li><a href="#">D/O Inquiry</a></li>
+							<li><a href="#">Empty Return Place Inquiry</a></li>
+							<li><a href="#">Demurrage & Detention</a></li>
+							<li><a href="#">Freetime Inquiry</a></li>
+						</ul>
+					</li> -->&#13;
+				</ul>&#13;
+			</div>&#13;
+<style type="text/css">&#13;
+.main {&#13;
+    float: left;&#13;
+    margin: 0.8px 4px 0 0;&#13;
+}&#13;
+</style>&#13;
+			<ul class="util-section">&#13;
+			<div class="main">&#13;
+				<li class="first"><a href="/?link=pan">HOMEPAGE</a></li>&#13;
+				&#13;
+					<li><a href="javascript:login();">LOGIN</a></li>&#13;
+					<li><a href="javascript:register();">REGISTER</a></li>&#13;
+				&#13;
+				&#13;
+				</div>&#13;
+				<!-- <li><a href="#">MEMBERSHIP</a></li>-->&#13;
+				<!-- <li><a href="#">SITEMAP</a></li>-->&#13;
+				<li class="language">&#13;
+					<select class="sel-area8" id="NAT" onchange="javascript:natChange()">&#13;
+						<option value="" selected="selected">LANGUAGE</option>&#13;
+						<option value="KR">KOREAN</option>&#13;
+						<option value="EN" selected="selected">ENGLISH</option>&#13;
+						<option value="JP">JAPANESE</option>&#13;
+						<option value="CH">CHINESE</option>&#13;
+					</select>&#13;
+				</li>&#13;
+			</ul>&#13;
+			<!-- <div><span style="margin-left: 25px; color:rgb(99, 174, 72);">Internet Explorer 11, CHROME 브라우저에 최적화 되어 있습니다.</span></div> -->&#13;
+		</div>&#13;
+		<input type="hidden" id="hidLang" value="EN"/>&#13;
+&#13;
+		<!-- 컨텐츠영역 -->&#13;
+		<div class="container close">&#13;
+			<!-- side 메뉴 -->&#13;
+			&#13;
+   &#13;
+&#13;
+&#13;
+&#13;
+&#13;
+<script type="text/javascript">&#13;
+&#13;
+getLeftMenu = function() {&#13;
+	var params = {};&#13;
+	params.I_AS_CTR_CD = 'EN' || "KR";&#13;
+	params.CALL_FROM = 'left';&#13;
+	&#13;
+	$.ajax({&#13;
+	    type : 'POST',&#13;
+	    url : 'selectCmmMenuList.pcl',&#13;
+	    contentType : "application/json",&#13;
+	    data : JSON.stringify(params),&#13;
+	    dataType : 'jsonp',&#13;
+	    async : true,&#13;
+	    error: function(xhr, status, error){&#13;
+	        alert("error : "+error);&#13;
+	    },&#13;
+	    success : function(data){&#13;
+	    	var preScrnId = "";&#13;
+	    	var src = "";&#13;
+	    	var path = "";&#13;
+	    	var Web201_NM = "";&#13;
+	    	var ctr_cd = "KR";&#13;
+	    	for (var i = 0; i &lt; data.rows.length; i++) {&#13;
+	    		var row = data.rows[i];&#13;
+	    		//row.SCRN_ID&#13;
+	    		//if(row.ITEM_CD=='SVC_RTE') continue;&#13;
+	    		if(row.ITEM_CD == 'WEB_REMOTE') continue;&#13;
+    			/* if(row.ITEM_CD == 'WEB_REMOTE'){&#13;
+    				alert('1');&#13;
+    				src += '&lt;li&gt;&lt;a href="http://113366.com/pancon" target="_blank"&gt;'+row.ITEM_NM+'&lt;/li&gt;'&#13;
+    				break;&#13;
+    			} */&#13;
+	    		if(preScrnId != row.SCRN_ID) {&#13;
+	    			preScrnId = row.SCRN_ID;&#13;
+	    			src += '&lt;/ul&gt;&lt;/li&gt;&lt;li&gt;&lt;span class="list"&gt;'+ row.MENU_NM +'&lt;/span&gt;'&#13;
+	    			     + '&lt;ul class="menu"&gt;';&#13;
+	    			if (row.SCRN_ID == 'EXP'){&#13;
+	    				src += '&lt;li&gt;&lt;a href="pageLink.pcl?link='+'COM'+'/WEB_201"&gt;'+Web201_NM+'&lt;/a&gt;&lt;/li&gt;';&#13;
+	    			}&#13;
+	    		}&#13;
+	    		var img_lock = '';&#13;
+	    		if ((row.LINK_ID=='EXP' &amp;&amp; (row.ITEM_CD!='WEB_006' &amp;&amp; row.ITEM_CD!='WEB_014')) || (row.LINK_ID=='IMP' &amp;&amp; (row.ITEM_CD!='WEB_108' &amp;&amp; row.ITEM_CD!='WEB_109' &amp;&amp; row.ITEM_CD!='WEB_109')) || row.ITEM_CD=='WEB_207' || row.ITEM_CD=='WEB_208' || row.ITEM_CD=='WEB_214' || row.ITEM_CD=='WEB_215' || row.ITEM_CD=='WEB_225' || row.ITEM_CD=='WEB_226' || row.ITEM_CD=='WEB_227' || row.ITEM_CD=='WEB_232'){&#13;
+	    			img_lock = '&lt;img class="mg-l5" src="resources/images/icon_lock.png" style="width:15px;height:15px"/&gt;';&#13;
+	    		}&#13;
+	    			if (ctr_cd!='KR' &amp;&amp; (row.ITEM_CD == 'WEB_224'||row.ITEM_CD == 'WEB_108'||row.ITEM_CD == 'WEB_229'||row.ITEM_CD == 'WEB_230')) continue;&#13;
+	    			src += '&lt;li&gt;&lt;a href='+((row.LINK_ID=='EXP' &amp;&amp; (row.ITEM_CD!='WEB_006' &amp;&amp; row.ITEM_CD!='WEB_014') &amp;&amp; 'I' == '')?'"javascript:getExpMsg();"':('"pageLink.pcl?link='+util_nvl(row.LINK_ID, preScrnId)+'/'+row.ITEM_CD+'&amp;SCRN_ID='+preScrnId+'"'))+'&gt;'+row.ITEM_NM+img_lock+'&lt;/a&gt;&lt;/li&gt;';&#13;
+	    			if (row.ITEM_CD == 'WEB_201') Web201_NM = row.ITEM_NM;&#13;
+				//src += '&lt;li&gt;&lt;a href="pageLink.pcl?link='+preScrnId+'/'+row.ITEM_CD+'"&gt;'+row.ITEM_NM+'&lt;/a&gt;&lt;/li&gt;';&#13;
+			}&#13;
+	    	src += '&lt;/ul&gt;&lt;/li&gt;';&#13;
+	    	&#13;
+	    	if (data.mymenus.length&gt;0){&#13;
+	    		console.log('menus');&#13;
+	    		src += '&lt;li&gt;&lt;span class="list"&gt;My Menu&lt;/span&gt;';&#13;
+	    		src += '&lt;ul class="menu"&gt;';&#13;
+	    		for (var i=0;i&lt;data.mymenus.length;i++){&#13;
+	    			var row = data.mymenus[i];&#13;
+	    			src += '&lt;li&gt;&lt;a href="pageLink.pcl?link='+row.H_PGM_NO+'/'+row.PGM_NO+'"&gt;'+row.PGM_NM+'&lt;/a&gt;&lt;/li&gt;';&#13;
+	    		}&#13;
+	    		src += '&lt;/ul&gt;&lt;/li&gt;';&#13;
+	    	}&#13;
+	    	&#13;
+	    	src = src.substring(10);&#13;
+	    	&#13;
+	    	//console.log("src="+src);&#13;
+	    	$("#leftMenu").html(src);&#13;
+	    	sideMenu();&#13;
+	    },&#13;
+	});			&#13;
+};&#13;
+&#13;
+&#13;
+getLeftMenu();&#13;
+&#13;
+&#13;
+&#13;
+function sideMenu(){&#13;
+	$('#btnSide').on('click', function(){&#13;
+		if($(this).attr('class') == 'action-btn close'){&#13;
+			$('.wrapper, .container, .action-btn, .lnb-section').removeClass('close');&#13;
+			$('.wrapper, .container, .action-btn, .lnb-section').addClass('open');&#13;
+			 $(window).trigger('resize');&#13;
+		}else{&#13;
+			if($(this).attr('class') == 'action-btn open'){&#13;
+				$('.wrapper, .container, .action-btn, .lnb-section').removeClass('open');&#13;
+				$('.wrapper, .container, .action-btn, .lnb-section').addClass('close');&#13;
+			}&#13;
+			 $(window).trigger('resize');&#13;
+		}&#13;
+		return false;&#13;
+	});&#13;
+&#13;
+	var asideMenu = $('.lnb-section .list'),&#13;
+		 asideSubMenu = $('.lnb-section .menu');&#13;
+	asideMenu.click(function(e){&#13;
+		e.preventDefault();&#13;
+		asideSubMenu.slideUp();&#13;
+		if($(this).next().is(':hidden') == true){&#13;
+			$(this).next().slideDown();&#13;
+		}&#13;
+	});&#13;
+	&#13;
+	asideMenu.eq(1).trigger('click');&#13;
+	&#13;
+	&#13;
+}&#13;
+&#13;
+/* Lnb메뉴 */&#13;
+/* function sideMenu(){&#13;
+	$('#btnSide').on('click', function(){&#13;
+		if($(this).attr('class') == 'action-btn close'){&#13;
+			$('.wrapper, .container, .action-btn').removeClass('close');&#13;
+			$('.wrapper, .container, .action-btn').addClass('open');&#13;
+			$(window).trigger('resize');&#13;
+			return false;&#13;
+		}else{&#13;
+			if($(this).attr('class') == 'action-btn open'){&#13;
+				$('.wrapper, .container, .action-btn').removeClass('open');&#13;
+				$('.wrapper, .container, .action-btn').addClass('close');&#13;
+			}&#13;
+			$(window).trigger('resize');&#13;
+			return false;&#13;
+		}&#13;
+		&#13;
+	});&#13;
+&#13;
+	var asideMenu = $('.lnb-section .list'),&#13;
+		 asideSubMenu = $('.lnb-section .menu');&#13;
+	asideMenu.click(function(e){&#13;
+		e.preventDefault();&#13;
+		asideSubMenu.slideUp();&#13;
+		if($(this).next().is(':hidden') == true){&#13;
+			$(this).next().slideDown();&#13;
+		}&#13;
+	});&#13;
+} */&#13;
+&#13;
+</script>&#13;
+&#13;
+&#13;
+&#13;
+			<!-- side 메뉴 -->			&#13;
+			<div class="lnb-section close">&#13;
+			<div class="logoSpace"/>&#13;
+				<ul class="lnb" id="leftMenu">&#13;
+					<!-- <li><span class="list">Common</span>
+						<ul class="menu">
+							<li><a href="#">- Agent &amp; Representative</a></li>
+							<li><a href="#">- Contact Us</a></li>
+							<li><a href="#">- Sales &amp; Doc P.I.C</a></li>
+							<li><a href="#">- Service Route</a></li>
+							<li><a href="http://210.222.64.12/pan/schedule.pcl">- Schedule</a></li>
+							<li><a href="#">- Freight Invoice Inquiry</a></li>
+							<li><a href="#">- Official Receipt Inquiry</a></li>
+							<li><a href="#">- Cargo Tracking Inquiry</a></li>
+							<li><a href="#">- Port/ CY &amp; Terminal</a></li>
+							<li><a href="#">- Request Inquiry</a></li>
+							<li><a href="#">- Surcharge &amp; Local Charges</a></li>
+							<li><a href="#">- Freetime Tariff</a></li>
+							<li><a href="#">- MRN / MSN / Call Sign</a></li>
+							<li><a href="#">- Bank Receipt Information</a></li>
+							<li><a href="#">- My Template</a></li>
+							<li><a href="#">- My Menu</a></li>
+						</ul>
+					</li>
+					<li><span class="list">Export</span>
+						<ul class="menu">
+							<li><a href="pageLink.pcl?link=outbound/WEB001">- Booking Inquiry</a></li>
+							<li><a href="#">- Tare Weight Inquiry</a></li>
+							<li><a href="#">- V.G.M Inquiry</a></li>
+							<li><a href="#">- B/L Creation</a></li>
+							<li><a href="#">- B/L Issue Inquiry</a></li>
+							<li><a href="#">- B/L Inquiry</a></li>
+						</ul>
+					</li>
+					<li><span class="list">Import</span>
+						<ul class="menu">
+							<li><a href="#">- Import B/L Inquiry</a></li>
+							<li><a href="#">- Arrival Notice Inquiry</a></li>
+							<li><a href="#">- D/O Inquiry</a></li>
+							<li><a href="#">- Empty Return Place Inquiry</a></li>
+							<li><a href="#">- Demurrage & Detention</a></li>
+							<li><a href="#">- Freetime Inquiry</a></li>
+						</ul>
+					</li> -->&#13;
+				</ul>&#13;
+&#13;
+				<a href="#none" class="action-btn close" id="btnSide"><span>버튼</span></a>&#13;
+			</div>&#13;
+	<div class="loding-section" style="display:none;" id="loading-bar">&#13;
+		<span class="loding"><img src="resources/images/loading1.gif" alt="로딩"/></span>&#13;
+	</div>&#13;
+			&#13;
+			<!-- 컨텐츠 -->&#13;
+			<div class="content">&#13;
+				<!-- 상단 픽스 영역 -->&#13;
+				<div class="top-fixed-block">&#13;
+					<div class="location">&#13;
+						<span id="WEB_201_SCH">Schedule</span>&#13;
+					</div>&#13;
+&#13;
+					<div class="btn-block">						&#13;
+						<a href="#none" class="btn-ms-type btn-min btn-none" id="WEB_201_SECS">구간별</a>&#13;
+						<a href="pageLink.pcl?link=COM/WEB_209" class="btn-ms-type btn-min" id="WEB_201_VSL">선박별</a>&#13;
+						<a href="pageLink.pcl?link=COM/WEB_210" class="btn-ms-type btn-min" id="WEB_201_PORT">항구별</a>&#13;
+						<a href="pageLink.pcl?link=COM/WEB_211" class="btn-ms-type btn-min" id="WEB_201_LONG_TERM">Long Term</a>	&#13;
+					</div>&#13;
+&#13;
+					<div class="form-block">&#13;
+					<form id="Web201VO" name="sForm" action="/pan/pageLink.pcl;JSESSIONID_13=6D701939AF494CC71FF43232BACDE259?link=COM/WEB_201&amp;nationals=EN" method="post">&#13;
+						<div class="form-cover fL">&#13;
+							<div id="searchForm">&#13;
+								<input type="hidden" id="P_POL_COUNTRY_CD" value=""/>&#13;
+								<input type="hidden" id="P_POL_PORT_CD" value=""/>&#13;
+								<input type="hidden" id="P_POD_COUNTRY_CD" value=""/>&#13;
+								<input type="hidden" id="P_POD_PORT_CD" value=""/>&#13;
+								<div id="cond0" class="schedule-form">&#13;
+									<span class="area pd-L0 inp-area13">&#13;
+										<span class="cover">&#13;
+											<label for="pol_country_plc_nm" id="WEB_201_POL">출발</label>&#13;
+											<input type="text" name="pol_country_plc_nm" id="pol_country_plc_nm" value="" class="inp-area11"/>&#13;
+											<span class="btn-port" id="btn_pol_port">검색</span>&#13;
+											<input type="hidden" name="I_AS_POL_CD" id="I_AS_POL_CD" enm=""/>&#13;
+											<input type="hidden" name="I_AS_POL_CTR" id="I_AS_POL_CTR"/>&#13;
+											<!-- 자동완성 -->&#13;
+											<div class="port-block" style="display:none;">&#13;
+												<ul class="ui-list-box none" id="auto_plc_nm">&#13;
+													&#13;
+												</ul>&#13;
+											</div>&#13;
+											<!-- // 자동완성 -->&#13;
+											&#13;
+											<!-- 콤보박스 레이아웃 -->&#13;
+											<div class="select-block" id="div_pol_search">&#13;
+												<div class="cover">&#13;
+													<label for="pol_country_cd" id="WEB_201_POL_CTR_SEL" class="in-block sel-area3">국가</label>&#13;
+													<select name="pol_country_cd" id="pol_country_cd" class="W75" onchange="getPLC(this, 'cond0');">&#13;
+														<option value="" selected="selected" id="WEB_201_POL_COUNTRY_CD">국가선택</option>&#13;
+													</select>&#13;
+													&#13;
+												</div>&#13;
+												<div class="cover">&#13;
+													<label for="pol_port_cd" id="WEB_201_POL_PORT_SEL" class="in-block sel-area3">항구</label>&#13;
+													<select name="pol_port_cd" id="pol_port_cd" class="W75" onchange="setPLC(this, 'cond0');">&#13;
+														<option value="" selected="selected" id="WEB_201_POL_PORT_CD">항구선택</option>&#13;
+													</select>&#13;
+													&#13;
+												</div>&#13;
+											</div>&#13;
+											<!-- // 콤보박스 레이아웃 -->&#13;
+										&#13;
+											<!-- <select name="pol_country_cd" title="출발국가를 선택해주세요" onchange="getPLC(this, 'cond0');">
+												<option value="" selected="selected">국가선택</option>
 
-    <div id="header">
-        <header>
-            <h1><a href="/eng/biz/eService/eservice.do"><span class="hide">NamSung</span></a></h1>
-            <div class="topMenu">
-                <ul>
-                    <!--
-                    <li class="menu1"><a href="/frt/biz/eService/selectSchdulList.do"><span class="hide">HOME</span></a></li>
-                    <li class="menu4"><a href="#"><span class="hide">SITEMAP</span></a></li>
-                     -->
-                    <li class="menu5"><a href="/frt/biz/eService/eservice.do"><span class="hide">KOREAN</span></a></li>
-                    <li class="menu6"><a href="/eng/main.do"><span class="hide">HOMEPAGE</span></a></li>
-                </ul>
-            </div>
-        </header>
-    </div><!-- //header -->
-    <div id="container">
-        <nav class="mainMenu">
-            <div>
-                <div>
-                    <ul class="pageMenu">
+											</select>
+											<select name="pol_port_cd" id="pol_port_cd" title="출발지역을 선택해주세요">
+												<option value="" selected="selected">지역선택</option>
+											</select>-->&#13;
+										</span>&#13;
+									</span>&#13;
+									<span class="area pd-L0 inp-area13">&#13;
+										<span class="cover">&#13;
+											<label for="pod_country_plc_nm" id="WEB_201_POD">도착</label>&#13;
+											<input type="text" name="pod_country_plc_nm" id="pod_country_plc_nm" value="" class="inp-area11"/>&#13;
+											<span class="btn-port" id="btn_pod_port"/>&#13;
+											<input type="hidden" name="I_AS_POD_CD" id="I_AS_POD_CD" enm=""/>&#13;
+											<input type="hidden" name="I_AS_POD_CTR" id="I_AS_POD_CTR"/>&#13;
+											<!-- 자동완성 -->&#13;
+											<div class="port-block" style="display:none;">&#13;
+												<ul class="ui-list-box none" id="auto_plc_nm">&#13;
+													&#13;
+												</ul>&#13;
+											</div>&#13;
+											<!-- // 자동완성 -->&#13;
+		&#13;
+											<!-- 콤보박스 레이아웃 -->&#13;
+											<div class="select-block" id="div_pod_search">&#13;
+												<div class="cover">&#13;
+													<label for="pod_country_cd" id="WEB_201_POD_CTR_SEL" class="in-block sel-area3">국가</label>&#13;
+													<select name="pod_country_cd" id="pod_country_cd" class="W75" onchange="getPLC(this, 'cond0')">&#13;
+														<option value="" selected="selected" id="WEB_201_POD_COUNTRY_CD">국가선택</option>&#13;
+													</select>&#13;
+												</div>&#13;
+												<div class="cover">&#13;
+													<label for="pod_port_cd" id="WEB_201_POD_PORT_SEL" class="in-block sel-area3">항구</label>&#13;
+													<select name="pod_port_cd" id="pod_port_cd" class="W75" onchange="setPLC(this, 'cond0')">&#13;
+														<option value="" selected="selected" id="WEB_201_POD_PORT_CD">항구선택</option>&#13;
+													</select>&#13;
+												</div>&#13;
+											</div>&#13;
+											<!-- // 콤보박스 레이아웃 -->&#13;
+											<!-- <select name="pod_country_cd" title="도착국가를 선택해주세요" onchange="getPLC(this, 'cond0')">
+												<option value="" selected="selected">국가선택</option>
 
-                        <li class="menu1 on"><a href="/eng/biz/eService/selectSchdulList.do">Schedule</a></li>
-                        <li class="menu1 "><a href="/eng/biz/eService/selectCargoTrace.do">Cargo Trace</a></li>
-                        <li class="menu1 "><a href="http://esvc.namsung.co.kr" target="_blank">E-service plus</a></li>
-                        <li class="menu2 on"><a href="/eng/biz/eService/selectSchdulList.do">Schedule</a></li>
-                        <li class="menu2 "><a href="/eng/biz/eService/selectCargoTrace.do">Cargo Tracking</a></li>
-                        <li class="menu2 "><a href="/eng/biz/eService/selectSurrender.do">Surrender B/L &amp;
-                            Waybill</a></li>
-                        <li class="menu2 "><a href="/eng/biz/eService/selectSr.do">S/R</a></li>
-                        <li class="menu2 "><a href="/eng/biz/eService/selectBooking.do">Booking</a></li>
-                    </ul>
-                    <footer id="footer">
-                        <p class="copy"><span>COPYRIGHT(C)</span> <span>2013 BY NAMSUNG</span>
-                            <span>SHIPPING Co., Ltd.</span><span>沪ICP备15046855号</span></p>
-                    </footer>
-                </div>
-            </div>
-        </nav>
-
-        <div id="contents">
-            <div class="sub_visual">
-                <p class="txt1">E-SERVICE</p>
-            </div>
-            <article class="contents">
-
-                <script type="text/javascript" src="http://wcs.naver.net/wcslog.js"/>
-                <script type="text/javascript">
-                    if (!wcs_add) var wcs_add = {};
-                    wcs_add["wa"] = "cf52d778d3cf";
-                    wcs_do();
-                </script>
-                &#13;
-                <div class="contents_top">&#13;
-                    <h3>Schedule</h3>&#13;
-                    <div class="position"><span class="home">Home</span> <span>E-SERVICE</span> <span>Schedule</span>
-                    </div>&#13;
-                </div>&#13;
-                <div class="content_view">&#13;
-                    <!-- 내용시작 -->&#13;
-                    &#13;
-                    <script type="text/javascript">&
-                    #13;
-                    &
-                    #13;
-
-                    function fn_search() {&
-                        #13;
-                        var varForm = document.schdulVO;
-                    &
-                        #13;
-                        varForm.action = "selectSchdulList.do";
-                    &
-                        #13;
-                        varForm.submit();
-                    &
-                        #13;
-                    }
-
-                    &
-                    #13;
-
-                    function fn_AjaxPortList1() {&
-                        #13;
-                        var strArg = "searchGuggaCd=" + document.getElementById("searchGuggaCdFrom").value;
-                    &
-                        #13;
-                        $.ajax({ & #13;
-                        url : "AjaxPortList.do",
-                    &
-                        #13;
-                        type : "GET",
-                    &
-                        #13;
-                        data : strArg,
-                    &
-                        #13;
-                        dataType : "html",
-                    &
-                        #13;
-                        success:function (object) {&
-                            #13;
-                            document.getElementById("searchPortCdFrom").innerHTML = "";
-                        &
-                            #13;
-                            $("#searchPortCdFrom").html(object);
-                        &
-                            #13;
-                        }
-                    ,          &
-                        #13;
-                        error:function (xhr, status, error) {
-                            alert(status);
-                        }
-                    &
-                        #13;
-                    })
-                        ;
-                    &
-                        #13;
-                    }
-
-                    &
-                    #13;
-
-                    function fn_AjaxPortList2() {&
-                        #13;
-                        var strArg = "searchGuggaCd=" + document.getElementById("searchGuggaCdTo").value;
-                    &
-                        #13;
-                        $.ajax({ & #13;
-                        url : "AjaxPortList.do",
-                    &
-                        #13;
-                        type : "GET",
-                    &
-                        #13;
-                        data : strArg,
-                    &
-                        #13;
-                        dataType : "html",
-                    &
-                        #13;
-                        success:function (object) {&
-                            #13;
-                            document.getElementById("searchPortCdTo").innerHTML = "";
-                        &
-                            #13;
-                            $("#searchPortCdTo").html(object);
-                        &
-                            #13;
-                        }
-                    ,          &
-                        #13;
-                        error:function (xhr, status, error) {
-                            alert(status);
-                        }
-                    &
-                        #13;
-                    })
-                        ;
-                    &
-                        #13;
-                    }
-
-                    &
-                    #13;
-
-                    function fn_AjaxNewViewList(searchPortCdFrom, searchPortCdTo, searchDate, searchVslvoy, searchVslCdTag, searchv_por, searchv_otag, searchv_oday, searchv_ofec, searchv_pord, searchv_pvy, searchv_itag, searchv_iday, searchv_ifec, searchv_pvyd, search_lpt, search_dpt) {&
-                        #13;
-                        var strArg = "searchPortCdFrom=" + searchPortCdFrom + & #13;
-                        "&amp;searchPortCdTo=" + searchPortCdTo + & #13;
-                        "&amp;searchDate=" + searchDate + & #13;
-                        "&amp;searchVslCdTag=" + searchVslCdTag + & #13;
-                        "&amp;searchVslvoy=" + searchVslvoy + & #13;
-                        "&amp;searchDateOption=startdate" + & #13;
-                        "&amp;searchv_por=" + searchv_por + & #13;
-                        "&amp;searchv_otag=" + searchv_otag + & #13;
-                        "&amp;searchv_oday=" + searchv_oday + & #13;
-                        "&amp;searchv_ofec=" + searchv_ofec + & #13;
-                        "&amp;searchv_pord=" + searchv_pord + & #13;
-                        "&amp;searchv_pvy=" + searchv_pvy + & #13;
-                        "&amp;searchv_itag=" + searchv_itag + & #13;
-                        "&amp;searchv_iday=" + searchv_iday + & #13;
-                        "&amp;searchv_ifec=" + searchv_ifec + & #13;
-                        "&amp;searchv_pvyd=" + searchv_pvyd + & #13;
-                        "&amp;search_lpt=" + search_lpt + & #13;
-                        "&amp;search_dpt=" + search_dpt;
-                    &
-                        #13;
-                        $.ajax({ & #13;
-                        url : "AjaxNewViewList.do",
-                    &
-                        #13;
-                        type : "GET",
-                    &
-                        #13;
-                        data : strArg,
-                    &
-                        #13;
-                        dataType : "html",
-                    &
-                        #13;
-                        success:function (object) {&
-                            #13;
-                            document.getElementById("newViewList").innerHTML = "";
-                        &
-                            #13;
-                            $("#newViewList").html(object);
-                        &
-                            #13;
-                        }
-                    ,          &
-                        #13;
-                        error:function (xhr, status, error) {
-                            alert(status);
-                        }
-                    &
-                        #13;
-                    })
-                        ;
-                    &
-                        #13;
-                    }
-
-                    &
-                    #13;
-
-                    function gf_popupVesselNamePrint(vslvoy_f) {&
-                        #13;
-                        /** 새창에 넘겨줄 paremeter 값 **/
-                    &
-                        #13;
-                        var inpvsl = vslvoy_f.substr(0, 4);
-                    &
-                        #13;
-                        var inpvoy = vslvoy_f.substr(4, 4);
-                    &
-                        #13;
-                        var inpbnd = vslvoy_f.substr(8, 1);
-                    &
-                        #13;
-                    &
-                        #13;
-                        /** Popup 설정 **/
-                    &
-                        #13;
-                        var sendUrl = '';                  // URL&#13;
-                        var popupName = 'VesselInfo';       // popup Target&#13;
-                        var width = '950';                 // 너비&#13;
-                        var height = '700';                 // 높이&#13;
-                        var option = 'toolbar=0, directories=0, status=0, menubar=0, scrollbars=1, resizable=no, location=no';       // popup 옵션&#13;
-                    &
-                        #13;
-                        gf_open(sendUrl, popupName, width, height, option);  // 팝업 생성&#13;
-                        sendUrl = 'http://esvc.namsung.co.kr/popup/actualScheduleSearchPopup';      // 실제 호출 URL&#13;
-                    &
-                        #13;
-                        /** parameter 값 설정 **/
-                    &
-                        #13;
-                        var form = document.frmHiddenVessel;
-                    &
-                        #13;
-                        form.action = sendUrl;
-                    &
-                        #13;
-                        form.target = popupName;
-                    &
-                        #13;
-                        form.method = 'post';
-                    &
-                        #13;
-                        form.inpvsl.value = inpvsl;
-                    &
-                        #13;
-                        form.inpvoy.value = inpvoy;
-                    &
-                        #13;
-                        form.inpbnd.value = inpbnd;
-                    &
-                        #13;
-                    &
-                        #13;
-                        form.submit();
-                    &
-                        #13;
-                    }
-
-                    &
-                    #13;
-
-                    function gf_open(url, name, width, height, option, left, top) {&
-                        #13;
-                        var w = $(document.body).width();
-                    &
-                        #13;
-                        var h = $(document.body).height();
-                    &
-                        #13;
-                        var l = parseInt(w / 2 - width / 2, 10);
-                    &
-                        #13;
-                        var t = parseInt(h / 2 - height / 2, 10);
-                    &
-                        #13;
-                    &
-                        #13;
-                        if (left == null) {&
-                            #13;
-                            left = parseInt(l) || 10;
-                        &
-                            #13;
-                        }
-                    &
-                        #13;
-                        if (top == null) {&
-                            #13;
-                            top = parseInt(t) || 10;
-                        &
-                            #13;
-                        }
-                    &
-                        #13;
-                        var popWin = window.open(url, name, 'width=' + width + ', height=' + height + ', left=' + left + ', top=' + top + ', ' + option);
-                    &
-                        #13;
-                        return popWin;
-                    &
-                        #13;
-                    }
-
-                    &
-                    #13;
-                    </script>&#13;
-                    &#13;
-                    <form id="schdulVO" name="schdulVO" action="selectSchdulList.do" method="get">&#13;
-                        &#13;
-                        <div class="board">&#13;
-                            &#13;
-                            <div class="schedule_top">&#13;
-                                <a href="/com/file/fileDown.do?fileId=FILE_000000000006547&amp;fileSn=0">PDF
-                                    DOWNLOAD</a>&#13;
-                                <a href="/com/file/fileDown.do?fileId=FILE_000000000006548&amp;fileSn=0">EXEL
-                                    DOWNLOAD</a>&#13;
-                            </div>&#13;
-                            &#13;
-                            <div class="view schedule_form">&#13;
-                                <div class="guide">&#13;
-                                    Outport, destination, just enter your information you can check the schedule.&#13;
-                                </div>&#13;
-                                <div class="row">&#13;
-                                    Year&#13;
-                                    <select id="searchYear" name="searchYear" title="Year">&#13;
-                                        &#13;
-                                        &#13;
-                                        <option value="2018">2018</option>&#13;
-                                        &#13;
-                                        &#13;
-                                        <option value="2019" selected="selected">2019</option>&#13;
-                                        &#13;
-                                        &#13;
-                                        <option value="2020">2020</option>&#13;
-                                        &#13;
-                                        &#13;
-                                        <option value="2021">2021</option>&#13;
-                                        &#13;
-                                        &#13;
-                                        <option value="2022">2022</option>&#13;
-                                        &#13;
-                                        &#13;
-                                        <option value="2023">2023</option>&#13;
-                                        &#13;
-                                        &#13;
-                                        <option value="2024">2024</option>&#13;
-                                        &#13;
-                                        &#13;
-                                        <option value="2025">2025</option>&#13;
-                                        &#13;
-                                    </select>&#13;
-                                    Month&#13;
-                                    <select id="searchMonth" name="searchMonth" title="Month">&#13;
-                                        &#13;
-                                        &#13;
-                                        <option value="01">1</option>&#13;
-                                        &#13;
-                                        &#13;
-                                        <option value="02">2</option>&#13;
-                                        &#13;
-                                        &#13;
-                                        <option value="03">3</option>&#13;
-                                        &#13;
-                                        &#13;
-                                        <option value="04">4</option>&#13;
-                                        &#13;
-                                        &#13;
-                                        <option value="05">5</option>&#13;
-                                        &#13;
-                                        &#13;
-                                        <option value="06">6</option>&#13;
-                                        &#13;
-                                        &#13;
-                                        <option value="07">7</option>&#13;
-                                        &#13;
-                                        &#13;
-                                        <option value="08">8</option>&#13;
-                                        &#13;
-                                        &#13;
-                                        <option value="09">9</option>&#13;
-                                        &#13;
-                                        &#13;
-                                        <option value="10">10</option>&#13;
-                                        &#13;
-                                        &#13;
-                                        <option value="11" selected="selected">11</option>&#13;
-                                        &#13;
-                                        &#13;
-                                        <option value="12">12</option>&#13;
-                                        &#13;
-                                    </select>&#13;
-                                    <input id="searchDateOption1" name="searchDateOption" type="radio" value="startdate"
-                                           checked="checked"/><label for="searchDateOption1">Departure</label> &#13;
-                                    <input id="searchDateOption2" name="searchDateOption" type="radio" value="enddate"/><label
-                                            for="searchDateOption2">Arrival</label>&#13;
-                                </div>&#13;
-                                <div class="row">&#13;
-                                    <dl>&#13;
-                                        <dt>Port of Loading</dt>&#13;
-                                        <dd>&#13;
-                                            <span>&#13;
-                                    <label for="searchGuggaCdFrom">Country</label>&#13;
-                                    <select id="searchGuggaCdFrom" name="searchGuggaCdFrom" title="출발지 검색 Country"
-                                            style="width:150px;" onchange="fn_AjaxPortList1();">&#13;
-                                        <option value="KR">KOREA</option><option value="JP">JAPAN</option><option
-                                                value="CN" selected="selected">CHINA</option><option value="HK">HONG KONG</option><option
-                                                value="VN">VIETNAM</option><option value="TH">THAILAND</option><option
-                                                value="PH">PHILIPPINES</option><option value="TW">TAIWAN</option><option
-                                                value="MN">MONGOLIA</option><option value="KH">CAMBODIA</option><option
-                                                value="LA">LAOS(LAO PEOPLE′S DEMOCRATIC REPUBLIC)</option>&#13;
-                                    </select>&#13;
-                                </span>&#13;
-                                            <span>&#13;
-                                    <label for="searchPortCdFrom">Port</label>&#13;
-                                    <select id="searchPortCdFrom" name="searchPortCdFrom" title="출발지 검색 Port"
-                                            style="width:150px;">&#13;
-                                        <option value="CNANJ" selected="selected">ANJI</option><option value="CNBAY">BAYUQUAN</option><option
-                                                value="CNBJO">BEI JIAO(PRD)</option><option
-                                                value="CNCBC">BEICUN(PRD)</option><option
-                                                value="CNBHY">BEIHAI(PRD)</option><option value="CNBJS">BEIJING</option><option
-                                                value="CNCCN">CHANGCHUN</option><option value="CNCSX">CHANGSHA</option><option
-                                                value="CNCGU">CHANGSHU, JIANGSU</option><option value="CNCZX">CHANGZHOU, JIANGSU</option><option
-                                                value="CNCTU">CHENGDU</option><option value="CNCKG">CHONGQING</option><option
-                                                value="CNDFE">DAFENG, JIANGSU</option><option
-                                                value="CNDLC">DALIAN</option><option value="CNDDG">DANDONG</option><option
-                                                value="CNDOU">DOUMEN</option><option value="CNFAN">FANG CHENG</option><option
-                                                value="CNFOS">FOSHAN</option><option value="CNFOC">FUZHOU</option><option
-                                                value="CNGOM">GAOMING</option><option value="CNHAK">HAIKOU</option><option
-                                                value="CNHME">HAIMEN</option><option value="CNHRB">HARBIN</option><option
-                                                value="CNHFE">HEFEI</option><option value="CNHTN">HEIGTEN</option><option
-                                                value="CNHSN">HESHAN</option><option value="CNCHD">HUADU(PRD)</option><option
-                                                value="CNHUA">HUANGPU</option><option value="CNHUI">HUIZHOU</option><option
-                                                value="CNHMN">HUMEN</option><option value="CNJMN">JIANGMEN</option><option
-                                                value="CNJYN">JIANGYIN (VIA HONGKONG)</option><option value="CNJIA">JIANGYIN(VIA SHANGHAI)</option><option
-                                                value="CNJXN">JIAOXIN(PRD)</option><option
-                                                value="CNJIN">JINGTANG PORT</option><option
-                                                value="CNJTG">JINGTANG PORT</option><option value="CNJIU">JIUJIANG (SHANGHAI INLAND)</option><option
-                                                value="CNJJG">JIUJIANG (VIA HONGKONG)</option><option value="CNKUS">KUNSHAN</option><option
-                                                value="CNLAI">LAIXI</option><option value="CNLAZ">LAIZHOU</option><option
-                                                value="CNCLF">LANG FANG</option><option
-                                                value="CNLAN">LANSHI(PRD)</option><option
-                                                value="CNLUU">LELIU / SHUNDE</option><option value="CNLIH">LIANHUASHAN(PRD)</option><option
-                                                value="CNLHS">LIANHUSHAN</option><option
-                                                value="CNLYG">LIANYUNGANG</option><option value="CNLUD">LIUDOU</option><option
-                                                value="CNLZH">LIUZHOU</option><option value="CNCLT">LONGTONG</option><option
-                                                value="CNLUY">LUOYANG</option><option
-                                                value="CNLZU">LUZHOU, SICHUAN</option><option
-                                                value="CNCMU">MACAU</option><option value="CNMFG">MAFANG(PRD)</option><option
-                                                value="CNKHN">NANCHANG</option><option
-                                                value="CNNAH">NANHAI(PRD)</option><option value="CNNKG">NANJING</option><option
-                                                value="CNNNG">NANNING</option><option value="CNNSA">NANSHA</option><option
-                                                value="CNNTG">NANTONG</option><option value="CNNGB">NINGBO</option><option
-                                                value="CNPNY">PANYU (SHIQIAO)</option><option
-                                                value="CNCPH">PINGHU</option><option value="CNTAO">QINGDAO</option><option
-                                                value="CNQYN">QINGYUAN, GUANGDONG</option><option value="CNSHP">QINHUANGDAO</option><option
-                                                value="CNQZH">QINZHOU, GUANGXI</option><option
-                                                value="CNRZH">RIZHAO</option><option value="CNROQ">RONGQI</option><option
-                                                value="CNCSR">SANRONG(PRD)</option><option
-                                                value="CNSHG">SANSHAN</option><option value="CNSJQ">SANSHUI</option><option
-                                                value="CNSHA">SHANGHAI</option><option value="CNSWA">SHANTOU</option><option
-                                                value="CNSTG">SHANTOU</option><option value="CNSIN">SHATIAN</option><option
-                                                value="CNSHE">SHENYANGSHI</option><option
-                                                value="CNSZP">SHENZHEN PT </option><option value="CNSHK">SHENZHEN/ SHEKOU</option><option
-                                                value="CNSHD">SHIDAO, SHANDONG</option><option value="CNSJZ">SHIJIAZHUANG</option><option
-                                                value="CNSKO">SHUIKOU</option><option
-                                                value="CNSZH">SUZHOU, JIANGSU</option><option
-                                                value="CNTAG">TAICANG</option><option value="CNTAP">TAIPING</option><option
-                                                value="CNCTS">TAISHAN (GONGYI)</option><option value="CNTZO">TAIZHOU - NNINGBO TS </option><option
-                                                value="CNTAS">TANGSHAN</option><option value="CNTSN">TIANJIN</option><option
-                                                value="CNWMO">WAIMAO</option><option value="CNWEF">WEIFANG</option><option
-                                                value="CNWEI">WEIHAI</option><option value="CNWNZ">WENZHOU</option><option
-                                                value="CNWUH">WUHAN</option><option value="CNWHI">WUHU, ANHUI</option><option
-                                                value="CNWJA">WUJIANG</option><option
-                                                value="CNWUX">WUXI, JIANGSU</option><option
-                                                value="CNWUZ">WUZHOU</option><option value="CNXMN">XIAMEN</option><option
-                                                value="CNXIL">XIAOLAN(PRD)</option><option value="CNXAB">XINFENG,GUANGZHOU</option><option
-                                                value="CNTXG">XINGANG</option><option value="CNXIN">XINHUI(PRD)</option><option
-                                                value="CNXYU">XIYU, ZHUHAI(PRD)</option><option
-                                                value="CNYZH">YANGZHOU</option><option value="CNYNJ">YANJI</option><option
-                                                value="CNYNT">YANTAI</option><option
-                                                value="CNYTN">YANTIAN(SHENZHEN)</option><option value="CNYIC">YICHANG, HUBEI</option><option
-                                                value="CNYIK">YINGKOU</option><option
-                                                value="CNYUY">YUEYANG, HUNAN</option><option
-                                                value="CNZJG">ZHANGJIAGANG</option><option
-                                                value="CNZGK">ZHANGJIAKOU</option><option
-                                                value="CNCZM">ZHANGMUTOU</option><option value="CNCZQ">ZHAOQING</option><option
-                                                value="CNCZP">ZHAPU</option><option value="CNCGO">ZHENG ZHOU</option><option
-                                                value="CNZHE">ZHENJIANG</option><option value="CNZSN">ZHONGSHAN</option><option
-                                                value="CNZOS">ZHOUSHAN</option><option
-                                                value="CNZUH">ZHUHAI(PRD)</option><option
-                                                value="CNCZO">ZHUHAI/ GAOLAN</option>&#13;
-                                    </select>&#13;
-                                </span>&#13;
-                                        </dd>&#13;
-                                    </dl>&#13;
-                                </div>&#13;
-                                &#13;
-                                <div class="row">&#13;
-                                    <dl>&#13;
-                                        <dt>Port of Discharge</dt>&#13;
-                                        <dd>&#13;
-                                            <span>&#13;
-                                    <label for="searchGuggaCdTo">Country</label>&#13;
-                                    <select id="searchGuggaCdTo" name="searchGuggaCdTo" title="도착지 검색 Country"
-                                            style="width:150px;" onchange="fn_AjaxPortList2();">&#13;
-                                        <option value="KR">KOREA</option><option value="JP"
-                                                                                 selected="selected">JAPAN</option><option
-                                                value="CN">CHINA</option><option value="HK">HONG KONG</option><option
-                                                value="VN">VIETNAM</option><option value="TH">THAILAND</option><option
-                                                value="PH">PHILIPPINES</option><option value="TW">TAIWAN</option><option
-                                                value="MN">MONGOLIA</option><option value="KH">CAMBODIA</option><option
-                                                value="LA">LAOS(LAO PEOPLE′S DEMOCRATIC REPUBLIC)</option>&#13;
-                                    </select>&#13;
-                                </span>&#13;
-                                            <span>&#13;
-                                    <label for="searchPortCdTo">Port</label>&#13;
-                                    <select id="searchPortCdTo" name="searchPortCdTo" title="도착지 검색 Port"
-                                            style="width:150px;">&#13;
-                                        <option value="JPABU">ABURATSU</option><option value="JPAXT">AKITA</option><option
-                                                value="JPBND">BANDO INLAND DEPO</option><option
-                                                value="JPHHE">HACHINOHE</option><option value="JPHKT">HAKATA</option><option
-                                                value="JPHKP">HAKODATE</option><option value="JPHMD">HAMADA</option><option
-                                                value="JPHIJ">HIROSHIMA</option><option
-                                                value="JPHIC">HITACHINAKA</option><option
-                                                value="JPHSM">HOSOSHIMA</option><option value="JPIMB">IMABARI</option><option
-                                                value="JPISI">ISHIKARI</option><option value="JPIWK">IWAKUNI</option><option
-                                                value="JPMKX">IYOMISHIMA</option><option value="JPKIS">KAMAISHI</option><option
-                                                value="JPKNZ" selected="selected">KANAZAWA</option><option
-                                                value="JPKWS">KAWASAKI</option><option value="JPUKB">KOBE</option><option
-                                                value="JPKUH">KUSHIRO</option><option value="JPMAI">MAIZURU</option><option
-                                                value="JPMYJ">MATSUYAMA</option><option value="JPMIZ">MIZUSHIMA</option><option
-                                                value="JPMOJ">MOJI</option><option
-                                                value="JPMOK">MOKA INLAND DEPO</option><option
-                                                value="JPMUR">MURORAN</option><option value="JPNGO">NAGOYA</option><option
-                                                value="JPNAO">NAOETSU</option><option value="JPNIH">NIIGATA</option><option
-                                                value="JPOIP">OITA</option><option value="JPONA">ONAHAMA</option><option
-                                                value="JPOSA">OSAKA</option><option value="JPOTK">OTAKE</option><option
-                                                value="JPSMN">SAKAIMINATO</option><option value="JPSKT">SAKATA</option><option
-                                                value="JPSXX">SANO INLAND PORT</option><option value="JPSGM">SENDAI SHIOGAMA-MIYAGI</option><option
-                                                value="JPSBS">SHIBUSHI</option><option value="JPSMZ">SHIMIZU</option><option
-                                                value="JPSHS">SHIMONOSEKI</option><option
-                                                value="JPTBT">TOBATA (HIBIKI)</option><option
-                                                value="JPTYO">TOKYO</option><option value="JPTMK">TOMAKOMAI</option><option
-                                                value="JPFSK">TOYAMA-SHINKO FUSHIKI</option><option value="JPTSB">TSUKUBA INLAND DEPO</option><option
-                                                value="JPWAK">WAKAYAMA</option><option value="JPYOK">YOKOHAMA</option>&#13;
-                                    </select>&#13;
-                                </span>&#13;
-                                        </dd>&#13;
-                                    </dl>&#13;
-                                </div>&#13;
-                                &#13;
-                                <!-- btn --> &#13;
-                                <div class="command">&#13;
-                                    <a href="selectSchdulList.do" onclick="fn_search(); return false;" class="btnBlue">SEARCH</a>&#13;
-                                </div>&#13;
-                                <!--// btn -->&#13;
-                                &#13;
-                            </div>&#13;
-                            &#13;
-                            <div class="calendar_top">&#13;
-                                <p><span class="red">Red</span> Closed document of a vessel(Booking closed)</p>&#13;
-                                <p><span class="blue">Blue</span> Available vessel booking </p>&#13;
-                                <p>(D) Direct</p>&#13;
-                                <p>(T) T/S</p>&#13;
-                            </div>&#13;
-                            <div class="calendar">&#13;
-                                <table summary="">&#13;
-                                    <caption>스케쥴 조회</caption>&#13;
-                                    <colgroup>&#13;
-                                        <col width="14%"/>&#13;
-                                        <col width="14%"/>&#13;
-                                        <col width="14%"/>&#13;
-                                        <col width="14%"/>&#13;
-                                        <col width="14%"/>&#13;
-                                        <col width="14%"/>&#13;
-                                        <col width="*%"/>&#13;
-                                    </colgroup>&#13;
-                                    <thead>&#13;
-                                    <tr>&#13;
-                                        <th scope="col" class="sun">Sun</th>&#13;
-                                        <th scope="col">Mon</th>&#13;
-                                        <th scope="col">Tue</th>&#13;
-                                        <th scope="col">Wed</th>&#13;
-                                        <th scope="col">Thu</th>&#13;
-                                        <th scope="col">Fri</th>&#13;
-                                        <th scope="col" class="sat">Sat</th>&#13;
-                                    </tr>&#13;
-                                    </thead>&#13;
-                                    <tbody>&#13;
-                                    <tr>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td><span/></td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td><span/></td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td><span/></td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td><span/></td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td><span/></td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            1&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left sat">&#13;
-                                            2&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                    </tr>&#13;
-                                    <tr>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left sun">&#13;
-                                            3&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            4&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            5&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            6&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            7&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            8&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left sat">&#13;
-                                            9&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                    </tr>&#13;
-                                    <tr>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left sun">&#13;
-                                            10&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            11&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            12&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            13&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            14&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            15&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left sat">&#13;
-                                            16&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                    </tr>&#13;
-                                    <tr>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left sun">&#13;
-                                            17&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            18&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            19&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            20&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            21&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            22&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left sat">&#13;
-                                            23&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                    </tr>&#13;
-                                    <tr>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left sun">&#13;
-                                            24&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            25&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            26&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            27&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            28&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left ">&#13;
-                                            29&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        <td class="left sat">&#13;
-                                            30&#13;
-                                            &#13;
-                                        </td>&#13;
-                                        &#13;
-                                    </tr>&#13;
-                                    <tr>&#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                        &#13;
-                                    </tr>&#13;
-                                    </tbody>&#13;
-                                </table>&#13;
-                            </div>&#13;
-                            <br/>&#13;
-                            &#13;
-                            <div id="newViewList" class="data"/>&#13;
-                            <script type="text/javascript">&
-                            #13;
-                            &lt;
-                            !-- & #13;
-
-                            function view_change(inNum) {&
-                                #13;
-                                totalViewNum = document.getElementById("totalNum").value;
-                            &
-                                #13;
-                                for (s = 0; s &lt; totalViewNum; s++) {&
-                                    #13;
-                                    document.getElementById("id_view_" + s).style.display = "none";
-                                &
-                                    #13;
-                                }
-                            &
-                                #13;
-                                document.getElementById("id_view_" + inNum).style.display = "";
-                            &
-                                #13;
-                            }
-
-                            &
-                            #13;
-                            //--&gt;&#13;
-                            </script>&#13;
-                        </div>&#13;
-                    </form>&#13;
-                    <form name="frmHiddenVessel" method="post">&#13;
-                        <input type="hidden" name="inpvsl"/>&#13;
-                        <input type="hidden" name="inpvoy"/>&#13;
-                        <input type="hidden" name="inpbnd"/>&#13;
-                    </form> &#13;
-                    <font color="#ED4C00">&#13;
-                        ※ ETD/ETA time could be changed without prior notice.&#13;
-                        ※ Document/Cargo closing time could be changed. Pls consult your local office.&#13;
-                        ※ T/S &amp; In-land schedule could be changed with or without prior notice.&#13;
-                    </font>&#13;
-                    <!-- 내용끝 -->&#13;
-                </div>&#13;
-
-
-                <p class="topMove"><a href="#contents"><span class="hide">맨 위로 이동</span></a></p>
-            </article>
-        </div>
-    </div><!-- //contents -->
-</div><!-- //container -->
-<!-- //wrap -->
-
-<!-- 기본 -->
-<script>
-
-    var menuState = false;
-    var siteState = false;
-    var quickStat = false;
-    wideMenu($("html").width(), $("html").height());
-
-    $(window).resize(function () {
-        respond();
-    }).resize();
-
-
-    function respond() { 	//Width 기준으로
-        var width = $("html").width();
-        var height = $("html").height();
-        $("html").css({"overflow-y": "scroll"});
-        if (width &lt; 1245) { //화면이 줄어들때
-
-            if (width &gt; 1020) {  //If MaxWidth( &gt; 1020)
-                $("body").removeClass().addClass("full");
-                wideSizeLayout(width, height);
-                wideContents(width, height);
-                wideMenu(width, height);
-                wideMenuEvent(width, height);
-                wideContents(width, height);
-
-            } else if (width &lt; 1020 &amp;&amp; width &gt; 720) { //If Tablet Size( &gt; 720)
-                $("body").removeClass().addClass("full width1020");
-                tabletSizeLayout(width, height);
-                wideMenu(width, height);
-                tabletMenuEvent(width, height);
-                wideContents(width, height);
-            } else if (width &lt; 720 &amp;&amp; width &gt; 0) { //If Mobile Size( &gt; 0)
-                $("body").removeClass().addClass("full width720");
-                $("#quickMenu").removeClass("on");
-                mobileSizeLayout(width, height);
-                moblieMenuEvent(width, height);
-            }
-
-        } else {	//Wide Screen
-            $("body").removeClass();
-            wideSizeLayout(width, height);
-            wideMenu(width, height);
-            wideMenuEvent(width, height);
-            wideContents(width, height);
-
-        }
-        $(".blind").remove();
-    }
-
-
-    //Wide Size 에 대한 레이아웃 변경
-    function wideSizeLayout(width, height) {
-        $(".sub_visual").prependTo("#contents");
-        $(".position").appendTo(".contents_top");
-        $(".contents_top .position .mMenuControl").remove();
-        $("#footer").appendTo(".mainMenu &gt; div &gt; div");
-        $(".news p em").removeAttr("style");
-        var left = (width - $(".sitemapWrap").width()) / 2;
-        var top = (height - 580) / 2;
-        $("#sitemapPop").height($("body").height());
-        $(".sitemapWrap").css({"height": "580px", "left": left, "top": top});
-        if (!menuState) {
-            menuState = true;
-            $(".pageMenu li.selected").addClass("on");
-            wideContents(width, height);
-            // wideSizeVisual(width, height);
-        }
-        $("#quickMenu .small").css({"top": (height - 87) / 2});
-    }
-
-    //Wide Size 에 대한 메뉴
-    function wideMenu(width, height) {
-        if (height &lt; 550) {
-            $(".mainMenu &gt; div &gt; div").height(height - 55);
-            $("#footer").css({"position": "relative", "bottom": "0"});
-        } else {
-            $("#footer").css({"position": "absolute", "bottom": "80px"});
-            $(".mainMenu &gt; div &gt; div").height(height);
-        }
-        $(".mainMenu").css({"left": $("#header header").offset().left + 20});
-        $(".mainMenu .move").css({"display": "none"});
-    }
-
-    //Wide Size 에 대한 Contents
-    function wideContents(width, height) {
-        var left = $(".mainMenu").width();
-        $("#contents").css({"padding-right": $("#quickMenu").width() + 12, "padding-left": left + 13});
-    }
-
-
-    //Wide Size 에 대한 Menu Event
-    function wideMenuEvent(width, height) {
-        $(".pageMenu &gt; li.menuClick &gt; a").unbind("click");
-
-        //사이트맵 버튼 클릭
-        $(".topMenu .menu4").on("click", function (e) {
-            e.preventDefault();
-            siteState = true;
-            $("#sitemapPop").fadeIn();
-        });
-    }
-
-    //Tablet Size Menu Event
-    function tabletSizeLayout(width, height) {
-        $(".rolling, .visual, .rolling &gt; div, #quickMenu, #contents").removeAttr("style");
-        $("#quickMenu").removeClass("on");
-        $(".sub_visual").prependTo("#contents");
-        $(".position").appendTo(".contents_top");
-        $(".contents_top .position .mMenuControl").remove();
-        $("#footer").appendTo(".mainMenu &gt; div &gt; div");
-        $(".sitemapWrap").css({"height": "520px"});
-        $("#sitemapPop").height($("body").height());
-    }
-
-
-    //Tablet Size 에 대한 Menu Event
-    function tabletMenuEvent(width, height) {
-        $(".pageMenu &gt; li.menuClick &gt; a").unbind("click");
-
-
-        //사이트맵 버튼 클릭
-        $(".topMenu .menu4").on("click", function (e) {
-            e.preventDefault();
-            siteState = true;
-            $("#sitemapPop").fadeIn();
-            var left = (width - $(".sitemapWrap").width()) / 2;
-            var position = $(window).scrollTop() + 55;
-            $(".sitemapWrap").css({"left": left, "top": position});
-
-        });
-    }
-
-    //Mobile Size Layout
-    function mobileSizeLayout(width, height) {
-        $(".ps-container, .ps-scrollbar-y-rail, .ps-scrollbar-y-rail &gt;div").removeAttr("style");
-        $("#contents, .mainMenu, .mainMenu &gt; div &gt; div, .visual, .visual div, .rolling,  #quickMenu, .sitemapWrap, .mainMenu .depth, .mainMenu .depth &gt; div").removeAttr("style");
-        $(".contents_top .position").append($("&lt;button class='mMenuControl'&gt;&lt;span class='hide'&gt;메뉴열기&lt;/span&gt;&lt;/button&gt;"))
-        $(".contents_top .position").prependTo("#container");
-        $(".sub_visual").prependTo("#container");
-        $("#footer").appendTo("#wrap");
-        $(".news p em").width($(".news p").width() - 80);
-        $(".mainMenu .move").css({"display": "none"});
-        $("#sitemapPop").height($("body").height());
-    }
-
-
-    //Moblie Size 에 대한 Menu Event
-    function moblieMenuEvent(width, height) {
-        $(".pageMenu &gt; li.menuClick &gt; a").unbind("click mouseover");
-        $(".pageMenu &gt; li.menuClick &gt; a").bind("click", function () {
-            if ($(this).parents("li").hasClass("on")) {
-                $(this).parents("li").removeClass("on");
-                menuState = false;
-            } else {
-                $(".pageMenu li").removeClass("on");
-                $(this).parents("li").addClass("on");
-                menuState = true;
-            }
-            return false;
-        });
-        //사이트맵 버튼 클릭
-        $(".topMenu .menu4").on("click", function (e) {
-            e.preventDefault();
-            siteState = true;
-            $("#sitemapPop").fadeIn();
-            $("html").css({"overflow-y": "scroll"});
-        });
-
-        $(".mMenuControl").unbind("click");
-        $(".mMenuControl").bind("click", function () {
-            if (!$(this).hasClass("on")) {
-                $(this).addClass("on");
-                $(".mainMenu").slideDown();
-            } else {
-                $(".mainMenu").slideUp();
-                $(this).removeClass("on");
-            }
-        });
-    }
-
-    //사이트맵 닫기 버튼 클릭
-    $("#sitemapPop .close").on("click", function (e) {
-        e.preventDefault();
-        siteState = false;
-        //console.log("dddd");
-        $("#sitemapPop").fadeOut();
-    });
-
-    //사이트맵 스크롤
-    $(window).scroll(function () {
-        var position = $(window).scrollTop();
-        if ($("#container").height() - $(".sitemapWrap").height() + 40 &gt; position) {
-            $(".sitemapWrap").stop().animate({"top": position + 55 + "px"}, 500);
-        }
-
-    });
-
-    //맨위로
-    $(".topMove a").on("click", function () {
-        var top = $("#contents").offset().top;
-        $("body").animate({scrollTop: top}, 1000);
-    });
-
-    //스크롤바
-    $(".mainMenu &gt; div &gt; div").perfectScrollbar();
-
-</script>
-
-
-</body>
+											</select>
+											<select name="pod_port_cd" id="pod_port_cd" title="도착지역을 선택해주세요">
+												<option value="" selected="selected">지역선택</option>
+											</select>-->&#13;
+										</span>&#13;
+									</span>&#13;
+		&#13;
+									<button id="addCond" type="button" class="btn-plus">추가</button>&#13;
+									<button id="delCond" type="button" class="btn-minus">삭제</button>&#13;
+								</div>&#13;
+							</div>			&#13;
+						&#13;
+							<div class="schedule-form">&#13;
+								<span class="area pd-L0 inp-area13">&#13;
+									<label for="sYear" id="WEB_201_INQ_DT">조회년월</label>&#13;
+									<select name="sYear" id="sYear">&#13;
+										&#13;
+											<option value="2021">2021</option>&#13;
+										&#13;
+											<option value="2020">2020</option>&#13;
+										&#13;
+											<option value="2019" selected="selected">2019</option>&#13;
+										&#13;
+											<option value="2018">2018</option>&#13;
+										&#13;
+											<option value="2017">2017</option>&#13;
+										&#13;
+									</select>&#13;
+									<select name="sMonth" id="sMonth">&#13;
+										&#13;
+											<option value="1">1</option>&#13;
+										&#13;
+											<option value="2">2</option>&#13;
+										&#13;
+											<option value="3">3</option>&#13;
+										&#13;
+											<option value="4">4</option>&#13;
+										&#13;
+											<option value="5">5</option>&#13;
+										&#13;
+											<option value="6">6</option>&#13;
+										&#13;
+											<option value="7">7</option>&#13;
+										&#13;
+											<option value="8">8</option>&#13;
+										&#13;
+											<option value="9">9</option>&#13;
+										&#13;
+											<option value="10">10</option>&#13;
+										&#13;
+											<option value="11" selected="selected">11</option>&#13;
+										&#13;
+											<option value="12">12</option>&#13;
+										&#13;
+									</select>&#13;
+								</span>&#13;
+								<span class="area add1 pd-L0 inp-area13">&#13;
+									<input type="radio" class="ui-inp-rad" value="O" name="rd_apdpDate" id="exportDate" checked="checked"/>&#13;
+									<label for="exportDate" id="WEB_201_POL_ETD">수출 &amp; 출항일</label>&#13;
+									<input type="radio" class="ui-inp-rad" value="I" name="rd_apdpDate" id="importDate"/>&#13;
+									<label for="importDate" id="WEB_201_POD_ETA">수입 &amp; 입항일</label>&#13;
+								</span>																		&#13;
+							</div>												&#13;
+						</div>&#13;
+						<!-- <div class="btn-block"><a href="#none" class="btn-ms-type btn-min4">My Schedule</a></div>-->&#13;
+						<div class="form-cover-btn fL">&#13;
+							<div class="btn-block btn-big">&#13;
+								<button id="WEB_201_INQ" type="button" class="btn-ms-type btn-min-big">Search</button>&#13;
+								 &#13;
+							</div> &#13;
+						</div>&#13;
+						&#13;
+						<div class="form-cover-btn add1 fL">&#13;
+							<div class="btn-block">								&#13;
+								<a href="#none" id="WEB_201_MY_SCH" class="btn-ms-type btn-min btn-mySchedule btn-none" disabled="disabled">My Schedule</a>&#13;
+								<a href="#none" id="WEB_201_TMPLT_SAVE" class="btn-ms-type btn-min btn-none" disabled="disabled">My Schedule 등록</a> &#13;
+								&#13;
+								<!-- 마이스케줄 팝업 -->&#13;
+								<div class="myschedule-scroll">&#13;
+									<div class="myschedule-layerpop" id="myschedule">&#13;
+										<ul class="ui-list-box add1">&#13;
+										&#13;
+										</ul>&#13;
+										<span href="#none" class="btn-close"/>&#13;
+									</div>&#13;
+								</div>	&#13;
+							</div> &#13;
+						</div>	&#13;
+						&#13;
+						</form>&#13;
+					</div>&#13;
+				</div>&#13;
+								&#13;
+				<!-- 캘린더 -->&#13;
+				<div id="calendar" class="calender-section">&#13;
+					<ul class="info-cover" id="pol_pod_info">&#13;
+						<li><a href="#none" class="first" id="fromto0">BUSAN <i class="icon-arrow"/> QINGDAO</a></li>&#13;
+					</ul>&#13;
+&#13;
+					<div class="top-cover">&#13;
+						<div class="yymm-block">&#13;
+							<a href="#none" class="arrow btn-prev" onclick="pcCalendar.setPrevMonth()">이전달로 이동</a>&#13;
+							<span class="area" id="schYM">2016. 08</span>&#13;
+							<a href="#none" class="arrow btn-next" onclick="pcCalendar.setNextMonth()">다음달로 이동</a>&#13;
+						</div>&#13;
+						<div class="txt-block">&#13;
+							<span class="area add1" id="WEB_201_HDR1">서류 및 부킹 마감 선택</span>&#13;
+							<span class="area add2" id="WEB_201_HDR2">부킹 가능한 선박</span>&#13;
+						</div>&#13;
+						<div class="btn-list">&#13;
+							<a href="#none" class="btn-ms-type btn-min4" id="WEB_201_TO_DAY">오늘날짜가기</a>&#13;
+							<a href="#none" class="btn-ms-type btn-min" id="WEB_201_LIST">List 형식보기</a>&#13;
+							<!-- <a href="#none" class="btn-ms-type btn-min" id="">Email 보내기</a>-->&#13;
+							<a href="#none" class="btn-ms-type btn-min" id="btn_cal">Calender</a>&#13;
+							<button type="button" class="btn-ms-type btn-min" id="WEB_201_DWN">Download</button>&#13;
+						</div>&#13;
+						&#13;
+					</div>&#13;
+&#13;
+					<div class="calender-cover" id="div_calendar">&#13;
+						<table id="calTable" class="ui-tb-box">&#13;
+							<caption>일, 월, 화, 수, 목, 금, 토요일에 대한 스케쥴 달력입니다.</caption>&#13;
+							<colgroup>&#13;
+								<col style="width:14.285%"/>&#13;
+								<col style="width:14.285%"/>&#13;
+								<col style="width:14.285%"/>&#13;
+								<col style="width:14.285%"/>&#13;
+								<col style="width:14.285%"/>&#13;
+								<col style="width:14.285%"/>&#13;
+								<col style="width:14.285%"/>&#13;
+							</colgroup>&#13;
+							<thead>&#13;
+								<tr id="calHead">&#13;
+									<th class="sun" scope="col"/>&#13;
+									<th scope="col"/>&#13;
+									<th scope="col"/>&#13;
+									<th scope="col"/>&#13;
+									<th scope="col"/>&#13;
+									<th scope="col"/>&#13;
+									<th class="sat" scope="col"/>&#13;
+								</tr>&#13;
+							</thead>&#13;
+							<tbody>&#13;
+								&#13;
+							</tbody>&#13;
+						</table>&#13;
+					</div>&#13;
+					&#13;
+					<div class="calender-cover" id="div_list">&#13;
+						<table id="gridList"/>&#13;
+						<div id="pager2"/>&#13;
+					</div>&#13;
+					&#13;
+				</div>&#13;
+				<!-- //캘린더 -->&#13;
+			</div>&#13;
+		&#13;
+&#13;
+	    </div>&#13;
+	    <!-- container E -->&#13;
+&#13;
+		<!-- 하단 -->&#13;
+		<div class="footer">&#13;
+			<span><img src="resources/images/p_bottom.jpg" alt="서울시 강남구 테혜란로 8길 8 동주빌딩 8. 10층"/></span>&#13;
+		</div>&#13;
+		<!-- 로딩 -->&#13;
+		<div class="loding-section" style="display:none;" id="loading-bar">&#13;
+			<span class="loding"><img src="resources/images/loading1.gif" alt="로딩"/></span>&#13;
+		</div>&#13;
+&#13;
+	<!--wrapper  E -->&#13;
+	</div>&#13;
+	</div>&#13;
+	&#13;
+&#13;
+</body>&#13;
 </html>

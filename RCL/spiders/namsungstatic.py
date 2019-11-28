@@ -73,7 +73,7 @@ class NamsungstaticSpider(scrapy.Spider):
                 'port': tds.eq(0).text(),
                 'ETA': tds.eq(1).text(),
                 'ETD': tds.eq(2).text(),
-                'treminal': tds.eq(3).text()
+                'terminal': tds.eq(3).text()
             })
         logging.info('静态航线')
         logging.info(row)
