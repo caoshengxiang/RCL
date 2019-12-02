@@ -61,6 +61,8 @@ class DjsSpider(scrapy.Spider):
     ]
     url = 'http://korea.djship.co.kr/dj/servlet/cn.support.action.sub3_1_Action'
 
+    SCAC = 'DJS'
+
     def start_requests(self):
         localtime = time.localtime(time.time())
         year = str(localtime.tm_year)
