@@ -35,7 +35,7 @@ class GroupItem(scrapy.Item):
     ROUTE_CODE = scrapy.Field()  # 航线代码，没有就不存
     POL_TERMINAL = scrapy.Field()  # 起始码头 ，没有就不存
     POD_TERMINAL = scrapy.Field()  # 目的港码头，没有就不存
-
+    SCAC= scrapy.Field()
 
 class PortGroupItem(scrapy.Item):
     # define the fields for your item here like:
