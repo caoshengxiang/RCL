@@ -6,7 +6,7 @@
 # Desc:      there is a python file description
 # ------------------------------------------------------------------
 
-from sqlalchemy import CHAR, Column, ForeignKey, Index, String, TIMESTAMP, text
+from sqlalchemy import CHAR, Column, ForeignKey, Index, String, TIMESTAMP, text, DateTime
 from sqlalchemy.dialects.mysql import INTEGER, TINYINT
 from sqlalchemy.orm import relationship
 
@@ -287,3 +287,13 @@ class NewSchedulesDynamic(Base):
     VERSION_NUMBER = Column(INTEGER(11), index=True, server_default=text("'0'"), comment='更新的版本，默认0')
 
     new_schedules_support_vessel = relationship('NewSchedulesSupportVessel')
+
+
+class NewSchedulesTaskVersion(Base):
+    __tablename__ = 'new_schedules_task_version'
+
+    ID = Column(INTEGER(11), primary_key=True)
+    SCAC = Column(String(4), nullable=False, comment='船公司四字码')
+    VERSION = Column(INTEGER(11), nullable=False, server_default=text("'0'"), comment='版本号')
+    START_TIME = Column(DateTime, nullable=False, comment='开始更新时间')
+    END_TIME = Column(DateTime, comment='结束更新时间')
