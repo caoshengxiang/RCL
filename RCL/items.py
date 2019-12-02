@@ -15,7 +15,6 @@ class PortItem(scrapy.Item):
     date = scrapy.Field()
     SCAC = scrapy.Field()
 
-
 class GroupItem(scrapy.Item):
     # define the fields for your item here like:
     pol = scrapy.Field()  # code
