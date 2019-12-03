@@ -50,3 +50,16 @@ class PortGroupItem(scrapy.Item):
     status = scrapy.Field()
     userTime = scrapy.Field()
     SCAC = scrapy.Field()
+
+
+class StaticsItem(scrapy.Item):
+    SCAC = scrapy.Field()
+
+    # 服务父航线名称
+    ROUTE_PARENT = scrapy.Field()
+    # 服务子航线名称
+    ROUTE_NAME_EN = scrapy.Field()
+    # 航线代码
+    ROUTE_CODE = scrapy.Field()
+    # 挂靠数据集合
+    docking_list = scrapy.Field()

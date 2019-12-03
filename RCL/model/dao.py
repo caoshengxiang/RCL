@@ -20,6 +20,13 @@ class CommonDao:
             session.close()
 
     @classmethod
+    def update_one(cls, data):
+        try:
+            db_session.commit()
+        except Exception as e:
+            db_session.rollback()
+
+    @classmethod
     def add_one_normal(cls, data):
         try:
             db_session.add(data)

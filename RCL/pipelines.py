@@ -9,7 +9,7 @@ from RCL.items import PortItem, PortGroupItem
 from RCL.items import GroupItem
 from RCL.model.dao import CommonDao
 from RCL.model.models import NewSchedulesSpiderPort, NewSchedulesStatic, NewSchedulesDynamic, \
-    NewSchedulesStaticDocking, NewSchedulesDynamicTransit
+    NewSchedulesStaticDocking, NewSchedulesDynamicTransit, NewSchedulesTaskVersion
 from RCL.model.models import NewSchedulesSpiderPortCollectScac
 import logging as log
 from RCL.utils.utils import EncrptUtils, DateTimeUtils
@@ -41,21 +41,69 @@ class MongoPipeline(object):
         self.client.close()
 
 
-def boolean_none(text):
-    return text if text and text != 'None' and text != 'null' and text != '' and text != '0000-00-00 00:00:00' else None
-
-
 class MysqlPipeline(object):
-    SCAC = 'RCLC'
+    # 不重复更新
+    seeds = set()
 
     def open_spider(self, spider):
-        log.info('MysqlPipeline')
+        """
+        开始时 更新对应的版本号和开始时间
+        :param spider:
+        :return:
+        """
+        log.info('MysqlPipeline  spider[%s] start', spider.name)
+        SCAC = self._get_scac(spider)
+        if SCAC not in self.seeds:
+            sql = "SELECT max(VERSION_NUMBER) from new_schedules_dynamic  where SCAC='%s'"
+            version = CommonDao.native_query(sql % (SCAC))[0]
+            if version is None or version < 0:
+                version = 0
+            old = CommonDao.get(NewSchedulesTaskVersion, SCAC=SCAC)
+            if old:
+                from RCL.model.basic import db_session
+                old.VERSION = version
+                old.START_TIME = DateTimeUtils.now()
+                db_session.commit()
+            else:
+                nstv = NewSchedulesTaskVersion()
+                nstv.SCAC = SCAC
+                nstv.VERSION = version
+                nstv.START_TIME = DateTimeUtils.now()
+                CommonDao.add_one_normal(nstv)
+            self.seeds.add(SCAC)
+
+    def close_spider(self, spider):
+        """
+        关闭时 更新对应的结束时间
+        :param spider:
+        :return:
+        """
+        SCAC = self._get_scac(spider)
+        old = CommonDao.get(NewSchedulesTaskVersion, SCAC=SCAC)
+        if old:
+            from RCL.model.basic import db_session
+            old.END_TIME = DateTimeUtils.now()
+            db_session.commit()
+        self.seeds.clear()
+        log.info('MysqlPipeline spider[%s] ended', spider.name)
 
     def process_item(self, item, spider):
+        """
+        解析item
+        :param item:
+        :param spider:
+        :return:
+        """
         self._parse_and_save(item, spider)
         return item
 
     def _parse_and_save(self, item, spider):
+        """
+        根据不同的item 获取不同的处理器 各自执行不同处理逻辑
+        :param item:
+        :param spider:
+        :return:
+        """
         handlers = {
             PortItem: self._handle_portitem,
             PortGroupItem: self._handle_port_group_item,
@@ -64,6 +112,11 @@ class MysqlPipeline(object):
         handlers[item.__class__](item, spider)
 
     def _get_indenty(self, item):
+        """
+        根据item的所有值获取主键编码 二版本已弃用
+        :param item:
+        :return:
+        """
         key = ''
         for k, v in item.items():
             key = key + k + str(v)
@@ -79,15 +132,43 @@ class MysqlPipeline(object):
         return datetime.strptime(param, '%d/%m/%Y')
 
     def _covert_time2weekday(self, param):
+        """
+        转成周几
+        :param param:
+        :return:
+        """
         return self._covert_time(param).weekday() + 1
 
     def _covert_value(self, param):
+        """
+        类型转型处理数字
+        :param param:
+        :return:
+        """
         return round(float(param))
 
+    def boolean_none(self, text):
+        return text if text and text != 'None' and text != 'null' and text != '' and text != '0000-00-00 00:00:00' else None
+
+    def _get_scac(self, spider):
+        """
+        根据spider名字 约定 获取对应的SCAC编码 再转大写
+        :param spider:
+        :return:
+        """
+        return spider.name.split('_')[0].upper()
+
     def _handle_portitem(self, item, spider):
+        """
+        处理港口数据入库逻辑
+        :param item:
+        :param spider:
+        :return:
+        """
         log.info('收到portitem 开始处理')
         code_ = item['portCode']
-        rows = CommonDao.check_repaet(NewSchedulesSpiderPortCollectScac, PORT_CODE=code_, SCAC=self.SCAC, DEL_FLAG=0)
+        SCAC = self._get_scac(spider)
+        rows = CommonDao.check_repaet(NewSchedulesSpiderPortCollectScac, PORT_CODE=code_, SCAC=SCAC, DEL_FLAG=0)
         if rows > 0:
             log.info('此portitem[%s]已存在', item)
             return
@@ -97,21 +178,28 @@ class MysqlPipeline(object):
         npcs.PORT_SCAC = port_
         npcs.PORT_CODE = code_
         npcs.BASE_CODE = code_
-        npcs.SCAC = self.SCAC
+        npcs.SCAC = SCAC
         npcs.COUNTRYNAME = 'US'
         CommonDao.add_one_normal(npcs)
         log.info('portitem[%s] 入库成功', str(item))
 
     def _handle_port_group_item(self, item, spider):
+        """
+        处理组合数据入库逻辑
+        :param item:
+        :param spider:
+        :return:
+        """
         log.info('收到port_group_item 开始处理')
         _start_code = item['portPol']
         _start_name = item['portNamePol']
         _end_code = item['portPod']
         _end_name = item['portNamePod']
+        SCAC = self._get_scac(spider)
         rows = CommonDao.check_repaet(NewSchedulesSpiderPort,
                                       START_BASIC_CODE=_start_code,
                                       DEL_FLAG=0,
-                                      END_BASIC_CODE=_end_code, SCAC=self.SCAC)
+                                      END_BASIC_CODE=_end_code, SCAC=SCAC)
         if rows > 0:
             log.info('此port_group_item[%s]已存在', item)
             return
@@ -119,7 +207,7 @@ class MysqlPipeline(object):
         nssp.START_PORT = _start_name
         nssp.START_PORT_CODE = _start_code
         nssp.START_BASIC_CODE = _start_code
-        nssp.SCAC = self.SCAC
+        nssp.SCAC = SCAC
         # 这里是已爬的
         nssp.STATE = 1
         nssp.END_PORT = _end_name
@@ -129,6 +217,12 @@ class MysqlPipeline(object):
         log.info('此port_group_item[%s]入库成功', str(item))
 
     def _handle_group_item(self, item, spider):
+        """
+        处理 动态船期数据 核心item入库 较复杂  一版本
+        :param item:
+        :param spider:
+        :return:
+        """
         log.info('收到group_item 开始处理')
         try:
             # 此站点没有routeCode
@@ -268,20 +362,26 @@ class MysqlPipeline(object):
             log.error("处理group_item[%s] 出错e[%s]", str(item), e)
 
     def _handle_group_item_v2(self, item, spider):
+        """
+        处理 动态船期数据 核心item入库 较复杂  二版本  改动较大
+        :param item:
+        :param spider:
+        :return:
+        """
         log.info('收到group_item 开始处理')
         try:
             log.info('查询静态航线')
-            route_code = item.get('ROUTE_CODE', None)
-            scac = spider.name.upper()
+            scac = self._get_scac(spider)
+            boolean_none = self.boolean_none
             item['ROUTE_CODE'] = self.getFirstRangeRouteCode(item, 0)
+            route_code = item.get('ROUTE_CODE')
             ssql = """
                     SELECT ID,FLAG FROM new_schedules_static
                     WHERE FIND_IN_SET( REPLACE(TRIM('%s'),' ',''), CONCAT_WS(',',REPLACE(TRIM(ROUTE_CODE),' ',''),
                     REPLACE(TRIM(MY_ROUTE_CODE),' ',''),REPLACE(TRIM(ROUTE_NAME_EN),' ',''))) AND SCAC = '%s'
                     ORDER BY CREATE_TIME ASC LIMIT 1
                 """
-            result = CommonDao.native_query(ssql % (item['ROUTE_CODE'], scac))
-            relation_id = None
+            result = CommonDao.native_query(ssql % (item['ROUTE_CODE'], scac))[0]
             main_id = ''
             if result and result.ID:
                 # 查到对应关系 直接主表id赋值
@@ -300,8 +400,8 @@ class MysqlPipeline(object):
                            WHERE s.SCAC='%s' and s.ROUTE_PARENT IS NULL and s.ROUTE_NAME_EN IS NULL and s.ROUTE_CODE='%s')
                            """
                 # 插入静态船期主表
-                CommonDao.native_update(insert_main_sql % ((main_id, scac.upper(), None, None, item['ROUTE_CODE'], 1,
-                                                            scac.upper(), item['ROUTE_CODE'])))
+                CommonDao.native_update(insert_main_sql % ((main_id, scac, None, None, item['ROUTE_CODE'], 1,
+                                                            scac, item['ROUTE_CODE'])))
             start_code = item['pol']
             end_code = item['pod']
             log.info('获取组合数据id')
@@ -314,18 +414,19 @@ class MysqlPipeline(object):
             log.info('写入静态航线和动态航线关联关系')
             insert_rel_sql = """
                        insert into new_schedules_static_p2p values('%s','%s','%s','%s') on duplicate key update id=values(ID)
-                       """ % (insert_rel_sql_key, scac.upper(), port_res.ID, main_id)
+                       """ % (relation_id, scac, port_res.ID, main_id)
             CommonDao.native_update(sql=insert_rel_sql)
 
             log.info('记录船名船次信息')
             now_time_str = DateTimeUtils.now().strftime('%Y-%m-%d %H:%M:%S')
-            support_vessl_sql_key = '%s,%s,%s,%s' % (insert_rel_sql_key, item['VESSEL'], item['VOYAGE'], route_code)
+            support_vessl_sql_key = '%s,%s,%s,%s' % (
+                relation_id, item['VESSEL'], item['VOYAGE'], boolean_none(route_code))
             support_vessl_sql_key = EncrptUtils.md5_str(support_vessl_sql_key)
             vessl_sql = """
                        insert into new_schedules_support_vessel(ID,RELATION_ID,VESSEL,VOYAGE,DYNAMIC_ROUTE_CODE,UPDATE_TIME)
                        values ('%s','%s','%s','%s','%s','%s') on  duplicate key update UPDATE_TIME=values(UPDATE_TIME)
-                       """ % (support_vessl_sql_key, insert_rel_sql_key, item['VESSEL'], item['VOYAGE'],
-                              route_code,
+                       """ % (support_vessl_sql_key, relation_id, item['VESSEL'], item['VOYAGE'],
+                              boolean_none(route_code),
                               now_time_str)
 
             CommonDao.native_update(vessl_sql)
@@ -383,15 +484,15 @@ class MysqlPipeline(object):
             for index, transit_info in enumerate(item['TRANSIT_LIST'], start=1):
                 try:
                     log.info('写入中转数据')
-                    transit_key = '%s,%s,%s,%s' % (transit_id, transit_info['TRANSIT_PORT_EN'],
-                                                   transit_info['TRANS_VESSEL'],
-                                                   transit_info['TRANS_VOYAGE'],
-                                                   )
-                    # todo
-                    # transit_key = "%s,%s,%s,%s" % (transit_id,
-                    #                        boolean_none(transit_info['TRANSIT_PORT_EN']),
-                    #                        boolean_none(transit_info['TRANSIT_PORT_CODE']),
-                    #                        boolean_none(transit_info['TRANSIT_ROUTE_CODE']))
+                    # transit_key = '%s,%s,%s,%s' % (transit_id, transit_info['TRANSIT_PORT_EN'],
+                    #                                transit_info['TRANS_VESSEL'],
+                    #                                transit_info['TRANS_VOYAGE'],
+                    #                                )
+                    transit_key = "%s,%s,%s,%s" % (transit_id,
+                                                   boolean_none(transit_info.get('TRANSIT_PORT_EN')),
+                                                   boolean_none(transit_info.get('TRANSIT_PORT_CODE')),
+                                                   boolean_none(transit_info.get('TRANSIT_ROUTE_CODE')))
+
                     transit_key = EncrptUtils.md5_str(transit_key)
 
                     dynamic_trainst = CommonDao.get(NewSchedulesDynamicTransit, ID=transit_key, DEL_FLAG=0)
@@ -472,6 +573,7 @@ class MysqlPipeline(object):
         # 航线code、船名航次是否有效，不为空，不为空串，不属于内支线，陆运等
         # 如果航线code不为空或者船名航次有效
         list = schedule['TRANSIT_LIST']
+        boolean_none = self.boolean_none
         if who == 0:
             if boolean_none(schedule['routeCode']) and boolean_none(schedule['routeCode']) not in littleShip:
                 routeCode = schedule['routeCode']
