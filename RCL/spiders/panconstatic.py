@@ -8,7 +8,7 @@ from scrapy import Request
 
 
 class PanconstaticSpider(scrapy.Spider):
-    name = 'panconstatic'
+    name = 'PASU_STATIC'
     allowed_domains = ['http://www.namsung.co.kr']
     start_urls = ['http://http://www.namsung.co.kr/']
 

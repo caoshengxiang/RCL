@@ -11,7 +11,7 @@ from RCL.items import PortItem, GroupItem, PortGroupItem
 
 
 class RclgroupSpider(scrapy.Spider):
-    name = 'rclgroup'
+    name = 'RCLC'
     allowed_domains = ['rclgroup.com']
     start_urls = ['https://www.rclgroup.com/Home']
     custom_settings = {  # 指定配置的通道, 要对应找到每个爬虫指定的管道,settings里也要进行管道配置

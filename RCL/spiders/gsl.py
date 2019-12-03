@@ -10,7 +10,7 @@ from RCL.items import PortGroupItem, PortItem, GroupItem
 
 
 class GslSpider(scrapy.Spider):
-    name = 'gsl'
+    name = 'GOSU'
     allowed_domains = ['https://www.gslltd.com.hk']
     start_urls = ['https://www.gslltd.com.hk/point-to-point_g.php']
 

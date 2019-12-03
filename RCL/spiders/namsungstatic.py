@@ -8,7 +8,7 @@ from scrapy import FormRequest, Request
 
 
 class NamsungstaticSpider(scrapy.Spider):
-    name = 'namsungstatic'
+    name = 'NSRU_STATIC'
     allowed_domains = ['http://www.namsung.co.kr']
     start_urls = ['http://www.namsung.co.kr/frt/ko/business/road/screen.do']
 

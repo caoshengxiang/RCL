@@ -13,7 +13,7 @@ from RCL.items import PortGroupItem, PortItem, GroupItem
 
 
 class NamsungSpider(scrapy.Spider):
-    name = 'namsung'
+    name = 'NSRU'
     allowed_domains = ['http://www.namsung.co.kr']
     start_urls = ['http://www.namsung.co.kr/eng/biz/eService/selectSchdulList.do']
 

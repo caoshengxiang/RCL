@@ -12,7 +12,7 @@ from RCL.items import PortGroupItem, PortItem, GroupItem
 
 
 class PanconSpider(scrapy.Spider):
-    name = 'pancon'
+    name = 'PASU'
     allowed_domains = ['http://www.pancon.co.kr']
     start_urls = ['http://www.pancon.co.kr/pan/pageLink.pcl?link=COM/WEB_201&nationals=EN']
 

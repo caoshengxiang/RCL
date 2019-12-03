@@ -9,4 +9,4 @@
 from scrapy import cmdline
 
 if __name__ == '__main__':
-    cmdline.execute('scrapy crawl namsungstatic'.split())
+    cmdline.execute('scrapy crawl NSRU_STATIC'.split())
