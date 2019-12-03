@@ -11,7 +11,7 @@ from RCL.items import PortItem, PortGroupItem, GroupItem
 
 
 class DysSpider(scrapy.Spider):
-    name = 'dys'
+    name = 'DYSL'
     allowed_domains = ['http://www.pcsline.co.kr']
     start_urls = ['http://www.pcsline.co.kr/eng/service/schedule.asp']
 

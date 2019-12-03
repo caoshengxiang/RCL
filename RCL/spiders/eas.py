@@ -13,7 +13,7 @@ from RCL.items import PortItem, PortGroupItem, GroupItem
 
 
 class EasSpider(scrapy.Spider):
-    name = 'eas'
+    name = 'EASC'
     allowed_domains = ['http://ecomm.easline.com']
     start_urls = ['http://ecomm.easline.com/ecomm/ecxmm/weBBSys/Ssch/wecmBBSschP2PtFrame.aspx']
 

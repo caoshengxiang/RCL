@@ -11,7 +11,7 @@ from RCL.items import PortGroupItem, PortItem, GroupItem
 
 
 class MatsonSpider(scrapy.Spider):
-    name = 'matson'
+    name = 'MATS'
     allowed_domains = ['https://www.matson.com']
     start_urls = ['https://www.matson.com/matnav/schedules/interactive_vessel_schedule.html']
 

@@ -11,7 +11,7 @@ from RCL.items import PortGroupItem, PortItem, GroupItem
 
 
 class TslSpider(scrapy.Spider):
-    name = 'tsl'
+    name = 'TSQD'
     allowed_domains = ['http://vgm.tslines.com']
     start_urls = ['http://vgm.tslines.com/VSM/LineServiceByPort.aspx']
 

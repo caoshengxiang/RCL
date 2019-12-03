@@ -11,7 +11,7 @@ from RCL.items import PortItem, PortGroupItem, GroupItem
 
 
 class DjsSpider(scrapy.Spider):
-    name = 'djs'
+    name = 'DJSL'
     allowed_domains = ['http://korea.djship.co.kr']
     start_urls = ['http://http://korea.djship.co.kr/']
 
@@ -60,8 +60,6 @@ class DjsSpider(scrapy.Spider):
         {'value': 'JNT', 'name': 'NIIGATA'},
     ]
     url = 'http://korea.djship.co.kr/dj/servlet/cn.support.action.sub3_1_Action'
-
-    SCAC = 'DJS'
 
     def start_requests(self):
         localtime = time.localtime(time.time())

@@ -6,7 +6,7 @@ from scrapy import Request
 
 
 class HeungaSpider(scrapy.Spider):
-    name = 'heunga'
+    name = 'HEUN'
     allowed_domains = ['http://www.heung-a.co.kr']
     start_urls = ['http://www.heung-a.co.kr/dzSmart/innerFile/modules/portlist.xml?_=1575014547347']
 
