@@ -5,7 +5,7 @@ from datetime import datetime
 
 import pymongo
 
-from RCL.items import PortItem, PortGroupItem
+from RCL.items import PortItem, PortGroupItem, StaticsItem
 from RCL.items import GroupItem
 from RCL.model.dao import CommonDao
 from RCL.model.models import NewSchedulesSpiderPort, NewSchedulesStatic, NewSchedulesDynamic, \
@@ -107,7 +107,8 @@ class MysqlPipeline(object):
         handlers = {
             PortItem: self._handle_portitem,
             PortGroupItem: self._handle_port_group_item,
-            GroupItem: self._handle_group_item
+            GroupItem: self._handle_group_item_v2,
+            StaticsItem: self._handle_statics_item,
         }
         handlers[item.__class__](item, spider)
 
@@ -553,6 +554,38 @@ class MysqlPipeline(object):
                 log.info('写入挂靠港口数据成功')
         except Exception as e:
             log.error("处理group_item[%s] 出错e[%s]", str(item), e)
+
+    def _handle_statics_item(self, item, spider):
+        """
+        静态数据item
+        :param item:
+        :param spider:
+        :return:
+        """
+        scac = self._get_scac(spider)
+        sns = NewSchedulesStatic()
+        ROUTE_PARENT = item.get('ROUTE_PARENT')
+        ROUTE_NAME_EN = item.get('ROUTE_NAME_EN')
+        ROUTE_CODE = item.get('ROUTE_CODE')
+        sns.ROUTE_PARENT = ROUTE_PARENT
+        sns.SCAC = scac
+        sns.ROUTE_NAME_EN = ROUTE_NAME_EN
+        sns.ROUTE_CODE = ROUTE_CODE
+        # 不重复插入
+        res = CommonDao.get(NewSchedulesStatic, ROUTE_PARENT=ROUTE_PARENT, ROUTE_NAME_EN=ROUTE_NAME_EN, SCAC=scac)
+        if res is not None:
+            return
+        CommonDao.add_one_normal(sns)
+        DOCKING_LIST = item.get('DOCKING_LIST')
+        for index, docking in enumerate(DOCKING_LIST, start=1):
+            sndocking = NewSchedulesStaticDocking()
+            sndocking.STATIC_ID = sns.ID
+            sndocking.PORT_NUMBER = index
+            sndocking.PORT = docking.get('PORT')
+            sndocking.TERMINAL = docking.get('TERMINAL')
+            sndocking.ETA = docking.get('ETA')
+            sndocking.ETD = docking.get('ETD')
+            CommonDao.add_one_normal(sndocking)
 
     def getFirstRangeRouteCode(self, schedule, who):
         littleShip = [

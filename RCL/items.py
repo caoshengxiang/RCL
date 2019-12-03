@@ -50,7 +50,6 @@ class PortGroupItem(scrapy.Item):
 
 
 class StaticsItem(scrapy.Item):
-    SCAC = scrapy.Field()
     # 服务父航线名称
     ROUTE_PARENT = scrapy.Field()
     # 服务子航线名称
