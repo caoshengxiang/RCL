@@ -129,7 +129,6 @@ class Spider:
 
 
 if __name__ == '__main__':
-    # test_ial()
     url = 'http://www.interasia.cc/content/c_service/sailing_schedule.aspx?SiteID=1'
     s = Spider()
     s.start(url)
