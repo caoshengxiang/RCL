@@ -37,11 +37,11 @@ class DjsSpider(scrapy.Spider):
 
     def parse(self, response):
         doc = pq(response.text)
-        trs = doc(
-            'body > form > table:nth-child(6) > tr > td:nth-child(2) > table > tr > td:nth-child(2) > table:nth-child(3) tr')
-        for tr in trs.items():
+        tds = doc(
+            'body > form > table:nth-child(6) > tr > td:nth-child(2) > table > tr > td:nth-child(2) > table:nth-child(3) tr td')
+        for td in tds.items():
             try:
-                href = 'http://korea.djship.co.kr/dj/ui/cn/business/' + tr.find('a').attr('href')
+                href = 'http://korea.djship.co.kr/dj/ui/cn/business/' + td.find('a').attr('href')
                 logging.debug(href)
                 ROUTE_PARENT = GetMiddleStr(href, '&mode=', '&ROUTE_CODE')
                 logging.debug(ROUTE_PARENT)
