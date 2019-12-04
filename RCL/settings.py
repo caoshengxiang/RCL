@@ -82,7 +82,7 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    # 'RCL.pipelines.MongoPipeline': 300,
+    'RCL.pipelines.MongoPipeline': 300,
     'RCL.pipelines.MysqlPipeline': 301
 }
 

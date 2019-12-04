@@ -72,7 +72,6 @@ class DjsSpider(scrapy.Spider):
             yield request
         # next month
         nextYear = year
-        nextMonth = month
         if int(month) + 1 > 12:
             nextYear = str(int(nextYear) + 1)
             nextMonth = '1'
@@ -111,9 +110,15 @@ class DjsSpider(scrapy.Spider):
     def parse(self, response):
         pItem = PortItem()
         pgItem = PortGroupItem()
+
         pItem['port'] = response.meta['polName']
         pItem['portCode'] = response.meta['pol']
         yield pItem
+
+        pItem['port'] = response.meta['podName']
+        pItem['portCode'] = response.meta['pod']
+        yield pItem
+
         pgItem['portPol'] = response.meta['pol']
         pgItem['portNamePol'] = response.meta['polName']
         pgItem['portPod'] = response.meta['pod']
