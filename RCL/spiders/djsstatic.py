@@ -61,13 +61,13 @@ class DjsSpider(scrapy.Spider):
         for al in alinks.items():
             try:
                 href = 'http://korea.djship.co.kr/dj/ui/cn/business/' + al.attr('href')
-                ROUTE_NAME_EN = GetMiddleStr(href, '&ROUTE_CODE=', '&SWF')
+                ROUTE_CODE = GetMiddleStr(href, '&ROUTE_CODE=', '&SWF')
                 yield Request(url=href,
                               dont_filter=True,
                               method='GET',
                               meta={
                                   'ROUTE_PARENT': response.meta['ROUTE_PARENT'],
-                                  'ROUTE_NAME_EN': ROUTE_NAME_EN,
+                                  'ROUTE_CODE': ROUTE_CODE,
                               },
                               headers=self.headers,
                               callback=self.parse_list)
@@ -79,7 +79,8 @@ class DjsSpider(scrapy.Spider):
         trs = doc('table.tb_color1 tr')
         item = StaticsItem()
         item['ROUTE_PARENT'] = response.meta['ROUTE_PARENT']
-        item['ROUTE_NAME_EN'] = response.meta['ROUTE_NAME_EN']
+        item['ROUTE_NAME_EN'] = response.meta['ROUTE_CODE']
+        item['ROUTE_CODE'] = response.meta['ROUTE_CODE']
         list = []
         for index, tr in enumerate(trs.items()):
             if index == 0:

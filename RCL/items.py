@@ -53,9 +53,9 @@ class PortGroupItem(scrapy.Item):
 
 
 class StaticsItem(scrapy.Item):
-    # 服务父航线名称
+    # 航线名称
     ROUTE_PARENT = scrapy.Field()
-    # 服务子航线名称
+    # 服务名称
     ROUTE_NAME_EN = scrapy.Field()
     # 航线代码
     ROUTE_CODE = scrapy.Field()

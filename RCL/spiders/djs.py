@@ -71,59 +71,59 @@ class DjsSpider(scrapy.Spider):
     url = 'http://korea.djship.co.kr/dj/servlet/cn.support.action.sub3_1_Action'
 
     def start_requests(self):
-        # localtime = time.localtime(time.time())
-        # year = str(localtime.tm_year)
-        # month = str(localtime.tm_mon)
-        # day = str(localtime.tm_mday)
-        #
-        # for request in self.get_calendar(year, month):
-        #     yield request
-        # # next month
-        # nextYear = year
-        # if int(month) + 1 > 12:
-        #     nextYear = str(int(nextYear) + 1)
-        #     nextMonth = '1'
-        # else:
-        #     nextMonth = str(int(month) + 1)
-        #
-        # for request in self.get_calendar(nextYear, nextMonth):
-        #     yield request
+        localtime = time.localtime(time.time())
+        year = str(localtime.tm_year)
+        month = str(localtime.tm_mon)
+        day = str(localtime.tm_mday)
 
-        # 测试
-        # param = ['', 'KCJ', 'DJ', '1948', 'E', 'CNSHA', 'KRPUS', '201912060530', '', 'WGQ5', '', '', 'N'] # 不中转
-        param = ['', 'KCJ', 'DJ', '1948', 'E', 'CNSHA', 'JPTYO', '201912060530', 'Y', 'WGQ5', '', '', 'N'] # 中转
-        logging.info(param)
-        yield FormRequest(url=self.url,
-                          method='POST',
-                          meta={
-                              'pol': param[5],
-                              'polName': 'SHANGHAI',
-                              'pod': param[6],
-                              # 'podName': 'BUSAN',
-                              'podName': 'TOKYO',
-                              'ROUTE_CODE': param[1]
-                          },
-                          formdata={
-                              'PROGRAM_ID': 'sub3_1_0',
-                              'mode': 'R1',
-                              'remode': '',
-                              'ROUTE_CODE': param[1],
-                              'VESSEL_CODE': param[2],
-                              'VOYAGE': param[3],
-                              'BOUND': param[4],
-                              'LD_PORT': param[5],
-                              'DC_PORT': param[6],
-                              'ETD': param[7],
-                              'VESSEL_NAME': '',
-                              'TS_GBN': param[8],
-                              'LD_TERMINAL': param[9],
-                              'DC_TERMINAL': '',
-                              'TS_PORT': '',
-                              'cargoGbn': 'C',
-                              'CLOSE_YN': param[12],
-                          },
-                          dont_filter=True,
-                          callback=self.parse_detail)
+        for request in self.get_calendar(year, month):
+            yield request
+        # next month
+        nextYear = year
+        if int(month) + 1 > 12:
+            nextYear = str(int(nextYear) + 1)
+            nextMonth = '1'
+        else:
+            nextMonth = str(int(month) + 1)
+
+        for request in self.get_calendar(nextYear, nextMonth):
+            yield request
+
+        # # 测试
+        # # param = ['', 'KCJ', 'DJ', '1948', 'E', 'CNSHA', 'KRPUS', '201912060530', '', 'WGQ5', '', '', 'N'] # 不中转
+        # param = ['', 'KCJ', 'DJ', '1948', 'E', 'CNSHA', 'JPTYO', '201912060530', 'Y', 'WGQ5', '', '', 'N'] # 中转
+        # logging.info(param)
+        # yield FormRequest(url=self.url,
+        #                   method='POST',
+        #                   meta={
+        #                       'pol': param[5],
+        #                       'polName': 'SHANGHAI',
+        #                       'pod': param[6],
+        #                       # 'podName': 'BUSAN',
+        #                       'podName': 'TOKYO',
+        #                       'ROUTE_CODE': param[1]
+        #                   },
+        #                   formdata={
+        #                       'PROGRAM_ID': 'sub3_1_0',
+        #                       'mode': 'R1',
+        #                       'remode': '',
+        #                       'ROUTE_CODE': param[1],
+        #                       'VESSEL_CODE': param[2],
+        #                       'VOYAGE': param[3],
+        #                       'BOUND': param[4],
+        #                       'LD_PORT': param[5],
+        #                       'DC_PORT': param[6],
+        #                       'ETD': param[7],
+        #                       'VESSEL_NAME': '',
+        #                       'TS_GBN': param[8],
+        #                       'LD_TERMINAL': param[9],
+        #                       'DC_TERMINAL': '',
+        #                       'TS_PORT': '',
+        #                       'cargoGbn': 'C',
+        #                       'CLOSE_YN': param[12],
+        #                   },
+        #                   dont_filter=True,
+        #                   callback=self.parse_detail)
 
     def get_calendar(self, y, m):
         for cn in self.cn_port:
