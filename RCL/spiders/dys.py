@@ -17,13 +17,12 @@ class DysSpider(scrapy.Spider):
 
     custom_settings = {  # 指定配置的通道, 要对应找到每个爬虫指定的管道,settings里也要进行管道配置
         'ITEM_PIPELINES': {
-            'RCL.pipelines.MysqlPipeline': 300
+            'RCL.pipelines.MongoPipeline': 300
         }
     }
 
     global_cn_port = []
     global_other_port = []
-    num = 0
 
     def start_requests(self):
         headers = {
@@ -36,34 +35,13 @@ class DysSpider(scrapy.Spider):
                           headers=headers,
                           callback=self.parse)
 
-        # 静态航线
-        staticUrls = ['http://www.pcsline.co.kr/eng/service/service0111.asp',
-                      'http://www.pcsline.co.kr/eng/service/service0112.asp',
-                      'http://www.pcsline.co.kr/eng/service/service0113.asp']
-        for url in staticUrls:
-            yield FormRequest(url=url,
-                              method='GET',
-                              # dont_filter=True,
-                              meta={
-                                  'pol': 'CNNGB',
-                                  'polName': 'CN',
-                                  'polVal': '',
-                                  'pod': 'KRPUS',
-                                  'podName': 'KR',
-                                  'podVal': '',
-                              },
-                              callback=self.parse_static_route)
-
-        ## 测试
-        # localtime = time.localtime(time.time())
-        # year = str(localtime.tm_year)
-        # month = str(localtime.tm_mon)
+        # # 测试
         # data = {
-        #     'syear': year,
-        #     'smonth': month,
+        #     'syear': '2019',
+        #     'smonth': '12',
         #     'importtype': '1',
         #     'con1': 'CN',
-        #     'ld_port': 'CNNGB',
+        #     'ld_port': 'CNDLC',
         #     'con2': 'KR',
         #     'ed_port': 'KRPUS',
         #     'action': 'search',
@@ -73,12 +51,10 @@ class DysSpider(scrapy.Spider):
         #                   method='POST',
         #                   # dont_filter=True,
         #                   meta={
-        #                       'pol': 'CNNGB',
-        #                       'polName': 'CN',
-        #                       'polVal': '',
+        #                       'pol': 'CNDLC',
+        #                       'polName': 'DALIAN',
         #                       'pod': 'KRPUS',
-        #                       'podName': 'KR',
-        #                       'podVal': '',
+        #                       'podName': 'BUSAN',
         #                   },
         #                   formdata=data,
         #                   callback=self.parse_group)
@@ -108,17 +84,17 @@ class DysSpider(scrapy.Spider):
         pItem = PortItem()
         for cn in self.global_cn_port:
             pItem['port'] = cn['name']
-            pItem['portCode'] = ''
+            pItem['portCode'] = cn['value']
             yield pItem
             for other in self.global_other_port:
                 # 港口
                 pItem['port'] = other['name']
-                pItem['portCode'] = ''
+                pItem['portCode'] = other['value']
                 yield pItem
                 # 港口组合
-                pgItem['portPol'] = ''
+                pgItem['portPol'] = cn['value']
                 pgItem['portNamePol'] = cn['name']
-                pgItem['portPod'] = ''
+                pgItem['portPod'] = other['value']
                 pgItem['portNamePod'] = other['name']
                 yield pgItem
 
@@ -141,12 +117,10 @@ class DysSpider(scrapy.Spider):
                                       method='POST',
                                       dont_filter=True,
                                       meta={
-                                          'pol': '',
+                                          'pol': cn['value'],
                                           'polName': cn['name'],
-                                          'polVal': cn['value'],
-                                          'pod': '',
+                                          'pod': other['value'],
                                           'podName': other['name'],
-                                          'podVal': other['value'],
                                       },
                                       formdata=data,
                                       callback=self.parse_group)
@@ -166,12 +140,10 @@ class DysSpider(scrapy.Spider):
                                       method='POST',
                                       dont_filter=True,
                                       meta={
-                                          'pol': '',
+                                          'pol': cn['value'],
                                           'polName': cn['name'],
-                                          'polVal': cn['value'],
-                                          'pod': '',
+                                          'pod': other['value'],
                                           'podName': other['name'],
-                                          'podVal': other['value'],
                                       },
                                       formdata=data,
                                       callback=self.parse_group)
@@ -200,62 +172,39 @@ class DysSpider(scrapy.Spider):
         # logging.info(ports)
 
     def parse_group(self, response):
-        self.num += 1
-        logging.info('详情接口数：{}'.format(self.num))
         doc = pq(response.text)
         table = doc('#container1 > table:nth-child(1) > tr > td > table > tr > td.contents > table:nth-child(4)')
         # logging.info(table)
         trs = table.find('tr')
         gItem = GroupItem()
         for index, tr in enumerate(trs.items()):
-            if index == 0:
-                continue
-            if tr.find('td').text() == 'No Data.':
-                logging.debug('查询无数据-无数据')
-                continue
+            try:
+                if index == 0:
+                    continue
+                if tr.find('td').text() == 'No Data.':
+                    logging.debug('查询无数据-无数据')
+                    continue
 
-            if tr.find('td'):
-                row = {
-                    'ETD': tr.find('td').eq(3).text(),
-                    'VESSEL': tr.find('td').eq(1).text(),
-                    'VOYAGE': tr.find('td').eq(2).text(),
-                    'ETA': tr.find('td').eq(5).text(),
-                    'TRANSIT_TIME': '',  # todo 这个字段有问题 天
-                    'TRANSIT_LIST': [],
-                    'IS_TRANSIT': 0,  # 确认为中转为1，直达为0, 默认为0
-                    'pol': response.meta['pol'],
-                    'pod': response.meta['pod'],
-                    'polName': response.meta['polName'],
-                    'podName': response.meta['podName'],
-                }
-                for field in gItem.fields:
-                    if field in row.keys():
-                        gItem[field] = row.get(field)
-                yield gItem
-                logging.info('{}列数据：'.format(index))
+                if tr.find('td'):
+                    row = {
+                        'ETD': tr.find('td').eq(3).text(),
+                        'VESSEL': tr.find('td').eq(1).text(),
+                        'VOYAGE': tr.find('td').eq(2).text(),
+                        'ETA': tr.find('td').eq(5).text(),
+                        'TRANSIT_TIME': int(tr.find('td').eq(7).text().replace('Days', '')),
+                        'TRANSIT_LIST': [],
+                        'IS_TRANSIT': 0,  # 确认为中转为1，直达为0, 默认为0
+                        'pol': response.meta['pol'],
+                        'pod': response.meta['pod'],
+                        'polName': response.meta['polName'],
+                        'podName': response.meta['podName'],
+                    }
+                    for field in gItem.fields:
+                        if field in row.keys():
+                            gItem[field] = row.get(field)
+                    yield gItem
+                    logging.info('{}列数据：'.format(index))
 
-    def parse_static_route(self, response):
-        doc = pq(response.text)
-        mT20 = doc('table.mT20')
-        # mT15 = doc('table.mT15')
-        page = {}
-        for index, mt20 in enumerate(mT20.items()):
-            logging.info('航线代码：')
-            route_code = mt20.find('strong').text().replace(' ', '').split(':')[1]
-            logging.info(route_code)
-            mT15 = mt20.next('table.mT15')
-            page[route_code] = []
-
-            for mt15 in mT15.items():
-                row = {}
-                trs = mt15.find('tr')
-                for tdIndex, tr in enumerate(trs.items()):
-                    if tr.find('td[bgcolor="#f4f4f4"]'):
-                        tds = tr.find('td')
-                        row['PORT'] = tds.eq(0).text()
-                        row['ETA'] = tds.eq(1).text().split(' ')[0]
-                        row['ETD'] = tds.eq(2).text().split(' ')[0]
-                        row['TERMINAL'] = tds.eq(3).text()
-                        page[route_code].append(row)
-                        logging.info('一列-静态数据；{}'.format(row))
-        logging.info('一页-静态数据；{}'.format(page))
+                    # 未发现有中转情况
+            except Exception as e:
+                pass
