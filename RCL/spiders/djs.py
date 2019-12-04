@@ -88,9 +88,9 @@ class DjsSpider(scrapy.Spider):
                 yield FormRequest(url=self.url,
                                   method='POST',
                                   meta={
-                                      'pol': cn['value'],
+                                      'pol': '',
                                       'polName': cn['name'],
-                                      'pod': other['value'],
+                                      'pod': '',
                                       'podName': other['name'],
                                   },
                                   formdata={

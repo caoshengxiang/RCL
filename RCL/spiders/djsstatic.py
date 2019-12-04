@@ -91,3 +91,5 @@ class DjsSpider(scrapy.Spider):
                 'ETA': GetMiddleStr(tds.eq(2).text(), '(', ')'),
                 'ETD': GetMiddleStr(tds.eq(4).text(), '(', ')'),
             })
+        item['DOCKING_LIST'] = list
+        yield item
