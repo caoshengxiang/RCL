@@ -10,6 +10,7 @@ import re
 import time
 
 import requests
+from datetime import datetime
 from requests_html import HTMLSession
 from selenium import webdriver
 from selenium.webdriver.support.select import Select
@@ -132,11 +133,16 @@ class Spider:
 if __name__ == '__main__':
     # test_ial()
     # session = HTMLSession()
-    url = 'http://www.interasia.cc/content/c_service/sailing_schedule.aspx?SiteID=1'
-    s = Spider()
-    s.start(url)
-    time.sleep(2)
-    with open('test.json', 'r') as f:
-        res = json.load(f)
-    for k, v in res.items():
-        test_ial(v)
+    # url = 'http://www.interasia.cc/content/c_service/sailing_schedule.aspx?SiteID=1'
+    # s = Spider()
+    # s.start(url)
+    # time.sleep(2)
+    # with open('test.json', 'r') as f:
+    #     res = json.load(f)
+    # for k, v in res.items():
+    #     test_ial(v)
+    x='2019-11-11'
+    _search = re.findall('(\d+-\d+-\d+)', x)
+    if _search and len(_search) > 0:
+        mm=datetime.strptime(_search[0], '%Y-%m-%d')
+        pass
