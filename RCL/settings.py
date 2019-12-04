@@ -21,7 +21,7 @@ MONGO_DB = 'rcltest'
 
 # 日志
 today = datetime.datetime.now()
-log_file_path = 'log/scrapy_{}_{}_{}.log'.format(today.year, today.month, today.day)
+log_file_path = '/opt/logs/rcl/scrapy_{}_{}_{}.log'.format(today.year, today.month, today.day)
 LOG_LEVEL = 'DEBUG'
 LOG_FILE = log_file_path
 LOG_ENCODING = 'utf-8'
@@ -33,17 +33,17 @@ LOG_STDOUT = True
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 1
+# CONCURRENT_REQUESTS = 16
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
 RANDOMIZE_DOWNLOAD_DELAY = True
-DOWNLOAD_DELAY = 0.8
+DOWNLOAD_DELAY = 0.2
 
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16  # 默认： 8 将对任何单个域执行的并发（即，并发）请求的最大数量。
-CONCURRENT_REQUESTS_PER_IP = 1  # 默认： 0,将对任何单个IP执行的并发（即，并发）请求的最大数量
+# CONCURRENT_REQUESTS_PER_IP = 1  # 默认： 0,将对任何单个IP执行的并发（即，并发）请求的最大数量
 
 RETRY_ENABLED = True  # 是否开启retry
 RETRY_TIMES = 2  # 重试次数
