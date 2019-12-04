@@ -21,7 +21,7 @@ MONGO_DB = 'rcltest'
 
 # 日志
 today = datetime.datetime.now()
-log_file_path = '/opt/logs/rcl/scrapy_{}_{}_{}.log'.format(today.year, today.month, today.day)
+log_file_path = 'log/scrapy_{}_{}_{}.log'.format(today.year, today.month, today.day)
 LOG_LEVEL = 'DEBUG'
 LOG_FILE = log_file_path
 LOG_ENCODING = 'utf-8'
@@ -33,7 +33,7 @@ LOG_STDOUT = True
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-# CONCURRENT_REQUESTS = 16
+CONCURRENT_REQUESTS = 1
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay

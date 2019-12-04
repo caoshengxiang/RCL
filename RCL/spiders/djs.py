@@ -32,8 +32,8 @@ class DjsSpider(scrapy.Spider):
 
     # js死数据
     cn_port = [
-        {'value': 'CSH', 'name': 'SHANGHAI'},
-        {'value': 'CXG', 'name': 'XINGANG'},
+        {'value': 'CSH', 'name': 'SHANGHAI', 'countryVa': '', 'countryName': ''},
+        {'value': 'CXG', 'name': 'XINGANG', 'countryVa': '', 'countryName': ''},
         {'value': 'CNB', 'name': 'NINGBO'},
         {'value': 'CDL', 'name': 'DALIAN'},
         {'value': 'CQD', 'name': 'QINGDAO'},
