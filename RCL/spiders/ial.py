@@ -44,6 +44,9 @@ class IalSpider(scrapy.Spider):
         self.driver = webdriver.Chrome(chrome_options=chrome_options)
 
     def parse(self, response):
+        pgItem = PortGroupItem()
+        pItem = PortItem()
+        gItem = GroupItem()
         doc = pq(response.text)
         countryOptions = doc('#ctl00_CPHContent_ddlDepartureC').find('option')
         c_h_c = []
@@ -62,18 +65,20 @@ class IalSpider(scrapy.Spider):
         logging.info('国家解析完成。')
 
         self.driver.get(self.start_urls[0])
+
         for c_h in c_h_c:
             time.sleep(1)
             Select(self.driver.find_element_by_id('ctl00_CPHContent_ddlDepartureC')).select_by_value(c_h['value'])
             time.sleep(1)
             c_h_options = self.driver.find_elements_by_css_selector('#ctl00_CPHContent_ddlDepartureL option')
-            # source = self.driver.page_source
-            # doc = pq(source)
 
             c_h_ports = get_ports(c_h_options)
 
             logging.info(c_h_ports)
             for c_h_port in c_h_ports:
+                pItem['port'] = c_h_port['name']
+                pItem['portCode'] = ''
+                yield pItem
                 try:
                     logging.info('港口数据:{}'.format(c_h_port))
                     Select(self.driver.find_element_by_id('ctl00_CPHContent_ddlDepartureL')).select_by_value(
@@ -91,6 +96,17 @@ class IalSpider(scrapy.Spider):
                             '#ctl00_CPHContent_ddlDestinationL option')
                         o_h_ports = get_ports(o_h_options)
                         for o_h_port in o_h_ports:
+                            # 港口
+                            pItem['port'] = o_h_port['name']
+                            pItem['portCode'] = ''
+                            yield pItem
+
+                            # 港口组合
+                            pgItem['portPol'] = ''
+                            pgItem['portNamePol'] = c_h_port['name']
+                            pgItem['portPod'] = ''
+                            pgItem['portNamePod'] = o_h_port['name']
+                            yield pgItem
                             try:
                                 logging.info('港口数据:{}'.format(o_h_port))
                                 Select(
@@ -104,6 +120,34 @@ class IalSpider(scrapy.Spider):
                                 ele.send_keys(code)
                                 self.driver.find_element_by_id('ctl00_CPHContent_btnSend').click()
                                 time.sleep(1)
+                                source = self.driver.page_source
+                                listDoc = pq(source)
+
+                                # 解析
+                                trs = listDoc('#ctl00_CPHContent_Panel2 .table_style2').find('tr')
+                                # logging.warning(response.text)
+                                for index, tr in enumerate(trs.items()):
+                                    logging.info('数据长度：{}'.format(tr.find('td').length))
+                                    if tr.find('td'):
+                                        row = {
+                                            'ETD': tr.find('td').eq(0).text(),
+                                            'VESSEL': tr.find('td').eq(1).text(),
+                                            'VOYAGE': tr.find('td').eq(2).text(),
+                                            'ETA': tr.find('td').eq(4).text(),
+                                            'TRANSIT_TIME': tr.find('td').eq(8).text(),
+                                            'TRANSIT_LIST': [],
+                                            'IS_TRANSIT': 0,  # 确认为中转为1，直达为0, 默认为0
+                                            'pol': c_h_port['name'],
+                                            'pod': o_h_port['name'],
+                                            'polName': '',
+                                            'podName': '',
+                                        }
+                                        for field in gItem.fields:
+                                            if field in row.keys():
+                                                gItem[field] = row.get(field)
+                                        yield gItem
+                                        logging.info('{}列数据：'.format(index + 1))
+
                                 self.driver.back()
                                 time.sleep(1)
                             except Exception as e:
