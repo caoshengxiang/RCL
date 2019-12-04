@@ -100,7 +100,10 @@ class CommonDao:
             counts_res = db_session.execute(stmt, params) if params else db_session.execute(stmt)
             for cx in counts_res:
                 counts = cx[0]
-        return res_list, counts
+        if auto_query_counts:
+            return res_list, counts
+        else:
+            return res_list
 
     @classmethod
     def native_update(cls, sql, params={}, commit=True):
