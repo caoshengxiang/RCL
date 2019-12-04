@@ -57,7 +57,9 @@ class RclSpiderMiddleware(object):
         spider.logger.info('Spider opened: %s' % spider.name)
 
 
-fake = faker.Faker("zh_CN")
+# fake = faker.Faker("zh_CN")
+fake = faker.Faker()
+
 
 
 class RclDownloaderMiddleware(object):
@@ -125,7 +127,9 @@ class RclDownloaderMiddleware(object):
         # - return None: continue processing this exception
         # - return a Response object: stops process_exception() chain
         # - return a Request object: stops process_exception() chain
-        logging.error('e%s', exception)
+        import traceback
+        logging.error(traceback.format_exc())
+        logging.error('e%s ', exception)
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)

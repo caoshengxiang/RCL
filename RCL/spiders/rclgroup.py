@@ -168,7 +168,8 @@ class RclgroupSpider(scrapy.Spider):
                             'ETD': row['ETD'],
                             'TRANSIT_TIME': float(row['TRANSIT_TIME']),
                             'TRANSIT_LIST': [],
-                            'IS_TRANSIT': 0  # 确认为中转为1，直达为0, 默认为0
+                            'IS_TRANSIT': 0,  # 确认为中转为1，直达为0, 默认为0
+                            "ROUTE_CODE": None
                         }
                     else:
                         itemObj['IS_TRANSIT'] = 1

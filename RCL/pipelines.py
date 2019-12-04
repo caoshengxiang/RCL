@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-
-
+import re
 from datetime import datetime
 
 import pymongo
@@ -54,8 +53,8 @@ class MysqlPipeline(object):
         log.info('MysqlPipeline  spider[%s] start', spider.name)
         SCAC = self._get_scac(spider)
         if SCAC not in self.seeds:
-            sql = "SELECT max(VERSION_NUMBER) from new_schedules_dynamic  where SCAC='%s'"
-            version = CommonDao.native_query(sql % (SCAC))[0]
+            sql = "SELECT max(VERSION_NUMBER) as max_version from new_schedules_dynamic  where SCAC='%s'"
+            version = CommonDao.native_query(sql % (SCAC))[0].get('max_version')
             if version is None or version < 0:
                 version = 0
             old = CommonDao.get(NewSchedulesTaskVersion, SCAC=SCAC)
@@ -130,7 +129,10 @@ class MysqlPipeline(object):
         :param param:
         :return:
         """
-        return datetime.strptime(param, '%d/%m/%Y')
+        if re.match('\d+/\d+\d+', param):
+            return datetime.strptime(param, '%d/%m/%Y')
+        if re.match('\d+-\d+-\d+', param):
+            return datetime.strptime(param, '%Y-%m-%d')
 
     def _covert_time2weekday(self, param):
         """
@@ -146,6 +148,8 @@ class MysqlPipeline(object):
         :param param:
         :return:
         """
+        if param is None or param == '':
+            return 0
         return round(float(param))
 
     def boolean_none(self, text):
@@ -167,9 +171,9 @@ class MysqlPipeline(object):
         :return:
         """
         log.info('收到portitem 开始处理')
-        code_ = item['portCode']
+        code_ = item['portCode'] or item['port']
         SCAC = self._get_scac(spider)
-        rows = CommonDao.check_repaet(NewSchedulesSpiderPortCollectScac, PORT_CODE=code_, SCAC=SCAC, DEL_FLAG=0)
+        rows = CommonDao.check_repaet(NewSchedulesSpiderPortCollectScac, PORT=item['port'], SCAC=SCAC, DEL_FLAG=0)
         if rows > 0:
             log.info('此portitem[%s]已存在', item)
             return
@@ -192,15 +196,15 @@ class MysqlPipeline(object):
         :return:
         """
         log.info('收到port_group_item 开始处理')
-        _start_code = item['portPol']
+        _start_code = item['portPol'] or item['portNamePol']
         _start_name = item['portNamePol']
-        _end_code = item['portPod']
+        _end_code = item['portPod'] or item['portNamePod']
         _end_name = item['portNamePod']
         SCAC = self._get_scac(spider)
         rows = CommonDao.check_repaet(NewSchedulesSpiderPort,
-                                      START_BASIC_CODE=_start_code,
+                                      START_PORT=_start_name,
                                       DEL_FLAG=0,
-                                      END_BASIC_CODE=_end_code, SCAC=SCAC)
+                                      END_PORT=_end_name, SCAC=SCAC)
         if rows > 0:
             log.info('此port_group_item[%s]已存在', item)
             return
@@ -371,43 +375,50 @@ class MysqlPipeline(object):
         """
         log.info('收到group_item 开始处理')
         try:
+            log.info('x写入挂靠港[%s]', item['IS_TRANSIT'])
             log.info('查询静态航线')
             scac = self._get_scac(spider)
             boolean_none = self.boolean_none
             item['ROUTE_CODE'] = self.getFirstRangeRouteCode(item, 0)
             route_code = item.get('ROUTE_CODE')
             ssql = """
-                    SELECT ID,FLAG FROM new_schedules_static
+                    SELECT ID FROM new_schedules_static
                     WHERE FIND_IN_SET( REPLACE(TRIM('%s'),' ',''), CONCAT_WS(',',REPLACE(TRIM(ROUTE_CODE),' ',''),
                     REPLACE(TRIM(MY_ROUTE_CODE),' ',''),REPLACE(TRIM(ROUTE_NAME_EN),' ',''))) AND SCAC = '%s'
                     ORDER BY CREATE_TIME ASC LIMIT 1
                 """
-            result = CommonDao.native_query(ssql % (item['ROUTE_CODE'], scac))[0]
+            query_list = CommonDao.native_query(ssql % (item['ROUTE_CODE'], scac))
+            if len(query_list) > 0:
+                result = CommonDao.native_query(ssql % (item['ROUTE_CODE'], scac))[0].get('ID')
+            else:
+                result = None
             main_id = ''
-            if result and result.ID:
+            if result:
                 # 查到对应关系 直接主表id赋值
-                main_id = result.ID
+                main_id = result
             else:
                 # 如果匹配不上静态航线code
                 # 生成主键
                 mdd = '%s,%s,%s,%s' % (scac.upper(), "NULL", "NULL", item['ROUTE_CODE'])
-                EncrptUtils.md5_str(mdd)
+                main_id = EncrptUtils.md5_str(mdd)
                 # 根据动态生成静态航线
                 insert_main_sql = """
                            INSERT INTO new_schedules_static (
-                           ID,SCAC,ROUTE_PARENT, ROUTE_NAME_EN,ROUTE_CODE,FLAG)
-                           SELECT '%s','%s','%s','%s','%s','%s' FROM DUAL WHERE NOT EXISTS
+                           ID,SCAC,ROUTE_CODE,FLAG)
+                           SELECT '%s','%s','%s','%s' FROM DUAL WHERE NOT EXISTS
                            ( SELECT * FROM new_schedules_static s
                            WHERE s.SCAC='%s' and s.ROUTE_PARENT IS NULL and s.ROUTE_NAME_EN IS NULL and s.ROUTE_CODE='%s')
                            """
                 # 插入静态船期主表
-                CommonDao.native_update(insert_main_sql % ((main_id, scac, None, None, item['ROUTE_CODE'], 1,
+                CommonDao.native_update(insert_main_sql % ((main_id, scac, item['ROUTE_CODE'], 1,
                                                             scac, item['ROUTE_CODE'])))
             start_code = item['pol']
             end_code = item['pod']
+            START_PORT = item['polName']
+            END_PORT = item['podName']
             log.info('获取组合数据id')
-            port_res = CommonDao.get(NewSchedulesSpiderPort, DEL_FLAG=0, START_BASIC_CODE=start_code,
-                                     END_BASIC_CODE=end_code,
+            port_res = CommonDao.get(NewSchedulesSpiderPort, DEL_FLAG=0, START_PORT=START_PORT,
+                                     END_PORT=END_PORT,
                                      SCAC=scac)
             insert_rel_sql_key = '%s,%s,%s' % (scac, port_res.ID, main_id)
             insert_rel_sql_key = EncrptUtils.md5_str(insert_rel_sql_key)
@@ -439,10 +450,10 @@ class MysqlPipeline(object):
             transitIdList = []
             for transitInfo in item['TRANSIT_LIST']:
                 transitIdList.append({
-                    "TRANSIT_ROUTE_CODE": boolean_none(transitInfo['TRANSIT_ROUTE_CODE']),
-                    "TRANSIT_PORT_EN": boolean_none(transitInfo['TRANSIT_PORT_EN']),
-                    "TRANSIT_PORT_CODE": boolean_none(transitInfo['TRANSIT_PORT_CODE']),
-                    "TRANSIT_VESSEL": boolean_none(transitInfo['TRANSIT_VESSEL']),
+                    "TRANSIT_ROUTE_CODE": boolean_none(transitInfo.get('TRANSIT_ROUTE_CODE')),
+                    "TRANSIT_PORT_EN": boolean_none(transitInfo.get('TRANSIT_PORT_EN')),
+                    "TRANSIT_PORT_CODE": boolean_none(transitInfo.get('TRANSIT_PORT_CODE')),
+                    "TRANSIT_VESSEL": boolean_none(transitInfo.get('TRANSIT_VESSEL')),
                 })
 
                 # 生成中转关联id
@@ -521,7 +532,7 @@ class MysqlPipeline(object):
             docking_res_1 = CommonDao.check_repaet(NewSchedulesStaticDocking,
                                                    STATIC_ID=main_id,
                                                    DEL_FLAG=0,
-                                                   PORT_CODE=item['pod'])
+                                                   PORT=item['podName'])
             if docking_res_1 <= 0 and int(item['IS_TRANSIT']) == 0:
                 nssd = NewSchedulesStaticDocking()
                 nssd.STATIC_ID = main_id
@@ -538,7 +549,9 @@ class MysqlPipeline(object):
 
             docking_res_2 = CommonDao.check_repaet(NewSchedulesStaticDocking,
                                                    STATIC_ID=main_id,
-                                                   PORT_CODE=item['pol'])
+                                                   PORT=item['polName'])
+
+            log.info('写入挂靠港[%s]', item['IS_TRANSIT'])
             if docking_res_2 <= 0 and int(item['IS_TRANSIT']) == 0:
                 nssd = NewSchedulesStaticDocking()
                 nssd.STATIC_ID = main_id
@@ -553,6 +566,9 @@ class MysqlPipeline(object):
                 CommonDao.add_one_normal(nssd)
                 log.info('写入挂靠港口数据成功')
         except Exception as e:
+            import traceback
+            traceback.format_exc()
+            log.error("处理group_item[%s] 出错e[%s]", traceback.format_exc())
             log.error("处理group_item[%s] 出错e[%s]", str(item), e)
 
     def _handle_statics_item(self, item, spider):
@@ -607,46 +623,49 @@ class MysqlPipeline(object):
         # 如果航线code不为空或者船名航次有效
         list = schedule['TRANSIT_LIST']
         boolean_none = self.boolean_none
-        if who == 0:
-            if boolean_none(schedule['routeCode']) and boolean_none(schedule['routeCode']) not in littleShip:
-                routeCode = schedule['routeCode']
-            elif boolean_none(list[0]['TRANSIT_ROUTE_CODE']) and boolean_none(
-                    list[0]['TRANSIT_ROUTE_CODE']) not in littleShip:
-                routeCode = list[0]['TRANSIT_ROUTE_CODE']
-            elif boolean_none(list[1]['TRANSIT_ROUTE_CODE']) and boolean_none(
-                    list[1]['TRANSIT_ROUTE_CODE']) not in littleShip:
-                routeCode = list[1]['TRANSIT_ROUTE_CODE']
-            elif boolean_none(list[2]['TRANSIT_ROUTE_CODE']) and boolean_none(
-                    list[2]['TRANSIT_ROUTE_CODE']) not in littleShip:
-                routeCode = list[2]['TRANSIT_ROUTE_CODE']
+        try:
+            if who == 0:
+                if boolean_none(schedule['ROUTE_CODE']) and boolean_none(schedule['ROUTE_CODE']) not in littleShip:
+                    routeCode = schedule['ROUTE_CODE']
+                elif boolean_none(list[0]['TRANSIT_ROUTE_CODE']) and boolean_none(
+                        list[0]['TRANSIT_ROUTE_CODE']) not in littleShip:
+                    routeCode = list[0]['TRANSIT_ROUTE_CODE']
+                elif boolean_none(list[1]['TRANSIT_ROUTE_CODE']) and boolean_none(
+                        list[1]['TRANSIT_ROUTE_CODE']) not in littleShip:
+                    routeCode = list[1]['TRANSIT_ROUTE_CODE']
+                elif boolean_none(list[2]['TRANSIT_ROUTE_CODE']) and boolean_none(
+                        list[2]['TRANSIT_ROUTE_CODE']) not in littleShip:
+                    routeCode = list[2]['TRANSIT_ROUTE_CODE']
+                else:
+                    routeCode = "UNDEFINED"
+            elif who == 2:
+                if boolean_none(schedule['ROUTE_CODE']) and boolean_none(schedule['ROUTE_CODE']) not in littleShip:
+                    routeCode = schedule['ROUTE_CODE']
+                elif boolean_none(list[0]['TRANSIT_ROUTE_CODE']) and boolean_none(
+                        list[0]['TRANSIT_ROUTE_CODE']) not in littleShip:
+                    routeCode = list[0]['TRANSIT_ROUTE_CODE']
+                elif boolean_none(list[1]['TRANSIT_ROUTE_CODE']) and boolean_none(
+                        list[1]['TRANSIT_ROUTE_CODE']) not in littleShip:
+                    routeCode = list[1]['TRANSIT_ROUTE_CODE']
+                elif boolean_none(list[2]['TRANSIT_ROUTE_CODE']) and boolean_none(
+                        list[2]['TRANSIT_ROUTE_CODE']) not in littleShip:
+                    routeCode = list[2]['TRANSIT_ROUTE_CODE']
+                else:
+                    routeCode = "UNDEFINED"
             else:
-                routeCode = "UNDEFINED"
-        elif who == 2:
-            if boolean_none(schedule['ROUTE_CODE']) and boolean_none(schedule['ROUTE_CODE']) not in littleShip:
-                routeCode = schedule['ROUTE_CODE']
-            elif boolean_none(list[0]['TRANSIT_ROUTE_CODE']) and boolean_none(
-                    list[0]['TRANSIT_ROUTE_CODE']) not in littleShip:
-                routeCode = list[0]['TRANSIT_ROUTE_CODE']
-            elif boolean_none(list[1]['TRANSIT_ROUTE_CODE']) and boolean_none(
-                    list[1]['TRANSIT_ROUTE_CODE']) not in littleShip:
-                routeCode = list[1]['TRANSIT_ROUTE_CODE']
-            elif boolean_none(list[2]['TRANSIT_ROUTE_CODE']) and boolean_none(
-                    list[2]['TRANSIT_ROUTE_CODE']) not in littleShip:
-                routeCode = list[2]['TRANSIT_ROUTE_CODE']
-            else:
-                routeCode = "UNDEFINED"
-        else:
-            if boolean_none(schedule['ROUTE_CODE']) and boolean_none(schedule['ROUTE_CODE']) not in littleShip:
-                routeCode = schedule['ROUTE_CODE']
-            elif boolean_none(list[0]['TRANSIT_ROUTE_CODE']) and boolean_none(
-                    list[0]['TRANSIT_ROUTE_CODE']) not in littleShip:
-                routeCode = list[0]['TRANSIT_ROUTE_CODE']
-            elif boolean_none(list[1]['TRANSIT_ROUTE_CODE']) and boolean_none(
-                    list[1]['TRANSIT_ROUTE_CODE']) not in littleShip:
-                routeCode = list[1]['TRANSIT_ROUTE_CODE']
-            elif boolean_none(list[2]['TRANSIT_ROUTE_CODE']) and boolean_none(
-                    list[2]['TRANSIT_ROUTE_CODE']) not in littleShip:
-                routeCode = list[2]['TRANSIT_ROUTE_CODE']
-            else:
-                routeCode = "UNDEFINED"
+                if boolean_none(schedule['ROUTE_CODE']) and boolean_none(schedule['ROUTE_CODE']) not in littleShip:
+                    routeCode = schedule['ROUTE_CODE']
+                elif boolean_none(list[0]['TRANSIT_ROUTE_CODE']) and boolean_none(
+                        list[0]['TRANSIT_ROUTE_CODE']) not in littleShip:
+                    routeCode = list[0]['TRANSIT_ROUTE_CODE']
+                elif boolean_none(list[1]['TRANSIT_ROUTE_CODE']) and boolean_none(
+                        list[1]['TRANSIT_ROUTE_CODE']) not in littleShip:
+                    routeCode = list[1]['TRANSIT_ROUTE_CODE']
+                elif boolean_none(list[2]['TRANSIT_ROUTE_CODE']) and boolean_none(
+                        list[2]['TRANSIT_ROUTE_CODE']) not in littleShip:
+                    routeCode = list[2]['TRANSIT_ROUTE_CODE']
+                else:
+                    routeCode = "UNDEFINED"
+        except Exception as e:
+            return "UNDEFINED"
         return routeCode
