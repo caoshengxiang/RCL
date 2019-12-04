@@ -380,7 +380,6 @@ class MysqlPipeline(object):
         """
         log.info('收到group_item 开始处理')
         try:
-            log.info('x写入挂靠港[%s]', item['IS_TRANSIT'])
             log.info('查询静态航线')
             scac = self._get_scac(spider)
             boolean_none = self.boolean_none
