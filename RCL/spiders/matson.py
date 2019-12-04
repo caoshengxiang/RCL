@@ -110,13 +110,18 @@ class MatsonSpider(scrapy.Spider):
         logging.info(data)
         gItem = GroupItem()
         try:
+            day = data.get('totalTransitDays')
+            if 'days' in day:
+                TRANSIT_TIME = int(data.get('totalTransitDays').split(' ')[0])
+            else:
+                TRANSIT_TIME = 0
             row = {
                 'ROUTE_CODE': '',
                 'ETD': data.get('departure'),
                 'VESSEL': data.get('vessel'),
                 'VOYAGE': data.get('voyage'),
                 'ETA': data.get('arrival'),
-                'TRANSIT_TIME': int(data.get('totalTransitDays').split(' ')[0]),
+                'TRANSIT_TIME': TRANSIT_TIME,
                 'TRANSIT_LIST': [],
                 'IS_TRANSIT': 0,  # 确认为中转为1，直达为0, 默认为0
                 'pol': '',
