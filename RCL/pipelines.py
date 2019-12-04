@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
+import traceback
 from datetime import datetime
 
 import pymongo
@@ -129,10 +130,13 @@ class MysqlPipeline(object):
         :param param:
         :return:
         """
+        if param is None or param=='':
+            return None
         if re.match('\d+/\d+\d+', param):
             return datetime.strptime(param, '%d/%m/%Y')
-        if re.match('\d+-\d+-\d+', param):
-            return datetime.strptime(param, '%Y-%m-%d')
+        _search = re.findall('(\d+-\d+-\d+)', param)
+        if _search and len(_search)>0:
+            return datetime.strptime( _search[0], '%Y-%m-%d')
 
     def _covert_time2weekday(self, param):
         """
@@ -173,7 +177,7 @@ class MysqlPipeline(object):
         log.info('收到portitem 开始处理')
         code_ = item['portCode'] or item['port']
         SCAC = self._get_scac(spider)
-        rows = CommonDao.check_repaet(NewSchedulesSpiderPortCollectScac, PORT_CODE=item['portCode'], SCAC=SCAC, DEL_FLAG=0)
+        rows = CommonDao.check_repaet(NewSchedulesSpiderPortCollectScac, PORT=item['port'], SCAC=SCAC, DEL_FLAG=0)
         if rows > 0:
             log.info('此portitem[%s]已存在', item)
             return
@@ -201,7 +205,7 @@ class MysqlPipeline(object):
         _end_code = item['portPod'] or item['portNamePod']
         _end_name = item['portNamePod']
         SCAC = self._get_scac(spider)
-        log.info('X收到port_group_item %s %s %s %s ',_start_code,_start_name,_end_code,_end_name)
+        log.info('X收到port_group_item %s %s %s %s ', _start_code, _start_name, _end_code, _end_name)
         rows = CommonDao.check_repaet(NewSchedulesSpiderPort,
                                       START_PORT=_start_name,
                                       DEL_FLAG=0,
@@ -413,11 +417,11 @@ class MysqlPipeline(object):
                 # 插入静态船期主表
                 CommonDao.native_update(insert_main_sql % ((main_id, scac, item['ROUTE_CODE'], 1,
                                                             scac, item['ROUTE_CODE'])))
-            start_code = item['pol'] or item['polName']
-            end_code = item['pod'] or item['podName']
+            start_name = item['polName']
+            end_name = item['podName']
             log.info('获取组合数据id')
-            port_res = CommonDao.get(NewSchedulesSpiderPort, DEL_FLAG=0, START_PORT_CODE=start_code,
-                                     END_PORT_CODE=end_code,
+            port_res = CommonDao.get(NewSchedulesSpiderPort, DEL_FLAG=0, START_PORT=start_name,
+                                     END_PORT=end_name,
                                      SCAC=scac)
             insert_rel_sql_key = '%s,%s,%s' % (scac, port_res.ID, main_id)
             insert_rel_sql_key = EncrptUtils.md5_str(insert_rel_sql_key)
@@ -526,6 +530,8 @@ class MysqlPipeline(object):
                     CommonDao.add_one_normal(nddt)
                     log.info('写入中转数据成功')
                 except Exception as e:
+                    traceback.format_exc()
+                    log.error("处理group_item[%s] 出错e[%s]", traceback.format_exc())
                     log.error("添加中转数据错误 item[%s]出错e[%s]", str(transit_info), e)
             log.info('写入挂靠港口数据')
             docking_res_1 = CommonDao.check_repaet(NewSchedulesStaticDocking,
@@ -565,7 +571,6 @@ class MysqlPipeline(object):
                 CommonDao.add_one_normal(nssd)
                 log.info('写入挂靠港口数据成功')
         except Exception as e:
-            import traceback
             traceback.format_exc()
             log.error("处理group_item[%s] 出错e[%s]", traceback.format_exc())
             log.error("处理group_item[%s] 出错e[%s]", str(item), e)
