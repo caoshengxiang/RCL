@@ -19,8 +19,8 @@ class EasSpider(scrapy.Spider):
 
     custom_settings = {  # 指定配置的通道, 要对应找到每个爬虫指定的管道,settings里也要进行管道配置
         'ITEM_PIPELINES': {
-            # 'RCL.pipelines.MongoPipeline': 300
-            'RCL.pipelines.MysqlPipeline': 300
+            'RCL.pipelines.MongoPipeline': 300
+            # 'RCL.pipelines.MysqlPipeline': 300
         }
     }
 
@@ -29,14 +29,10 @@ class EasSpider(scrapy.Spider):
 
     portUrl = 'http://ecomm.easline.com/ecomm/ecxmm/weBBSys/Ssch/wecmBBSschP2PtFrame.aspx/select_wecomBBSschP2PtFramePortList'
 
-    num = 0
-
     def parse(self, response):
         doc = pq(response.text)
         self.__VIEWSTATE = doc('#__VIEWSTATE').attr('value')
         self.__EVENTVALIDATION = doc('#__EVENTVALIDATION').attr('value')
-        logging.info(self.__VIEWSTATE)
-        logging.info(self.__EVENTVALIDATION)
 
         # re = requests.post(self.portUrl, data=json.dumps({'portname': '', 'inoutflag': 'out'}),
         #                    headers={
@@ -68,14 +64,14 @@ class EasSpider(scrapy.Spider):
         pItem = PortItem()
         for index, item in enumerate(portList):
             pItem['port'] = item
-            pItem['portCode'] = ''
+            pItem['portCode'] = item
             yield pItem
             if index + 1 < len(portList):
                 for jItem in portList[index + 1:]:
                     # 港口组合
-                    pgItem['portPol'] = ''
+                    pgItem['portPol'] = item
                     pgItem['portNamePol'] = item
-                    pgItem['portPod'] = ''
+                    pgItem['portPod'] = jItem
                     pgItem['portNamePod'] = jItem
                     yield pgItem
 
@@ -115,10 +111,10 @@ class EasSpider(scrapy.Spider):
                                       method='POST',
                                       dont_filter=True,
                                       meta={
-                                          'pol': '',
+                                          'pol': item,
                                           'polName': item,
                                           'polVal': '',
-                                          'pod': '',
+                                          'pod': jItem,
                                           'podName': jItem,
                                           'podVal': '',
                                       },
@@ -126,9 +122,6 @@ class EasSpider(scrapy.Spider):
                                       callback=self.parse_group)
 
     def parse_group(self, response):
-        self.num += 1
-        logging.info('{}-{};接口数：{}'.format(response.meta['polName'], response.meta['podName'], self.num))
-
         doc = pq(response.text)
         trs = doc('#grd_List tr')
         gItem = GroupItem()
@@ -144,13 +137,13 @@ class EasSpider(scrapy.Spider):
                     'VESSEL': tds.eq(2).text(),
                     'VOYAGE': tds.eq(3).text(),
                     'ETA': tds.eq(9).text(),
-                    'TRANSIT_TIME': '',
+                    'TRANSIT_TIME': 0,
                     'TRANSIT_LIST': [],
                     'IS_TRANSIT': 0,  # 确认为中转为1，直达为0, 默认为0
-                    'pol': '',
-                    'pod': '',
-                    'polName': tds.eq(4).text(),
-                    'podName': tds.eq(7).text(),
+                    'pol': response.meta['pol'],
+                    'pod': response.meta['pod'],
+                    'polName': response.meta['polName'],
+                    'podName': response.meta['podName'],
                     'POL_TERMINAL': tds.eq(5).text(),
                     'POD_TERMINAL': tds.eq(8).text(),
                 }
