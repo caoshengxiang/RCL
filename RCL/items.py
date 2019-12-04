@@ -30,10 +30,14 @@ class GroupItem(scrapy.Item):
     ETA = scrapy.Field()  # 到港时间
     TRANSIT_TIME = scrapy.Field()  # 航程
     # FLAG = scrapy.Field()
-    TRANSIT_LIST = scrapy.Field()  # 中转
     ROUTE_CODE = scrapy.Field()  # 航线代码，没有就不存
     POL_TERMINAL = scrapy.Field()  # 起始码头 ，没有就不存
     POD_TERMINAL = scrapy.Field()  # 目的港码头，没有就不存
+
+    TRANSIT_LIST = scrapy.Field()  # 中转
+        # TRANSIT_PORT_EN 中转港
+        # TRANS_VESSEL 中转船名
+        # TRANS_VOYAGE 中转航次
 
 
 class PortGroupItem(scrapy.Item):
