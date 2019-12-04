@@ -108,22 +108,6 @@ class DjsSpider(scrapy.Spider):
                                   callback=self.parse)
 
     def parse(self, response):
-        pItem = PortItem()
-        pgItem = PortGroupItem()
-
-        pItem['port'] = response.meta['polName']
-        pItem['portCode'] = response.meta['pol']
-        yield pItem
-
-        pItem['port'] = response.meta['podName']
-        pItem['portCode'] = response.meta['pod']
-        yield pItem
-
-        pgItem['portPol'] = response.meta['pol']
-        pgItem['portNamePol'] = response.meta['polName']
-        pgItem['portPod'] = response.meta['pod']
-        pgItem['portNamePod'] = response.meta['podName']
-        yield pgItem
 
         doc = pq(response.text)
         table = doc('body > form > table:nth-child(11) > tr > td > table')
@@ -178,6 +162,24 @@ class DjsSpider(scrapy.Spider):
                     pass
 
     def parse_detail(self, response):
+
+        pItem = PortItem()
+        pgItem = PortGroupItem()
+
+        pItem['port'] = response.meta['polName']
+        pItem['portCode'] = response.meta['pol']
+        yield pItem
+
+        pItem['port'] = response.meta['podName']
+        pItem['portCode'] = response.meta['pod']
+        yield pItem
+
+        pgItem['portPol'] = response.meta['pol']
+        pgItem['portNamePol'] = response.meta['polName']
+        pgItem['portPod'] = response.meta['pod']
+        pgItem['portNamePod'] = response.meta['podName']
+        yield pgItem
+
         doc = pq(response.text)
         table = doc('body > form > table.tb_color1')
         # logging.info(table)

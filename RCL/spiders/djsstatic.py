@@ -88,8 +88,8 @@ class DjsSpider(scrapy.Spider):
             list.append({
                 'PORT': tds.eq(0).text(),
                 'TERMINAL': tds.eq(1).text(),
-                'ETA': GetMiddleStr(tds.eq(2).text(), '(', ')'),
-                'ETD': GetMiddleStr(tds.eq(4).text(), '(', ')'),
+                'ETA': GetMiddleStr(tds.eq(2).text(), '\(', '\)'),
+                'ETD': GetMiddleStr(tds.eq(4).text(), '\(', '\)'),
             })
         item['DOCKING_LIST'] = list
         yield item
