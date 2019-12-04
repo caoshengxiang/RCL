@@ -61,3 +61,7 @@ class StaticsItem(scrapy.Item):
     ROUTE_CODE = scrapy.Field()
     # 挂靠数据集合
     DOCKING_LIST = scrapy.Field()
+        # 'PORT'
+        # 'TERMINAL'
+        # 'ETA'
+        # 'ETD'
