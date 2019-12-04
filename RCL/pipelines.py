@@ -156,7 +156,7 @@ class MysqlPipeline(object):
             return 0
         return round(float(param))
 
-    def boolean_none(self, text):
+    def _boolean_none(self, text):
         return text if text and text != 'None' and text != 'null' and text != '' and text != '0000-00-00 00:00:00' else None
 
     def _get_scac(self, spider):
@@ -382,8 +382,8 @@ class MysqlPipeline(object):
         try:
             log.info('查询静态航线')
             scac = self._get_scac(spider)
-            boolean_none = self.boolean_none
-            item['ROUTE_CODE'] = self.getFirstRangeRouteCode(item, 0)
+            boolean_none = self._boolean_none
+            item['ROUTE_CODE'] = self._getFirstRangeRouteCode(item, 0)
             route_code = item.get('ROUTE_CODE')
             ssql = """
                     SELECT ID FROM new_schedules_static
@@ -604,18 +604,26 @@ class MysqlPipeline(object):
         log.info(' 插入new_schedules_static  成功')
         DOCKING_LIST = item.get('DOCKING_LIST')
         for index, docking in enumerate(DOCKING_LIST, start=1):
+            res = CommonDao.get(NewSchedulesStaticDocking, STATIC_ID=sns.ID, PORT=docking.get('PORT'),
+                                TERMINAL=docking.get('TERMINAL'))
+            if res:
+                log.info('NewSchedulesStaticDocking 重复')
+                continue
             sndocking = NewSchedulesStaticDocking()
             sndocking.STATIC_ID = sns.ID
             sndocking.PORT_NUMBER = index
             sndocking.PORT = docking.get('PORT')
             sndocking.TERMINAL = docking.get('TERMINAL')
-            sndocking.ETA = docking.get('ETA')
-            sndocking.ETD = docking.get('ETD')
+            if 'DJSL' in spider.name:
+                sndocking.ETA = self._parse_et(docking.get('ETA'))
+                sndocking.ETD = self._parse_et(docking.get('ETD'))
+            else:
+                sndocking.ETA = docking.get('ETA')
+                sndocking.ETD = docking.get('ETD')
             CommonDao.add_one_normal(sndocking)
             log.info('插入static docking 成功')
 
-
-    def getFirstRangeRouteCode(self, schedule, who):
+    def _getFirstRangeRouteCode(self, schedule, who):
         littleShip = [
             "WATER",
             "TRACE",
@@ -634,7 +642,7 @@ class MysqlPipeline(object):
         # 航线code、船名航次是否有效，不为空，不为空串，不属于内支线，陆运等
         # 如果航线code不为空或者船名航次有效
         list = schedule['TRANSIT_LIST']
-        boolean_none = self.boolean_none
+        boolean_none = self._boolean_none
         try:
             if who == 0:
                 if boolean_none(schedule['ROUTE_CODE']) and boolean_none(schedule['ROUTE_CODE']) not in littleShip:
@@ -681,3 +689,15 @@ class MysqlPipeline(object):
         except Exception as e:
             return "UNDEFINED"
         return routeCode
+
+    def _parse_et(self, et):
+        store = {
+            "MON": "1",
+            "TUE": "2",
+            "WED": "3",
+            "THU": "4",
+            "FRI": "5",
+            "SAT": "6",
+            "SUN": "7",
+        }
+        return store.get(et, et)
