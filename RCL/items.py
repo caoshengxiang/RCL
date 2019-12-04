@@ -21,7 +21,6 @@ class GroupItem(scrapy.Item):
     pod = scrapy.Field()
     polName = scrapy.Field()
     podName = scrapy.Field()
-    useTime = scrapy.Field()
     date = scrapy.Field()
     IS_TRANSIT = scrapy.Field()  # 是否中转 确认为中转为1，直达为0
     VESSEL = scrapy.Field()  # 船名
@@ -30,7 +29,7 @@ class GroupItem(scrapy.Item):
     ETD = scrapy.Field()  # 离港时间
     ETA = scrapy.Field()  # 到港时间
     TRANSIT_TIME = scrapy.Field()  # 航程
-    FLAG = scrapy.Field()
+    # FLAG = scrapy.Field()
     TRANSIT_LIST = scrapy.Field()  # 中转
     ROUTE_CODE = scrapy.Field()  # 航线代码，没有就不存
     POL_TERMINAL = scrapy.Field()  # 起始码头 ，没有就不存

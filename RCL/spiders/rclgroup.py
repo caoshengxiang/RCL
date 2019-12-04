@@ -24,16 +24,7 @@ class RclgroupSpider(scrapy.Spider):
 
     headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept-Language': 'zh-CN,zh;q=0.9',
-        'Cache-Control': 'max-age=0',
-        'Connection': 'keep-alive',
         'Cookie': '_ga=GA1.2.383328044.1572849733; _gid=GA1.2.1319479703.1573436902; cookiesession1=4860C136QSBUT4QBQNC3W4QSTSMTA652',
-        'Host': 'www.rclgroup.com',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'none',
-        'Sec-Fetch-User': '?1',
-        'Upgrade-Insecure-Requests': 1,
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.62 Safari/537.36'
     }
 
@@ -142,6 +133,7 @@ class RclgroupSpider(scrapy.Spider):
 
     def parse_group(self, response):
         self.group_ocunt += 1
+        logging.debug('解析第{}个组合'.format(self.group_ocunt))
         doc = pq(response.text)
         trs = doc('#vesseltable tr')
         pgItem = PortGroupItem()
