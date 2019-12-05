@@ -35,7 +35,7 @@ class MatsonSpider(scrapy.Spider):
             }
             logging.info('港口数据：{}'.format(row))
             pItem['port'] = row['name']
-            pItem['portCode'] = ''
+            pItem['portCode'] = row['name']
             yield pItem
 
             # yield Request(url=self.portUrl,
@@ -62,9 +62,9 @@ class MatsonSpider(scrapy.Spider):
         for item in data:
             # 港口组合
             logging.info('港口组合:')
-            pgItem['portPol'] = ''
+            pgItem['portPol'] = response.meta['polName']
             pgItem['portNamePol'] = response.meta['polName']
-            pgItem['portPod'] = ''
+            pgItem['portPod'] = item.get('locationName')
             pgItem['portNamePod'] = item.get('locationName')
             yield pgItem
 
@@ -115,17 +115,37 @@ class MatsonSpider(scrapy.Spider):
                 TRANSIT_TIME = int(data.get('totalTransitDays').split(' ')[0])
             else:
                 TRANSIT_TIME = 0
+
+            today = datetime.datetime.now()
+            current_month = today.month
+            etd = data.get('departure')
+            eta = data.get('arrival')
+            etd_str = etd.split(' ')[3]
+            eta_str = eta.split(' ')[3]
+            etd_year = today.year
+            eta_year = today.year
+            etd_month = etd_str[0:2]
+            etd_day = etd_str[-2:]
+            eta_month = eta_str[0:2]
+            eta_day = eta_str[-2:]
+            if int(current_month) > int(etd_month):
+                etd_year = int(etd_year) + 1
+            if int(current_month) > int(eta_month):
+                eta_year = int(eta_year) + 1
+            ETD = '{}-{}-{}'.format(etd_year, etd_month, etd_day)
+            ETA = '{}-{}-{}'.format(eta_year, eta_month, eta_day)
+
             row = {
                 'ROUTE_CODE': '',
-                'ETD': data.get('departure'),
+                'ETD': ETD,
                 'VESSEL': data.get('vessel'),
                 'VOYAGE': data.get('voyage'),
-                'ETA': data.get('arrival'),
+                'ETA': ETA,
                 'TRANSIT_TIME': TRANSIT_TIME,
                 'TRANSIT_LIST': [],
                 'IS_TRANSIT': 0,  # 确认为中转为1，直达为0, 默认为0
-                'pol': '',
-                'pod': '',
+                'pol': data.get('originName'),
+                'pod': data.get('destinationName'),
                 'polName': data.get('originName'),
                 'podName': data.get('destinationName'),
             }
