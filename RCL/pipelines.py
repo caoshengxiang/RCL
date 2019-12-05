@@ -42,8 +42,6 @@ class MongoPipeline(object):
 
 
 class MysqlPipeline(object):
-    # 不重复更新
-    seeds = set()
 
     def open_spider(self, spider):
         """
@@ -53,24 +51,25 @@ class MysqlPipeline(object):
         """
         log.info('MysqlPipeline  spider[%s] start', spider.name)
         SCAC = self._get_scac(spider)
-        if SCAC not in self.seeds:
-            sql = "SELECT max(VERSION_NUMBER) as max_version from new_schedules_dynamic  where SCAC='%s'"
-            version = CommonDao.native_query(sql % (SCAC))[0].get('max_version')
-            if version is None or version < 0:
-                version = 0
-            old = CommonDao.get(NewSchedulesTaskVersion, SCAC=SCAC)
-            if old:
-                from RCL.model.basic import db_session
-                old.VERSION = version
-                old.START_TIME = DateTimeUtils.now()
-                db_session.commit()
-            else:
-                nstv = NewSchedulesTaskVersion()
-                nstv.SCAC = SCAC
-                nstv.VERSION = version
-                nstv.START_TIME = DateTimeUtils.now()
-                CommonDao.add_one_normal(nstv)
-            self.seeds.add(SCAC)
+        #静态的不更新
+        if 'static' in spider.name:
+            return
+        sql = "SELECT max(VERSION_NUMBER) as max_version from new_schedules_dynamic  where SCAC='%s'"
+        version = CommonDao.native_query(sql % (SCAC))[0].get('max_version')
+        if version is None or version < 0:
+            version = 0
+        old = CommonDao.get(NewSchedulesTaskVersion, SCAC=SCAC)
+        if old:
+            from RCL.model.basic import db_session
+            old.VERSION = version
+            old.START_TIME = DateTimeUtils.now()
+            db_session.commit()
+        else:
+            nstv = NewSchedulesTaskVersion()
+            nstv.SCAC = SCAC
+            nstv.VERSION = version
+            nstv.START_TIME = DateTimeUtils.now()
+            CommonDao.add_one_normal(nstv)
 
     def close_spider(self, spider):
         """
@@ -79,12 +78,13 @@ class MysqlPipeline(object):
         :return:
         """
         SCAC = self._get_scac(spider)
+        if 'static' in spider.name:
+            return
         old = CommonDao.get(NewSchedulesTaskVersion, SCAC=SCAC)
         if old:
             from RCL.model.basic import db_session
             old.END_TIME = DateTimeUtils.now()
             db_session.commit()
-        self.seeds.clear()
         log.info('MysqlPipeline spider[%s] ended', spider.name)
 
     def process_item(self, item, spider):
@@ -144,8 +144,10 @@ class MysqlPipeline(object):
         :param param:
         :return:
         """
-        return self._covert_time(param).weekday() + 1
-
+        try:
+            return self._covert_time(param).weekday() + 1
+        except Exception as e:
+            return param
     def _covert_value(self, param):
         """
         类型转型处理数字
