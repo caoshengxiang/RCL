@@ -427,7 +427,7 @@ class MysqlPipeline(object):
                                      END_PORT=end_name,
                                      SCAC=scac)
             if port_res is None:
-                log.error('port_res is none start_name  %s end_name %s', start_name, end_name)
+                log.error('error port_res is none start_name  %s end_name %s', start_name, end_name)
                 log.error('item is  %s', item)
                 return
             insert_rel_sql_key = '%s,%s,%s' % (scac, port_res.ID, main_id)
