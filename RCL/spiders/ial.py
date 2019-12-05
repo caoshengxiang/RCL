@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
+import math
 import time
 from selenium import webdriver
 from selenium.webdriver.support.select import Select
@@ -77,7 +78,7 @@ class IalSpider(scrapy.Spider):
             logging.info(c_h_ports)
             for c_h_port in c_h_ports:
                 pItem['port'] = c_h_port['name']
-                pItem['portCode'] = ''
+                pItem['portCode'] = c_h_port['name']
                 yield pItem
                 try:
                     logging.info('港口数据:{}'.format(c_h_port))
@@ -98,13 +99,13 @@ class IalSpider(scrapy.Spider):
                         for o_h_port in o_h_ports:
                             # 港口
                             pItem['port'] = o_h_port['name']
-                            pItem['portCode'] = ''
+                            pItem['portCode'] = o_h_port['name']
                             yield pItem
 
                             # 港口组合
-                            pgItem['portPol'] = ''
+                            pgItem['portPol'] = c_h_port['name']
                             pgItem['portNamePol'] = c_h_port['name']
-                            pgItem['portPod'] = ''
+                            pgItem['portPod'] = o_h_port['name']
                             pgItem['portNamePod'] = o_h_port['name']
                             yield pgItem
                             try:
@@ -129,18 +130,23 @@ class IalSpider(scrapy.Spider):
                                 for index, tr in enumerate(trs.items()):
                                     logging.info('数据长度：{}'.format(tr.find('td').length))
                                     if tr.find('td'):
+                                        timeS = tr.find('td').eq(8).text()
+                                        if timeS:
+                                            timeI = math.ceil(float(timeS))
+                                        else:
+                                            timeI = 0
                                         row = {
                                             'ETD': tr.find('td').eq(0).text(),
                                             'VESSEL': tr.find('td').eq(1).text(),
                                             'VOYAGE': tr.find('td').eq(2).text(),
                                             'ETA': tr.find('td').eq(4).text(),
-                                            'TRANSIT_TIME': tr.find('td').eq(8).text(),
+                                            'TRANSIT_TIME': timeI,
                                             'TRANSIT_LIST': [],
                                             'IS_TRANSIT': 0,  # 确认为中转为1，直达为0, 默认为0
                                             'pol': c_h_port['name'],
                                             'pod': o_h_port['name'],
-                                            'polName': '',
-                                            'podName': '',
+                                            'polName': c_h_port['name'],
+                                            'podName': o_h_port['name'],
                                         }
                                         for field in gItem.fields:
                                             if field in row.keys():
