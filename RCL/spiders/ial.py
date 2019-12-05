@@ -135,7 +135,7 @@ class IalSpider(scrapy.Spider):
                                 # logging.warning(response.text)
                                 for index, tr in enumerate(trs.items()):
                                     logging.info('数据长度：{}'.format(tr.find('td').length))
-                                    if tr.find('td'):
+                                    if tr.find('td').length > 1:
                                         timeS = tr.find('td').eq(8).text()
                                         if timeS:
                                             timeI = math.ceil(float(timeS))
