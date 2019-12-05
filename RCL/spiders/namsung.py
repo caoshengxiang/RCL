@@ -23,7 +23,6 @@ class NamsungSpider(scrapy.Spider):
         }
     }
 
-    detail_num = 0
     global_cn_port = []
     global_other_port = []
     port_url = ' http://www.namsung.co.kr/eng/biz/eService/AjaxPortList.do?searchGuggaCd={}'
@@ -55,16 +54,16 @@ class NamsungSpider(scrapy.Spider):
             day = str(localtime.tm_mday)
 
             for cnindex, cn in enumerate(self.global_cn_port):
-                #测试
-                # if cnindex != 13:
-                #     continue
+                # 测试
+                if cnindex != 13:
+                    continue
                 pItem['port'] = cn['name']
-                pItem['portCode'] = ''
+                pItem['portCode'] = cn['value']
                 yield pItem
                 for oincex, other in enumerate(self.global_other_port):
-                    #测试
-                    # if oincex > 2:
-                    #     break
+                    # 测试
+                    if oincex != 0:
+                        continue
                     # 港口
                     pItem['port'] = other['name']
                     pItem['portCode'] = other['value']
@@ -76,30 +75,25 @@ class NamsungSpider(scrapy.Spider):
                     pgItem['portNamePod'] = other['name']
                     yield pgItem
 
-                    # logging.info(cn['countryVa'])
-                    # logging.info(cn['value'])
-                    # logging.info(other['countryVa'])
-                    # logging.info(other['value'])
-
                     # 日历数据
 
-                    for request in self.get_calendar(year, month, cn, other, False):
-                        yield request
-                    # next month
-                    nextYear = year
-                    nextMonth = month
-                    if int(month) + 1 > 12:
-                        nextYear = str(int(nextYear) + 1)
-                        nextMonth = '1'
-                    else:
-                        nextMonth = str(int(month) + 1)
+                    # for request in self.get_calendar(year, month, cn, other, False):
+                    #     yield request
+                    # # next month
+                    # nextYear = year
+                    # nextMonth = month
+                    # if int(month) + 1 > 12:
+                    #     nextYear = str(int(nextYear) + 1)
+                    #     nextMonth = '1'
+                    # else:
+                    #     nextMonth = str(int(month) + 1)
+                    #
+                    # for request in self.get_calendar(nextYear, nextMonth, cn, other, True):
+                    #     yield request
 
-                    for request in self.get_calendar(nextYear, nextMonth, cn, other, True):
+                    # 测试
+                    for request in self.get_calendar('2019', '12', cn, other, False):
                         yield request
-
-            # # 测试
-            # for request in self.get_calendar('2019', '11'):
-            #     yield request
 
         except Exception as e:
             logging.error(e)
@@ -169,7 +163,7 @@ class NamsungSpider(scrapy.Spider):
                     isNextMonth = response.meta['isNextMonth']
                     logging.debug(isNextMonth)
                     if response.meta['isNextMonth'] == False:
-                        if int(day) >= int(time.localtime().tm_mday):
+                        if int(day) < int(time.localtime().tm_mday):
                             continue
 
                     aEles = td.find('a')
@@ -177,7 +171,7 @@ class NamsungSpider(scrapy.Spider):
                         paramHrefStr = a.attr('href')
                         # logging.info(paramHrefStr)
                         if paramHrefStr:
-                            reP = re.compile(r'[\'](.*?)[\']', re.S) # 解析 js
+                            reP = re.compile(r'[\'](.*?)[\']', re.S)  # 解析 js
                             param = re.findall(reP, paramHrefStr)
                             # [searchPortCdFrom, searchPortCdTo, searchDate, searchVslvoy, searchVslCdTag, searchv_por, searchv_otag, searchv_oday,searchv_ofec,searchv_pord, searchv_pvy, searchv_itag,searchv_iday,searchv_ifec,searchv_pvyd,search_lpt,search_dpt]
                             url = self.detail_url.format(
@@ -207,6 +201,7 @@ class NamsungSpider(scrapy.Spider):
                                               'polName': response.meta['polName'],
                                               'pod': response.meta['pod'],
                                               'podName': response.meta['podName'],
+                                              'param': param[3]
                                           },
                                           dont_filter=True,
                                           callback=self.parse_detail)
@@ -216,66 +211,63 @@ class NamsungSpider(scrapy.Spider):
 
     def parse_detail(self, response):
         try:
-            self.detail_num += 1
-            logging.info('第{}个详情'.format(self.detail_num))
             doc = pq(response.text)
             tables = doc('table')
             # logging.info(table)
             gItem = GroupItem()
             tablesLen = len(tables)
-            if tablesLen < 2:
-                vv = tables.eq(0).find('tr:nth-child(1) > td:nth-child(2)').text().splitlines()[0]
-                timeStr = tables.eq(0).find('tr:nth-child(1) > td:nth-child(4)').text()
-                if time:
-                    timeInt = math.ceil(float(timeStr))
-                else:
-                    timeInt = 0
-                row = {
-                    'ETD': tables.eq(0).find('tr:nth-child(3) > td:nth-child(2)').text(),
-                    'VESSEL': vv.split(' / ')[0],
-                    'VOYAGE': vv.split(' / ')[1],
-                    'ETA': tables.eq(0).find('tr:nth-child(3) > td:nth-child(4)').text(),
-                    'TRANSIT_TIME': timeInt,
-                    'TRANSIT_LIST': [],
-                    'IS_TRANSIT': 0,  # 确认为中转为1，直达为0, 默认为0
-                    'pol': response.meta['pol'],
-                    'pod': response.meta['pod'],
-                    'polName': response.meta['polName'],
-                    'podName': response.meta['podName'],
-                }
+            param = response.meta['param']
+            vv = tables.eq(0).find('tr:nth-child(1) > td:nth-child(2)').text().splitlines()[0]
+            timeStr = tables.eq(0).find('tr:nth-child(1) > td:nth-child(4)').text()
+            if timeStr:
+                time = float(timeStr)
             else:
-                vv = tables.eq(1).find('tr:nth-child(1) > td:nth-child(2)').text().splitlines()[0]
-                row = {
-                    'ETD': tables.eq(1).find('tr:nth-child(3) > td:nth-child(2)').text(),
-                    'VESSEL': vv.split(' / ')[0],
-                    'VOYAGE': vv.split(' / ')[1],
-                    'ETA': tables.eq(1).find('tr:nth-child(3) > td:nth-child(4)').text(),
-                    'TRANSIT_TIME': tables.eq(0).find('tr:nth-child(1) > td:nth-child(4)').text(),
-                    'TRANSIT_LIST': [],
-                    'IS_TRANSIT': 0,  # 确认为中转为1，直达为0, 默认为0
-                    'pol': response.meta['pol'],
-                    'pod': response.meta['pod'],
-                    'polName': response.meta['polName'],
-                    'podName': response.meta['podName'],
-                }
+                time = 0
+            row = {
+                'ETD': tables.eq(0).find('tr:nth-child(3) > td:nth-child(2)').text(),
+                'VESSEL': vv.split(' / ')[0],
+                'VOYAGE': vv.split(' / ')[1],
+                'ETA': tables.eq(0).find('tr:nth-child(3) > td:nth-child(4)').text(),
+                'TRANSIT_TIME': time,
+                'TRANSIT_LIST': [],
+                'IS_TRANSIT': 0,  # 确认为中转为1，直达为0, 默认为0
+                'pol': response.meta['pol'],
+                'pod': response.meta['pod'],
+                'polName': response.meta['polName'],
+                'podName': response.meta['podName'],
+            }
 
-                transitTable = doc('table[id^=id_view_]')
-                if transitTable:
-                    for tab in transitTable.items():
-                        vv_t = tab.find('tr:nth-child(1) > td:nth-child(2)').text().splitlines()[0]
-                        row['IS_TRANSIT'] = 1
-                        row['ETA'] = tab.find('tr:nth-child(3) > td:nth-child(4)').text()
-                        row['TRANSIT_LIST'].append({
-                            'TRANSIT_PORT_EN': tab.find('tr:nth-child(2) > td:nth-child(2)').text().split(' ')[0],
-                            'TRANS_VESSEL': vv_t.split(' / ')[0],
-                            'TRANS_VOYAGE': vv_t.split(' / ')[1],
-                            'level': 1
-                        })
-            logging.info(row)
-            for field in gItem.fields:
-                if field in row.keys():
-                    gItem[field] = row.get(field)
-            yield gItem
+            transitTable = doc('table[id^=id_view_]')
+            if transitTable:
+                for tab in transitTable.items():
+                    row['TRANSIT_LIST'] = []
+                    vv_t = tab.find('tr:nth-child(1) > td:nth-child(2)').text().splitlines()[0]
+                    tra_timeStr = tab.find('tr:nth-child(1) > td:nth-child(4)').text()
+                    if tra_timeStr:
+                        tra_time = float(tra_timeStr)
+                    else:
+                        tra_time = 0
+
+                    row['TRANSIT_TIME'] = math.ceil(time + tra_time)
+                    row['IS_TRANSIT'] = 1
+                    row['ETA'] = tab.find('tr:nth-child(3) > td:nth-child(4)').text()
+                    row['TRANSIT_LIST'].append({
+                        'TRANSIT_PORT_EN': tab.find('tr:nth-child(2) > td:nth-child(2)').text().split(' ')[0],
+                        'TRANS_VESSEL': vv_t.split(' / ')[0],
+                        'TRANS_VOYAGE': vv_t.split(' / ')[1]
+                    })
+                    logging.info(row)
+                    for field in gItem.fields:
+                        if field in row.keys():
+                            gItem[field] = row.get(field)
+                    yield gItem
+            else:
+                row['TRANSIT_TIME'] = math.ceil(time)
+                for field in gItem.fields:
+                    if field in row.keys():
+                        gItem[field] = row.get(field)
+                yield gItem
+
         except Exception as e:
             logging.error(e)
 
