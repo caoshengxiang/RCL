@@ -6,6 +6,8 @@ import scrapy
 from pyquery import PyQuery as pq
 from scrapy import FormRequest, Request
 
+from RCL.items import StaticsItem
+
 
 class NamsungstaticSpider(scrapy.Spider):
     name = 'NSRU_STATIC'
@@ -60,20 +62,21 @@ class NamsungstaticSpider(scrapy.Spider):
     def parse_list(self, response):
         doc = pq(response.text)
         trs = doc('#mainTable table tr')
-        row = {
-            'list': [],
-            'service': response.meta['service'],
-            'routeCode': response.meta['routeCode'],
-        }
+
+        item = StaticsItem()
+        item['ROUTE_PARENT'] = response.meta['service']
+        item['ROUTE_NAME_EN'] = response.meta['service']
+        item['ROUTE_CODE'] = response.meta['routeCode']
+        list = []
         for index, tr in enumerate(trs.items()):
             if index == 0:
                 continue
             tds = tr.find('td')
-            row['list'].append({
-                'port': tds.eq(0).text(),
-                'ETA': tds.eq(1).text(),
-                'ETD': tds.eq(2).text(),
-                'terminal': tds.eq(3).text()
+            list.append({
+                'PORT': tds.eq(0).text(),
+                'ETA': tds.eq(1).text().split(' ')[0],
+                'ETD': tds.eq(2).text().split(' ')[0],
+                'TERMINAL': tds.eq(3).text()
             })
-        logging.info('静态航线')
-        logging.info(row)
+        item['DOCKING_LIST'] = list
+        yield item
