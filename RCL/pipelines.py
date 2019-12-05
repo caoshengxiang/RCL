@@ -78,7 +78,7 @@ class MysqlPipeline(object):
         :return:
         """
         SCAC = self._get_scac(spider)
-        if 'static' in spider.name:
+        if 'static' in spider.name.lower():
             return
         old = CommonDao.get(NewSchedulesTaskVersion, SCAC=SCAC)
         if old:
@@ -137,6 +137,8 @@ class MysqlPipeline(object):
         _search = re.findall('(\d+-\d+-\d+)', param)
         if _search and len(_search) > 0:
             return datetime.strptime(_search[0], '%Y-%m-%d')
+        if re.match('\d+', param):
+            return datetime.strptime(param, '%Y%m%d')
 
     def _covert_time2weekday(self, param):
         """
