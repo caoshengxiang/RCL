@@ -51,7 +51,7 @@ class MysqlPipeline(object):
         """
         log.info('MysqlPipeline  spider[%s] start', spider.name)
         SCAC = self._get_scac(spider)
-        #静态的不更新
+        # 静态的不更新
         if 'static' in spider.name:
             return
         sql = "SELECT max(VERSION_NUMBER) as max_version from new_schedules_dynamic  where SCAC='%s'"
@@ -148,6 +148,7 @@ class MysqlPipeline(object):
             return self._covert_time(param).weekday() + 1
         except Exception as e:
             return param
+
     def _covert_value(self, param):
         """
         类型转型处理数字
@@ -421,9 +422,14 @@ class MysqlPipeline(object):
             start_name = item['polName']
             end_name = item['podName']
             log.info('获取组合数据id')
+            # 可以优化 存在内存中
             port_res = CommonDao.get(NewSchedulesSpiderPort, DEL_FLAG=0, START_PORT=start_name,
                                      END_PORT=end_name,
                                      SCAC=scac)
+            if port_res is None:
+                log.error('port_res is none start_name  %s end_name %s', start_name, end_name)
+                log.error('item is  %s', item)
+                return
             insert_rel_sql_key = '%s,%s,%s' % (scac, port_res.ID, main_id)
             insert_rel_sql_key = EncrptUtils.md5_str(insert_rel_sql_key)
             relation_id = insert_rel_sql_key
