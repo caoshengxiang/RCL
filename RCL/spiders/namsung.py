@@ -19,7 +19,8 @@ class NamsungSpider(scrapy.Spider):
 
     custom_settings = {  # 指定配置的通道, 要对应找到每个爬虫指定的管道,settings里也要进行管道配置
         'ITEM_PIPELINES': {
-            'RCL.pipelines.MongoPipeline': 300
+            # 'RCL.pipelines.MongoPipeline': 300
+            'RCL.pipelines.MysqlPipeline': 300
         }
     }
 
@@ -54,16 +55,16 @@ class NamsungSpider(scrapy.Spider):
             day = str(localtime.tm_mday)
 
             for cnindex, cn in enumerate(self.global_cn_port):
-                # 测试
-                if cnindex != 13:
-                    continue
+                # # 测试
+                # if cnindex != 13:
+                #     continue
                 pItem['port'] = cn['name']
                 pItem['portCode'] = cn['value']
                 yield pItem
                 for oincex, other in enumerate(self.global_other_port):
-                    # 测试
-                    if oincex != 0:
-                        continue
+                    # # 测试
+                    # if oincex != 0:
+                    #     continue
                     # 港口
                     pItem['port'] = other['name']
                     pItem['portCode'] = other['value']
@@ -77,23 +78,23 @@ class NamsungSpider(scrapy.Spider):
 
                     # 日历数据
 
-                    # for request in self.get_calendar(year, month, cn, other, False):
-                    #     yield request
-                    # # next month
-                    # nextYear = year
-                    # nextMonth = month
-                    # if int(month) + 1 > 12:
-                    #     nextYear = str(int(nextYear) + 1)
-                    #     nextMonth = '1'
-                    # else:
-                    #     nextMonth = str(int(month) + 1)
-                    #
-                    # for request in self.get_calendar(nextYear, nextMonth, cn, other, True):
-                    #     yield request
+                    for request in self.get_calendar(year, month, cn, other, False):
+                        yield request
+                    # next month
+                    nextYear = year
+                    nextMonth = month
+                    if int(month) + 1 > 12:
+                        nextYear = str(int(nextYear) + 1)
+                        nextMonth = '1'
+                    else:
+                        nextMonth = str(int(month) + 1)
+
+                    for request in self.get_calendar(nextYear, nextMonth, cn, other, True):
+                        yield request
 
                     # 测试
-                    for request in self.get_calendar('2019', '12', cn, other, False):
-                        yield request
+                    # for request in self.get_calendar('2019', '12', cn, other, False):
+                    #     yield request
 
         except Exception as e:
             logging.error(e)
