@@ -18,8 +18,8 @@ class PanconSpider(scrapy.Spider):
 
     custom_settings = {  # 指定配置的通道, 要对应找到每个爬虫指定的管道,settings里也要进行管道配置
         'ITEM_PIPELINES': {
-            # 'RCL.pipelines.MongoPipeline': 300
-            'RCL.pipelines.MysqlPipeline': 300
+            'RCL.pipelines.MongoPipeline': 300
+            # 'RCL.pipelines.MysqlPipeline': 300
         }
     }
 
@@ -79,15 +79,17 @@ class PanconSpider(scrapy.Spider):
 
             for cnindex, cn in enumerate(self.global_cn_port):
                 # 测试
-                # if cnindex != 13:
-                #     continue
+                if cnindex != 7:
+                    continue
                 pItem['port'] = cn['PLC_ENM']
                 pItem['portCode'] = cn['COUNTRY_PLC_CD']
                 yield pItem
                 for oincex, other in enumerate(self.global_other_port):
                     # 测试
-                    # if oincex > 2:
-                    #     break
+                    # if oincex != 19:
+                    #     continue
+                    if oincex != 34:  # HAIPHONG
+                        continue
                     # 港口
                     pItem['port'] = other['PLC_ENM']
                     pItem['portCode'] = other['COUNTRY_PLC_CD']
@@ -148,6 +150,9 @@ class PanconSpider(scrapy.Spider):
         if not data['schedule'] or not data['schedule']['O_RESULT_CURSOR']:
             logging.info('查询列表无数据')
             return
+        if (data['O_ERROR_FLAG'] == 'Y'):
+            logging.debug('查询接口返回错误日志')
+            return
         Lists = data['schedule']['O_RESULT_CURSOR']
 
         def filter_seq2(li):
@@ -186,34 +191,61 @@ class PanconSpider(scrapy.Spider):
                     row['TRANSIT_TIME'] = int(item.get('TT', '0'))
                     row['TRANSIT_LIST'] = []
                     row['IS_TRANSIT'] = 0  # 确认为中转为1，直达为0, 默认为0
-                if item.get('TS') == 'N':
-                    row['POD_TERMINAL'] = item.get('POD', '').split(' / ')[1]
-                    row['ETA'] = item.get('POD_ETA', '')
+                    if item.get('TS') == 'Y':
+                        if len(SEC_SEQ2) > 0:
+                            row['POD_TERMINAL'] = item.get('POD', '').split(' / ')[1]
+                            POD_item = SEC_SEQ2[SEC_SEQ2_index]  # todo
+                            row['ETA'] = POD_item.get('POD_ETA', '')
+                            row['IS_TRANSIT'] = 1
+                            row['TRANSIT_TIME'] += int(item.get('TT', '0'))
+                            row['TRANSIT_LIST'].append({
+                                'TRANSIT_PORT_EN': item.get('POD', '').split(' / ')[0],
+                                'TRANS_VESSEL': '',
+                                'TRANS_VOYAGE': '',
+                            })
+                        if len(SEC_SEQ3) > 0:
+                            row['POD_TERMINAL'] = item.get('POD', '').split(' / ')[1]
+                            POD_item = SEC_SEQ3[SEC_SEQ2_index]  # todo
+                            row['ETA'] = POD_item.get('POD_ETA', '')
+                            row['IS_TRANSIT'] = 1
+                            row['TRANSIT_TIME'] += int(item.get('TT', '0'))
+                            row['TRANSIT_LIST'].append({
+                                'TRANSIT_PORT_EN': item.get('POD', '').split(' / ')[0],
+                                'TRANS_VESSEL': '',
+                                'TRANS_VOYAGE': '',
+                            })
                     for field in gItem.fields:
                         if field in row.keys():
                             gItem[field] = row.get(field)
-                    yield gItem
-                    logging.info(row)
-                    row = {
-                        'pol': response.meta['portPol'],
-                        'pod': response.meta['portPod'],
-                        'polName': response.meta['portNamePol'],
-                        'podName': response.meta['portNamePod'],
-                    }
-                else:
-                    row['POD_TERMINAL'] = item.get('POD', '').split(' / ')[1]
-                    POD_item = SEC_SEQ2[SEC_SEQ2_index]
-                    if SEC_SEQ2_index + 1 < len(SEC_SEQ2):
-                        logging.info('取完')
-                        break
 
-                    row['ETA'] = POD_item.get('POD_ETA', '')
-                    row['IS_TRANSIT'] = 1
-                    row['TRANSIT_TIME'] += int(item.get('TT', '0'))
-                    row['TRANSIT_LIST'].append({
-                        'TRANSIT_PORT_EN': item.get('POD', '').split(' / ')[0],
-                        'TRANS_VESSEL': '',
-                        'TRANS_VOYAGE': '',
-                    })
+                # if item.get('TS') == 'N':
+                #     row['POD_TERMINAL'] = item.get('POD', '').split(' / ')[1]
+                #     row['ETA'] = item.get('POD_ETA', '')
+                #     for field in gItem.fields:
+                #         if field in row.keys():
+                #             gItem[field] = row.get(field)
+                #     yield gItem
+                #     logging.info(row)
+                #     row = {
+                #         'pol': response.meta['portPol'],
+                #         'pod': response.meta['portPod'],
+                #         'polName': response.meta['portNamePol'],
+                #         'podName': response.meta['portNamePod'],
+                #     }
+                # else:
+                #     row['POD_TERMINAL'] = item.get('POD', '').split(' / ')[1]
+                #     POD_item = SEC_SEQ2[SEC_SEQ2_index]
+                #     if SEC_SEQ2_index + 1 > len(SEC_SEQ2):
+                #         logging.info('取完')
+                #         break
+                #
+                #     row['ETA'] = POD_item.get('POD_ETA', '')
+                #     row['IS_TRANSIT'] = 1
+                #     row['TRANSIT_TIME'] += int(item.get('TT', '0'))
+                #     row['TRANSIT_LIST'].append({
+                #         'TRANSIT_PORT_EN': item.get('POD', '').split(' / ')[0],
+                #         'TRANS_VESSEL': '',
+                #         'TRANS_VOYAGE': '',
+                #     })
             except Exception as e:
                 logging.error(e)
