@@ -57,6 +57,8 @@ class TslSpider(scrapy.Spider):
         chrome_options.add_argument('--disable-dev-shm-usage')
         No_Image_loading = {"profile.managed_default_content_settings.images": 2}
         chrome_options.add_experimental_option("prefs", No_Image_loading)
+        self.driver = webdriver.Chrome(chrome_options=chrome_options)
+        # 设置超时，双重保险,注意超时后derver 就死了
         # chrome_options.binary_location = r"D:\soft\googlechrome\Application\77.0.3865.120\chrome.exe"
         # epath = "D:/work/chromedriver.exe"
         epath = "/usr/bin/chromedriver"
@@ -119,7 +121,7 @@ class TslSpider(scrapy.Spider):
                     logging.error(e)
 
                 for o_h in o_h_c:
-                    # 测试
+                    # # 测试
                     # if o_h['name'] != 'HONGKONG':
                     #     continue
                     try:
@@ -162,6 +164,7 @@ class TslSpider(scrapy.Spider):
                                     self.driver.find_element_by_id('Button2').click()
                                 except Exception as e:
                                     logging.debug('网站超时')
+                                    self.driver.close()
                                     self.__init__()
                                     self.driver.get(self.start_urls[0])
                                     time.sleep(1)
