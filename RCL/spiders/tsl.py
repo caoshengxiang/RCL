@@ -58,7 +58,6 @@ class TslSpider(scrapy.Spider):
         No_Image_loading = {"profile.managed_default_content_settings.images": 2}
         chrome_options.add_experimental_option("prefs", No_Image_loading)
         self.driver = webdriver.Chrome(chrome_options=chrome_options)
-        # 设置超时，双重保险,注意超时后derver 就死了
         # chrome_options.binary_location = r"D:\soft\googlechrome\Application\77.0.3865.120\chrome.exe"
         # epath = "D:/work/chromedriver.exe"
         epath = "/usr/bin/chromedriver"
