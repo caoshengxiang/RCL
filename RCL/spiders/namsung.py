@@ -93,15 +93,15 @@ class NamsungSpider(scrapy.Spider):
                         yield request
 
                     # 测试
-                    # for request in self.get_calendar('2019', '12', cn, other, False):
-                    #     yield request
+                    for request in self.get_calendar('2019', '12', cn, other, False):
+                        yield request
 
         except Exception as e:
             logging.error(e)
 
     def get_calendar(self, y, m, cn, other, isNextMonth):
-        # logging.info(cn)
-        # logging.debug('时间；pol-pod:{}-{}; {}-{}'.format(y, m, cn['value'], other['value']))
+        logging.info(cn)
+        logging.debug('时间；pol-pod:{}-{}; {}-{}'.format(y, m, cn['value'], other['value']))
         yield Request(
             url=self.calendar_url.format(y, m, 'startdate', cn['countryVa'], cn['value'], other['countryVa'],
                                          other['value']),
@@ -116,19 +116,19 @@ class NamsungSpider(scrapy.Spider):
             dont_filter=True,
             callback=self.parse_calendar)
 
-    # 测试
-    # yield Request(
-    #     # url='http://www.namsung.co.kr/eng/biz/eService/selectSchdulList.do?searchYear=2019&searchMonth=11&searchDateOption=startdate&searchGuggaCdFrom=CN&searchPortCdFrom=CNJIA&searchGuggaCdTo=JP&searchPortCdTo=JPTBT',
-    #     url='http://www.namsung.co.kr/eng/biz/eService/selectSchdulList.do?searchYear=2019&searchMonth=12&searchDateOption=startdate&searchGuggaCdFrom=HK&searchPortCdFrom=HKHKG&searchGuggaCdTo=VN&searchPortCdTo=VNHPH',
-    #     method='GET',
-    #     meta={
-    #         'pol': 'CNJIA',
-    #         'polName': 'aa',
-    #         'pod': 'JPTBT',
-    #         'podName': 'bb',
-    #     },
-    #     dont_filter=True,
-    #     callback=self.parse_calendar)
+        # 测试
+        # yield Request(
+        #     # url='http://www.namsung.co.kr/eng/biz/eService/selectSchdulList.do?searchYear=2019&searchMonth=11&searchDateOption=startdate&searchGuggaCdFrom=CN&searchPortCdFrom=CNJIA&searchGuggaCdTo=JP&searchPortCdTo=JPTBT',
+        #     url='http://www.namsung.co.kr/eng/biz/eService/selectSchdulList.do?searchYear=2019&searchMonth=12&searchDateOption=startdate&searchGuggaCdFrom=CN&searchPortCdFrom=CNWHI&searchGuggaCdTo=VN&searchPortCdTo=VNVIN',
+        #     method='GET',
+        #     meta={
+        #         'pol': 'CNJIA',
+        #         'polName': 'aa',
+        #         'pod': 'JPTBT',
+        #         'podName': 'bb',
+        #     },
+        #     dont_filter=True,
+        #     callback=self.parse_calendar)
 
     def parse_calendar(self, response):
         try:
