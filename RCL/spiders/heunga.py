@@ -26,3 +26,4 @@ class HeungaSpider(scrapy.Spider):
 
     def parse(self, response):
         logging.info(response.text)
+        # 页面打不开

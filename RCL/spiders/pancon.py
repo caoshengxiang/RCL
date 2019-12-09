@@ -18,8 +18,8 @@ class PanconSpider(scrapy.Spider):
 
     custom_settings = {  # 指定配置的通道, 要对应找到每个爬虫指定的管道,settings里也要进行管道配置
         'ITEM_PIPELINES': {
-            # 'RCL.pipelines.MongoPipeline': 300
-            'RCL.pipelines.MysqlPipeline': 300
+            'RCL.pipelines.MongoPipeline': 300
+            # 'RCL.pipelines.MysqlPipeline': 300
         }
     }
 
@@ -79,24 +79,26 @@ class PanconSpider(scrapy.Spider):
 
             for cnindex, cn in enumerate(self.global_cn_port):
                 # 测试
-                # if cnindex != 13:
-                #     continue
+                if cnindex != 7:
+                    continue
                 pItem['port'] = cn['PLC_ENM']
                 pItem['portCode'] = cn['COUNTRY_PLC_CD']
                 yield pItem
                 for oincex, other in enumerate(self.global_other_port):
                     # 测试
-                    # if oincex > 2:
-                    #     break
+                    # if oincex != 19:
+                    #     continue
+                    if oincex != 34:  # HAIPHONG
+                        continue
                     # 港口
                     pItem['port'] = other['PLC_ENM']
                     pItem['portCode'] = other['COUNTRY_PLC_CD']
                     yield pItem
                     # 港口组合
-                    pgItem['portPol'] = cn['PLC_ENM']
-                    pgItem['portNamePol'] = cn['COUNTRY_PLC_CD']
-                    pgItem['portPod'] = other['PLC_ENM']
-                    pgItem['portNamePod'] = other['COUNTRY_PLC_CD']
+                    pgItem['portPol'] = cn['COUNTRY_PLC_CD']
+                    pgItem['portNamePol'] = cn['PLC_ENM']
+                    pgItem['portPod'] = other['COUNTRY_PLC_CD']
+                    pgItem['portNamePod'] = other['PLC_ENM']
                     yield pgItem
 
                     yield Request(
@@ -148,6 +150,9 @@ class PanconSpider(scrapy.Spider):
         if not data['schedule'] or not data['schedule']['O_RESULT_CURSOR']:
             logging.info('查询列表无数据')
             return
+        if (data['schedule']['O_ERROR_FLAG'] == 'Y'):
+            logging.debug('查询接口返回错误日志')
+            return
         Lists = data['schedule']['O_RESULT_CURSOR']
 
         def filter_seq2(li):
@@ -156,12 +161,22 @@ class PanconSpider(scrapy.Spider):
         def filter_seq3(li):
             return li['SEC_SEQ'] == 3
 
+        def fitler_li(pod_t, list):
+            for li in list:
+                if pod_t <= li['POL_REVISED_APDP_DATE'] + li['POL_REVISED_APDP_TM']:
+                    return li
+            return {}
+
         SEC_SEQ2 = list(filter(filter_seq2, Lists))
-        SEC_SEQ2_index = 0
+
+        if len(SEC_SEQ2) > 0:
+            SEC_SEQ2.sort(key=lambda x: x['POD_REVISED_APDP_DATE'] + x['POD_REVISED_APDP_TM'], reverse=True)
+
         SEC_SEQ3 = list(filter(filter_seq3, Lists))
         if len(SEC_SEQ3) > 0:
             logging.info('存在 SEQ == 3')
-            logging.info(Lists)
+            SEC_SEQ3.sort(key=lambda x: x['POD_REVISED_APDP_DATE'] + x['POD_REVISED_APDP_TM'], reverse=True)
+
         gItem = GroupItem()
         row = {
             'pol': response.meta['portPol'],
@@ -171,49 +186,74 @@ class PanconSpider(scrapy.Spider):
         }
         for item in Lists:
             try:
-                if not row.get('ETD') and item.get('SEC_SEQ') == 2:
-                    if SEC_SEQ2_index + 1 < len(SEC_SEQ2):
-                        SEC_SEQ2_index += 1
-                    logging.info('开始数据 为上个月中转数据')
-                    logging.info(row)
-                    continue
 
                 if item.get('SEC_SEQ') == 1:
                     row['ETD'] = item.get('POL_ETD')
+                    row['ETA'] = item.get('POD_ETA', '')
                     row['POL_TERMINAL'] = item.get('POL', '').split(' / ')[1]
                     row['VESSEL'] = item.get('VSL_NM')
                     row['VOYAGE'] = item.get('IMP_VOY_NO')
                     row['TRANSIT_TIME'] = int(item.get('TT', '0'))
                     row['TRANSIT_LIST'] = []
                     row['IS_TRANSIT'] = 0  # 确认为中转为1，直达为0, 默认为0
-                if item.get('TS') == 'N':
-                    row['POD_TERMINAL'] = item.get('POD', '').split(' / ')[1]
-                    row['ETA'] = item.get('POD_ETA', '')
+                    if item.get('TS') == 'Y':
+                        if len(SEC_SEQ2) > 0:
+                            row['POD_TERMINAL'] = item.get('POD', '').split(' / ')[1]
+                            POD_item = fitler_li(item.get('POD_REVISED_APDP_DATE') + item.get('POD_REVISED_APDP_TM'),
+                                                 SEC_SEQ2)
+                            # row['ETA'] = item.get('POD_ETA', '')
+                            row['IS_TRANSIT'] = 1
+                            row['TRANSIT_TIME'] += int(POD_item.get('TT', '0'))
+                            row['TRANSIT_LIST'].append({
+                                'TRANSIT_PORT_EN': item.get('POD', '').split(' / ')[0],
+                                'TRANS_VESSEL': '',
+                                'TRANS_VOYAGE': '',
+                            })
+                        if len(SEC_SEQ3) > 0:
+                            row['POD_TERMINAL'] = item.get('POD', '').split(' / ')[1]
+                            POD_item = fitler_li(item.get('POD_REVISED_APDP_DATE') + item.get('POD_REVISED_APDP_TM'),
+                                                 SEC_SEQ3)
+                            # row['ETA'] = POD_item.get('POD_ETA', '')
+                            row['IS_TRANSIT'] = 1
+                            row['TRANSIT_TIME'] += int(POD_item.get('TT', '0'))
+                            row['TRANSIT_LIST'].append({
+                                'TRANSIT_PORT_EN': item.get('POD', '').split(' / ')[0],
+                                'TRANS_VESSEL': '',
+                                'TRANS_VOYAGE': '',
+                            })
                     for field in gItem.fields:
                         if field in row.keys():
                             gItem[field] = row.get(field)
                     yield gItem
-                    logging.info(row)
-                    row = {
-                        'pol': response.meta['portPol'],
-                        'pod': response.meta['portPod'],
-                        'polName': response.meta['portNamePol'],
-                        'podName': response.meta['portNamePod'],
-                    }
-                else:
-                    row['POD_TERMINAL'] = item.get('POD', '').split(' / ')[1]
-                    POD_item = SEC_SEQ2[SEC_SEQ2_index]
-                    if SEC_SEQ2_index + 1 < len(SEC_SEQ2):
-                        logging.info('取完')
-                        break
 
-                    row['ETA'] = POD_item.get('POD_ETA', '')
-                    row['IS_TRANSIT'] = 1
-                    row['TRANSIT_TIME'] += int(item.get('TT', '0'))
-                    row['TRANSIT_LIST'].append({
-                        'TRANSIT_PORT_EN': item.get('POD', '').split(' / ')[0],
-                        'TRANS_VESSEL': '',
-                        'TRANS_VOYAGE': '',
-                    })
+                # if item.get('TS') == 'N':
+                #     row['POD_TERMINAL'] = item.get('POD', '').split(' / ')[1]
+                #     row['ETA'] = item.get('POD_ETA', '')
+                #     for field in gItem.fields:
+                #         if field in row.keys():
+                #             gItem[field] = row.get(field)
+                #     yield gItem
+                #     logging.info(row)
+                #     row = {
+                #         'pol': response.meta['portPol'],
+                #         'pod': response.meta['portPod'],
+                #         'polName': response.meta['portNamePol'],
+                #         'podName': response.meta['portNamePod'],
+                #     }
+                # else:
+                #     row['POD_TERMINAL'] = item.get('POD', '').split(' / ')[1]
+                #     POD_item = SEC_SEQ2[SEC_SEQ2_index]
+                #     if SEC_SEQ2_index + 1 > len(SEC_SEQ2):
+                #         logging.info('取完')
+                #         break
+                #
+                #     row['ETA'] = POD_item.get('POD_ETA', '')
+                #     row['IS_TRANSIT'] = 1
+                #     row['TRANSIT_TIME'] += int(item.get('TT', '0'))
+                #     row['TRANSIT_LIST'].append({
+                #         'TRANSIT_PORT_EN': item.get('POD', '').split(' / ')[0],
+                #         'TRANS_VESSEL': '',
+                #         'TRANS_VOYAGE': '',
+                #     })
             except Exception as e:
                 logging.error(e)

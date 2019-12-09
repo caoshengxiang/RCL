@@ -19,8 +19,8 @@ class NamsungSpider(scrapy.Spider):
 
     custom_settings = {  # 指定配置的通道, 要对应找到每个爬虫指定的管道,settings里也要进行管道配置
         'ITEM_PIPELINES': {
-            # 'RCL.pipelines.MongoPipeline': 300
-            'RCL.pipelines.MysqlPipeline': 300
+            'RCL.pipelines.MongoPipeline': 300
+            # 'RCL.pipelines.MysqlPipeline': 300
         }
     }
 
@@ -93,15 +93,15 @@ class NamsungSpider(scrapy.Spider):
                         yield request
 
                     # 测试
-                    for request in self.get_calendar('2019', '12', cn, other, False):
-                        yield request
+                    # for request in self.get_calendar('2019', '12', cn, other, False):
+                    #     yield request
 
         except Exception as e:
             logging.error(e)
 
     def get_calendar(self, y, m, cn, other, isNextMonth):
-        logging.info(cn)
-        logging.debug('时间；pol-pod:{}-{}; {}-{}'.format(y, m, cn['value'], other['value']))
+        # logging.info(cn)
+        # logging.debug('时间；pol-pod:{}-{}; {}-{}'.format(y, m, cn['value'], other['value']))
         yield Request(
             url=self.calendar_url.format(y, m, 'startdate', cn['countryVa'], cn['value'], other['countryVa'],
                                          other['value']),
@@ -119,7 +119,7 @@ class NamsungSpider(scrapy.Spider):
         # 测试
         # yield Request(
         #     # url='http://www.namsung.co.kr/eng/biz/eService/selectSchdulList.do?searchYear=2019&searchMonth=11&searchDateOption=startdate&searchGuggaCdFrom=CN&searchPortCdFrom=CNJIA&searchGuggaCdTo=JP&searchPortCdTo=JPTBT',
-        #     url='http://www.namsung.co.kr/eng/biz/eService/selectSchdulList.do?searchYear=2019&searchMonth=12&searchDateOption=startdate&searchGuggaCdFrom=CN&searchPortCdFrom=CNWHI&searchGuggaCdTo=VN&searchPortCdTo=VNVIN',
+        #     url='http://www.namsung.co.kr/eng/biz/eService/selectSchdulList.do?searchYear=2019&searchMonth=12&searchDateOption=startdate&searchGuggaCdFrom=HK&searchPortCdFrom=HKHKG&searchGuggaCdTo=VN&searchPortCdTo=VNHPH',
         #     method='GET',
         #     meta={
         #         'pol': 'CNJIA',
@@ -202,7 +202,7 @@ class NamsungSpider(scrapy.Spider):
                                               'polName': response.meta['polName'],
                                               'pod': response.meta['pod'],
                                               'podName': response.meta['podName'],
-                                              'param': param[3]
+                                              'param': param,
                                           },
                                           dont_filter=True,
                                           callback=self.parse_detail)
@@ -216,19 +216,26 @@ class NamsungSpider(scrapy.Spider):
             tables = doc('table')
             # logging.info(table)
             gItem = GroupItem()
-            tablesLen = len(tables)
-            param = response.meta['param']
-            vv = tables.eq(0).find('tr:nth-child(1) > td:nth-child(2)').text().splitlines()[0]
-            timeStr = tables.eq(0).find('tr:nth-child(1) > td:nth-child(4)').text()
+
+            pol_table_index = 0
+            if tables.eq(pol_table_index).find('tr').length != 6:
+                pol_table_index += 1
+
+            if tables.eq(pol_table_index).find('tr').length != 6:
+                logging.error('异常需要处理 ')
+                return
+
+            vv = tables.eq(pol_table_index).find('tr:nth-child(1) > td:nth-child(2)').text().splitlines()[0]
+            timeStr = tables.eq(pol_table_index).find('tr:nth-child(1) > td:nth-child(4)').text()
             if timeStr:
                 time = float(timeStr)
             else:
                 time = 0
             row = {
-                'ETD': tables.eq(0).find('tr:nth-child(3) > td:nth-child(2)').text(),
+                'ETD': tables.eq(pol_table_index).find('tr:nth-child(3) > td:nth-child(2)').text(),
                 'VESSEL': vv.split(' / ')[0],
                 'VOYAGE': vv.split(' / ')[1],
-                'ETA': tables.eq(0).find('tr:nth-child(3) > td:nth-child(4)').text(),
+                'ETA': tables.eq(pol_table_index).find('tr:nth-child(3) > td:nth-child(4)').text(),
                 'TRANSIT_TIME': time,
                 'TRANSIT_LIST': [],
                 'IS_TRANSIT': 0,  # 确认为中转为1，直达为0, 默认为0
