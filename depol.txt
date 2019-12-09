@@ -1,0 +1,86 @@
+# 以下为部署说明 请按顺序仔细阅读
+
+#安装chrome
+yum install -y chromium
+#安装zip
+yum install -y unzip zip
+#需要手动去 此地址下载[http://npm.taobao.org/mirrors/chromedriver] 对应chrome版本的对应linux版driver驱动
+unzip chromedriver_linux64.zip
+mv chromedriver /usr/bin
+#安装Xvfb
+yum install Xvfb -y
+yum install xorg-x11-fonts* -y
+
+#新建如下脚本文件
+vim /usr/bin/xvfb-chrom
+
+
+            #!/bin/bash
+
+            _kill_procs() {
+              kill -TERM $chromium
+              wait $chromium
+              kill -TERM $xvfb
+            }
+
+            # Setup a trap to catch SIGTERM and relay it to child processes
+            trap _kill_procs SIGTERM
+
+            XVFB_WHD=${XVFB_WHD:-1280x720x16}
+
+            # Start Xvfb
+            Xvfb :99 -ac -screen 0 $XVFB_WHD -nolisten tcp &
+            xvfb=$!
+
+            export DISPLAY=:99
+
+            chromium --no-sandbox --disable-gpu$@ &
+            chromium=$!
+
+            wait $chromium
+            wait $xvfb
+
+
+#更改权限
+chmod +x chromedriver
+chmod +x xvfb-chrom
+#建立软连接
+ln -s /usr/lib64/chromium-browser/chromium-browser.sh /usr/bin/chromium
+ rm -rf /usr/bin/chromium-browser
+ ln -s /usr/bin/xvfb-chromium /usr/bin/chromium-browser
+ ln -s /usr/bin/xvfb-chromium /usr/bin/google-chrome
+
+
+
+#新建测试文件
+vim test1.py
+
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+
+chrome_options = Options()
+chrome_options.add_argument('--headless')
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument('--disable-gpu')
+chrome_options.add_argument('--disable-dev-shm-usage')
+driver = webdriver.Chrome(executable_path=(r'/usr/bin/chromedriver'), chrome_options=chrome_options)
+driver.get('https://www.baidu.com')
+print(driver.title)
+driver.quit()
+
+ 运行 python  test1.py  能输出百度的话 安装测试成功
+
+mkdir /opt/logs/rcl -p    # 创建日志目录
+
+linux上安装好 crontab服务
+配置定时任务
+crontab -e
+0 3,15 * * *  sh  /usr/local/workspace/rcl/cron.sh  #每天凌晨三点和15点定时启动爬虫任务
+wq 保存即可
+
+
+注意
+chrome服务必须严格按照以上步骤配置
+日志目录必须存在
+目标机器下 python环境变量命令如果不为python3 需要更改cron.sh 里的python3 为python
+linux上python默认版本为python2 需要自行安装python3版本 此项目为python3.7环境 不支持python2.x 版本
