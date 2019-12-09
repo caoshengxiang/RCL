@@ -54,7 +54,7 @@ class TslSpider(scrapy.Spider):
         No_Image_loading = {"profile.managed_default_content_settings.images": 2}
         chrome_options.add_experimental_option("prefs", No_Image_loading)
         self.driver = webdriver.Chrome(chrome_options=chrome_options)
-        # 设置超时，双重保险,设置后derver 就死了
+        # 设置超时，双重保险,注意超时后derver 就死了
         self.driver.set_page_load_timeout(30)
         self.driver.set_script_timeout(30)
 
@@ -155,6 +155,7 @@ class TslSpider(scrapy.Spider):
                                     self.driver.find_element_by_id('Button2').click()
                                 except Exception as e:
                                     logging.debug('网站超时')
+                                    self.driver.close()
                                     self.__init__()
                                     self.driver.get(self.start_urls[0])
                                     time.sleep(1)
