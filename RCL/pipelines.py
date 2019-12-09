@@ -383,6 +383,7 @@ class MysqlPipeline(object):
         :param spider:
         :return:
         """
+
         log.info('收到group_item 开始处理')
         try:
             log.info('查询静态航线')
