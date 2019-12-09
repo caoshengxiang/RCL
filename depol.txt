@@ -71,7 +71,7 @@ driver.quit()
  运行 python  test1.py  能输出百度的话 安装测试成功
 
 mkdir /opt/logs/rcl -p    # 创建日志目录
-
+mkdir /usr/local/workspace/rcl -p  # 创项目目录
 linux上安装好 crontab服务
 配置定时任务
 crontab -e
