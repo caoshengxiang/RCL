@@ -40,13 +40,14 @@ class IalSpider(scrapy.Spider):
 
     def __init__(self):
         chrome_options = Options()
-        # chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--headless')
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument('--disable-gpu')
         chrome_options.add_argument('--disable-dev-shm-usage')
-        No_Image_loading = {"profile.managed_default_content_settings.images": 2}
-        chrome_options.binary_location = r"D:\soft\googlechrome\Application\77.0.3865.120\chrome.exe"
-        epath = "D:/work/chromedriver.exe"
+        # No_Image_loading = {"profile.managed_default_content_settings.images": 2}
+        # chrome_options.binary_location = r"D:\soft\googlechrome\Application\77.0.3865.120\chrome.exe"
+        # epath = "D:/work/chromedriver.exe"
+        epath = "/usr/bin/chromedriver"
         self.driver = webdriver.Chrome(executable_path=epath, chrome_options=chrome_options)
         # chrome_options.add_experimental_option("prefs", No_Image_loading)
         # self.driver = webdriver.Chrome(chrome_options=chrome_options)
