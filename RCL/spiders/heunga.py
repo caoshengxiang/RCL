@@ -12,7 +12,7 @@ class HeungaSpider(scrapy.Spider):
 
     custom_settings = {  # 指定配置的通道, 要对应找到每个爬虫指定的管道,settings里也要进行管道配置
         'ITEM_PIPELINES': {
-            'RCL.pipelines.MongoPipeline': 300
+            'RCL.pipelines.MysqlPipeline': 300
         }
     }
 
@@ -26,3 +26,4 @@ class HeungaSpider(scrapy.Spider):
 
     def parse(self, response):
         logging.info(response.text)
+        # 页面打不开

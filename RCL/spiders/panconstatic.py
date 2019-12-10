@@ -6,6 +6,8 @@ import re
 import scrapy
 from scrapy import Request
 
+from RCL.items import StaticsItem
+
 
 class PanconstaticSpider(scrapy.Spider):
     name = 'PASU_STATIC'
@@ -38,11 +40,11 @@ class PanconstaticSpider(scrapy.Spider):
         # SP_SVC_ROUTE_GRP_R = data['SP_SVC_ROUTE_GRP_R']  # 菜单名
 
         for dtl in SP_SVC_ROUTE_DTL_R:
-            reP = re.compile(r'[(](.*?)[)]', re.S)  # 解析 js
-            serv = re.findall(reP, dtl['LINE_NM'])
-            service = ''
-            if len(serv):
-                service = serv[0]
+            # reP = re.compile(r'[(](.*?)[)]', re.S)  # 解析 js
+            # serv = re.findall(reP, dtl['LINE_NM'])
+            # service = ''
+            # if len(serv):
+            #     service = serv[0]
 
             yield Request(
                 url='http://www.pancon.co.kr/pan/getDataSvcRouteVer.pcl',
@@ -54,7 +56,7 @@ class PanconstaticSpider(scrapy.Spider):
                 meta={
                     'route': dtl['GRP_NM'],
                     'routeCode': dtl['LINE_CD'],
-                    'service': service
+                    # 'service': service
                 },
                 dont_filter=True,
                 callback=self.parse_linecd)
@@ -74,7 +76,7 @@ class PanconstaticSpider(scrapy.Spider):
                 meta={
                     'route': response.meta['route'],
                     'routeCode': response.meta['routeCode'],
-                    'service': response.meta['service']
+                    'service': row['LINE_NM']
                 },
                 dont_filter=True,
                 callback=self.parse_list)
@@ -82,18 +84,18 @@ class PanconstaticSpider(scrapy.Spider):
     def parse_list(self, response):
         data = json.loads(response.text)
         SP_SVC_ROUTE_PORT_R = data['SP_SVC_ROUTE_PORT_R']
-        row = {
-            'list': [],
-            'service': response.meta['service'],
-            'route': response.meta['route'],
-            'routeCode': response.meta['routeCode'],
-        }
+
+        item = StaticsItem()
+        item['ROUTE_PARENT'] = response.meta['route']
+        item['ROUTE_NAME_EN'] = response.meta['service']
+        item['ROUTE_CODE'] = response.meta['routeCode']
+        list = []
         for port in SP_SVC_ROUTE_PORT_R:
-                row['list'].append({
-                    'port': port['PORT_NM'],
-                    'ETA': port['ETA'].split(' / ')[0],
-                    'ETD': port['ETD'].split(' / ')[0],
-                    'terminal': port['TMN_NM']
-                })
-        logging.info('静态航线')
-        logging.info(row)
+            list.append({
+                'PORT': port['PORT_NM'],
+                'ETA': port['ETA'].split(' / ')[0],
+                'ETD': port['ETD'].split(' / ')[0],
+                'TERMINAL': port['TMN_NM']
+            })
+        item['DOCKING_LIST'] = list
+        yield item

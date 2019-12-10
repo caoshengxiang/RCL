@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
+import math
 import time
 from selenium import webdriver
 from selenium.webdriver.support.select import Select
@@ -32,16 +33,24 @@ class IalSpider(scrapy.Spider):
     start_urls = ['http://www.interasia.cc/content/c_service/sailing_schedule.aspx?SiteID=1']
     custom_settings = {  # 指定配置的通道, 要对应找到每个爬虫指定的管道,settings里也要进行管道配置
         'ITEM_PIPELINES': {
-            'RCL.pipelines.MongoPipeline': 300
+            # 'RCL.pipelines.MongoPipeline': 300
+            'RCL.pipelines.MysqlPipeline': 300
         }
     }
 
     def __init__(self):
         chrome_options = Options()
-        # chrome_options.add_argument('--headless')
-        No_Image_loading = {"profile.managed_default_content_settings.images": 2}
-        chrome_options.add_experimental_option("prefs", No_Image_loading)
-        self.driver = webdriver.Chrome(chrome_options=chrome_options)
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument('--disable-gpu')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        # No_Image_loading = {"profile.managed_default_content_settings.images": 2}
+        # chrome_options.binary_location = r"D:\soft\googlechrome\Application\77.0.3865.120\chrome.exe"
+        # epath = "D:/work/chromedriver.exe"
+        epath = "/usr/bin/chromedriver"
+        self.driver = webdriver.Chrome(executable_path=epath, chrome_options=chrome_options)
+        # chrome_options.add_experimental_option("prefs", No_Image_loading)
+        # self.driver = webdriver.Chrome(chrome_options=chrome_options)
 
     def parse(self, response):
         pgItem = PortGroupItem()
@@ -65,7 +74,6 @@ class IalSpider(scrapy.Spider):
         logging.info('国家解析完成。')
 
         self.driver.get(self.start_urls[0])
-
         for c_h in c_h_c:
             time.sleep(1)
             Select(self.driver.find_element_by_id('ctl00_CPHContent_ddlDepartureC')).select_by_value(c_h['value'])
@@ -77,7 +85,7 @@ class IalSpider(scrapy.Spider):
             logging.info(c_h_ports)
             for c_h_port in c_h_ports:
                 pItem['port'] = c_h_port['name']
-                pItem['portCode'] = ''
+                pItem['portCode'] = c_h_port['name']
                 yield pItem
                 try:
                     logging.info('港口数据:{}'.format(c_h_port))
@@ -98,13 +106,13 @@ class IalSpider(scrapy.Spider):
                         for o_h_port in o_h_ports:
                             # 港口
                             pItem['port'] = o_h_port['name']
-                            pItem['portCode'] = ''
+                            pItem['portCode'] = o_h_port['name']
                             yield pItem
 
                             # 港口组合
-                            pgItem['portPol'] = ''
+                            pgItem['portPol'] = c_h_port['name']
                             pgItem['portNamePol'] = c_h_port['name']
-                            pgItem['portPod'] = ''
+                            pgItem['portPod'] = o_h_port['name']
                             pgItem['portNamePod'] = o_h_port['name']
                             yield pgItem
                             try:
@@ -128,19 +136,24 @@ class IalSpider(scrapy.Spider):
                                 # logging.warning(response.text)
                                 for index, tr in enumerate(trs.items()):
                                     logging.info('数据长度：{}'.format(tr.find('td').length))
-                                    if tr.find('td'):
+                                    if tr.find('td').length > 1:
+                                        timeS = tr.find('td').eq(8).text()
+                                        if timeS:
+                                            timeI = math.ceil(float(timeS))
+                                        else:
+                                            timeI = 0
                                         row = {
                                             'ETD': tr.find('td').eq(0).text(),
                                             'VESSEL': tr.find('td').eq(1).text(),
                                             'VOYAGE': tr.find('td').eq(2).text(),
                                             'ETA': tr.find('td').eq(4).text(),
-                                            'TRANSIT_TIME': tr.find('td').eq(8).text(),
+                                            'TRANSIT_TIME': timeI,
                                             'TRANSIT_LIST': [],
                                             'IS_TRANSIT': 0,  # 确认为中转为1，直达为0, 默认为0
                                             'pol': c_h_port['name'],
                                             'pod': o_h_port['name'],
-                                            'polName': '',
-                                            'podName': '',
+                                            'polName': c_h_port['name'],
+                                            'podName': o_h_port['name'],
                                         }
                                         for field in gItem.fields:
                                             if field in row.keys():
@@ -154,3 +167,15 @@ class IalSpider(scrapy.Spider):
                                 logging.error(e)
                     except Exception as e:
                         continue
+
+    @staticmethod
+    def close(spider, reason):
+        """
+        关闭chrome
+        :param spider:
+        :param reason:
+        :return:
+        """
+        if spider.driver:
+            spider.driver.quit()
+        super().close(spider, reason)
