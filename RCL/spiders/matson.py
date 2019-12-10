@@ -60,7 +60,13 @@ class MatsonSpider(scrapy.Spider):
         data = json.loads(response.text)
         logging.info(data)
         pgItem = PortGroupItem()
+        pItem = PortItem()
         for item in data:
+            # 目的港
+            pItem['port'] = item.get('locationName')
+            pItem['portCode'] = item.get('locationName')
+            yield pItem
+
             # 港口组合
             logging.info('港口组合:')
             pgItem['portPol'] = response.meta['polName']

@@ -218,10 +218,14 @@ class NamsungSpider(scrapy.Spider):
             gItem = GroupItem()
 
             pol_table_index = 0
-            if tables.eq(pol_table_index).find('tr').length != 6:
+            tb1 = tables.eq(pol_table_index)
+            len1 = tables.eq(pol_table_index).find('tr').length
+            if len1 != 6 and len1 != 7:
                 pol_table_index += 1
 
-            if tables.eq(pol_table_index).find('tr').length != 6:
+            tb2 = tables.eq(pol_table_index)
+            len2 = tables.eq(pol_table_index).find('tr').length
+            if len2 != 6 and len2 != 7:
                 logging.error('异常需要处理 ')
                 return
 
