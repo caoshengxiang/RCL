@@ -1,421 +1,192 @@
+<script>
+    function getScheduleCallBack(data, arg, divId) {
+        //console.log();
+        //alert(data);
+        var sch = JSON.parse(data).schedule;
+        console.log(sch);
+        var schList = sch.O_RESULT_CURSOR;
+        console.log(schList);
+        var apdp = sch.rd_apdpDate;
+        var tsList = getTSSchSort(schList);
+        console.log(tsList);
+        var newList = new Array();
+        var newItem;
+        if (isSearch && sch.O_ERROR_FLAG == 'Y') comLib.messageOut(sch.O_MESSAGE_CODE);
+        if (isSearch && schList.length == 0) comLib.messageOut("0", 'Schedule');
 
+        for (var i = 0; i < schList.length; i++) {
+            console.log(schList[i].POL_REVISED_APDP_DATE + ' ' + schList[i].GUBUN + ' ' + schList[i].SEC_SEQ);
+            if (parseInt(schList[i].SEC_SEQ) > 1) continue;
+            var apdp_date = '';
+            var detail_cont_id = '';
+            var voy_no = '';
+            if (apdp == 'O') {
+                apdp_date = schList[i].POL_REVISED_APDP_DATE;
+                detail_cont_id = 'ex_detail';
+                voy_no = schList[i].EXP_VOY_NO;
+            } else if (apdp == 'I') {
+                apdp_date = schList[i].POD_REVISED_APDP_DATE;
+                detail_cont_id = 'im_detail';
+                voy_no = schList[i].IMP_VOY_NO;
+            }
 
+            if (apdp_date.substring(0, 6) != pcCalendar.cur_year + util_lpad(pcCalendar.cur_month, 2, '0')) continue;
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xmlns:fb="http://ogp.me/ns/fb#" xml:lang="zh-TW" lang="zh-TW"><!-- InstanceBegin template="/Templates/page.dwt" codeOutsideHTMLIsLocked="false" -->
-<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><meta http-equiv="content-language" content="&lt;%=Resources.RsAll.Lang_Meta%>" />
-    <!-- InstanceBeginEditable name="doctitle" -->
-    <title>
-	Interasia
-</title>
-    <!-- InstanceEndEditable -->
-    <meta name="Title" content="Interasia"><meta name="keywords" /><meta name="description" /><link href="../../css/en/reset.css" rel="stylesheet" type="text/css" /><link href="../../css/en/layout.css" rel="stylesheet" type="text/css" /><link href="../../css/en/page.css" rel="stylesheet" type="text/css" /><link href="../../css/en/editable_content.css" rel="stylesheet" type="text/css" /><link rel="stylesheet" type="text/css" href="../../css/en/colorbox.css" />
+            newItem = schList[i];
+            apdp_date_day = apdp_date.substring(6, 8);
+            var closeYN = schList[i].CLOSED == 'CLOSED' ? 'end' : schList[i].CLOSED == 'CHECK' ? 'end' : 'ing';
+            var tooltip = '';
+            if (closeYN == 'ing') {
+                tooltip = "<span class='tooltip'><span id='WEB_201_C_VOY'>항차</span> : " + voy_no + "(" + (schList[i].TS == 'N' ? 'Direct' : 'TS') + ")<br /> ETD : " + getDateFormat(schList[i].POL_REVISED_APDP_DATE + schList[i].POL_REVISED_APDP_TM, 'YYYY/MM/DD HH:MI') + "<br /> ETA : " + getDateFormat(schList[i].POD_REVISED_APDP_DATE + schList[i].POD_REVISED_APDP_TM, 'YYYY/MM/DD HH:MI') + "</span>";
+            } else {
+                if (schList[i].CLOSED == 'CLOSED') tooltip = "<span class='tooltip'>" + bkg_closed_msg + "</span>";//"해당 선박은 Booking이 마감되었습니다.<br /> 다른 선박을 선택하여 주시기 바랍니다.";
+                else if (schList[i].CLOSED == 'CHECK') tooltip = "<span class='tooltip'>" + bkg_check_msg + "</span>";
+            }
 
-    
-    <script src="../../js/jquery-latest.min.js" type="text/javascript"></script>
-    <script src="../../js/jquery.js" type="text/javascript"></script>
+            var tsSchNo = '';
 
-    <script src="../../js/jquery.colorbox.js" type="text/javascript"></script><!-- 燈箱效果 -->
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $(".group3").colorbox({
-                onOpen: function () { $(".msgmodule_media").hide(); },
-                rel: 'group3', transition: "none", width: "75%", height: "75%",
-                onClosed: function () {
-                    $(".msgmodule_media").show(); $(".group3").focus();
+            $.add_vsl = $("<li class='calendar-list' id='" + schList[i].VSL_CD + "' pol_sch_no='" + schList[i].POL_SCH_NO + "' pod_sch_no='" + schList[i].POD_SCH_NO + "' ts='" + schList[i].TS + "'><a href='#none' class='" + closeYN + "'>" + schList[i].VSL_NM + "<font color='red' size='0.5'>" + (schList[i].TS == 'N' ? '' : '(TS)') + "</font></a>" + tooltip + "</li>");
+            $.add_vsl.attr("pol_sch_no", schList[i].POL_SCH_NO);
+            $.add_vsl.attr("pod_sch_no", schList[i].POD_SCH_NO);
+            $.add_vsl.attr("gubun", schList[i].GUBUN);
+            $.add_vsl.attr("sec_seq", schList[i].SEC_SEQ);
+            $.add_vsl.attr("vsl_cd", schList[i].VSL_CD);
+            $.add_vsl.attr("vsl_nm", schList[i].VSL_NM);
+            $.add_vsl.attr("voy_no", voy_no);
+            $.add_vsl.attr("pol_country_cd", schList[i].POL_COUNTRY_CD);
+            $.add_vsl.attr("pol_port_cd", schList[i].POL_PORT_CD);
+            $.add_vsl.attr("pod_country_cd", schList[i].POD_COUNTRY_CD);
+            $.add_vsl.attr("pod_port_cd", schList[i].POD_PORT_CD);
+            $.add_vsl.attr("closed", schList[i].CLOSED);
+            $.add_vsl.attr("ts_seq", 1);
+
+            if (schList[i].TS == 'Y') {
+                var tsSchArr = {};
+                if (tsList.arr2.length > 0) {
+                    tsSchArr = getTSSchNo(schList[i].POD_REVISED_APDP_DATE + schList[i].POD_REVISED_APDP_TM, tsList.arr2);
+                    if (tsSchArr.POL_SCH_NO != undefined) {
+                        $.add_vsl.attr("pol_sch_no_ts2", tsSchArr.POL_SCH_NO);
+                        $.add_vsl.attr("pod_sch_no_ts2", tsSchArr.POD_SCH_NO);
+                        $.add_vsl.attr("gubun_ts2", tsSchArr.GUBUN);
+                        $.add_vsl.attr("sec_seq_ts2", tsSchArr.SEC_SEQ);
+                        $.add_vsl.attr("vsl_cd_ts2", tsSchArr.VSL_CD);
+                        $.add_vsl.attr("vsl_nm_ts2", tsSchArr.VSL_NM);
+                        $.add_vsl.attr("voy_no_ts2", tsSchArr.EXP_VOY_NO);
+                        $.add_vsl.attr("pol_country_cd_ts2", tsSchArr.POL_COUNTRY_CD);
+                        $.add_vsl.attr("pol_port_cd_ts2", tsSchArr.POL_PORT_CD);
+                        $.add_vsl.attr("pod_country_cd_ts2", tsSchArr.POD_COUNTRY_CD);
+                        $.add_vsl.attr("pod_port_cd_ts2", tsSchArr.POD_PORT_CD);
+                        $.add_vsl.attr("ts_seq", 2);
+
+                        newItem.TS = tsSchArr.POL;
+                        newItem.TT = parseInt(newItem.TT) + parseInt(tsSchArr.TT);
+                        newItem.POD = tsSchArr.POD;
+                    }
                 }
+                if (tsList.arr3.length > 0) {
+                    tsSchArr = getTSSchNo(schList[i].POD_REVISED_APDP_DATE + schList[i].POD_REVISED_APDP_TM, tsList.arr3);
+                    $.add_vsl.attr("pol_sch_no_ts3", tsSchArr.POL_SCH_NO);
+                    $.add_vsl.attr("pod_sch_no_ts3", tsSchArr.POD_SCH_NO);
+                    $.add_vsl.attr("gubun_ts3", tsSchArr.GUBUN);
+                    $.add_vsl.attr("sec_seq_ts3", tsSchArr.SEC_SEQ);
+                    $.add_vsl.attr("vsl_cd_ts3", tsSchArr.VSL_CD);
+                    $.add_vsl.attr("vsl_nm_ts3", tsSchArr.VSL_NM);
+                    $.add_vsl.attr("voy_no_ts3", tsSchArr.EXP_VOY_NO);
+                    $.add_vsl.attr("pol_country_cd_ts3", tsSchArr.POL_COUNTRY_CD);
+                    $.add_vsl.attr("pol_port_cd_ts3", tsSchArr.POL_PORT_CD);
+                    $.add_vsl.attr("pod_country_cd_ts3", tsSchArr.POD_COUNTRY_CD);
+                    $.add_vsl.attr("pod_port_cd_ts3", tsSchArr.POD_PORT_CD);
+                    $.add_vsl.attr("ts_seq", 3);
+
+                    newItem.TS += '<br/>' + tsSchArr.POL;
+                    newItem.TT = parseInt(newItem.TT) + parseInt(tsSchArr.TT);
+                    newItem.POD = tsSchArr.POD;
+                }
+
+                newList.push(newItem);
+            } else newList.push(newItem);
+
+            $.add_vsl.click(function () {
+
+                var listDiv = $(this).parents('tr').next().find('.detail-cont#' + detail_cont_id);
+                listDiv.children(':not(#' + detail_cont_id + '_1)').remove();
+                getDataWeb201BCR($(this), apdp, detail_cont_id, 'N');
+                if ($(this).attr("ts") == 'Y') {
+                    for (var i = 1; i < parseInt($(this).attr("ts_seq")); i++) {
+                        getDataWeb201BCR($(this), apdp, detail_cont_id, 'ts' + (i + 1));
+                    }
+                }
+
             });
-        });
-    </script>
+            $.add_vsl.hover(function () {
+                $(this).children(".tooltip").show();
+            }, function () {
+                $(this).children(".tooltip").hide();
+            });
+            $("#" + pcCalendar.id + "_" + parseInt(apdp_date_day) + "_date").append($.add_vsl);
+            //html.push("<li><a href='#none'>HEUNG-A</a></li>");
+            //"+pcCalendar.id+"_"+i+"_date
 
-    <!-- InstanceBeginEditable name="head" -->
-    
+        }
 
-    <!-- InstanceEndEditable -->
-<script>
-(function (i, s, o, g, r, a, m) {
-i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
-(i[r].q = i[r].q || []).push(arguments)
-}, i[r].l = 1 * new Date(); a = s.createElement(o),
-m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
-})(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
-ga('create', 'UA-102880365-1', 'auto');
-ga('send', 'pageview');
+
+        /*for (var i=0;i<schList.length;i++){
+            if (schList[i].)
+        }*/
+        var grid = $("#gridList");
+        grid.jqGrid('clearGridData');
+        grid.jqGrid('setGridParam', {datatype: "local", data: newList}).trigger("reloadGrid");
+
+        comLib.getScreenIetm("WEB_201_B", null, headerNameBRCallbackFs);
+        comLib.getScreenIetm("WEB_201_C", null, headerNameCRCallbackFs);
+        inq_ing = false;
+        $("#loading-bar").hide();
+    }
+
+    function getTSSchSort(arr) {
+        var result = {};
+        var arr2 = new Array();
+        var arr3 = new Array();
+        result.arr2 = arr2;
+        result.arr3 = arr3;
+
+        for (var i = 0; i < arr.length; i++) {
+            if (arr[i].GUBUN == '2' && parseInt(arr[i].SEC_SEQ) == 2) arr2.push(arr[i]);
+            else if (arr[i].GUBUN == '2' && parseInt(arr[i].SEC_SEQ == 3)) arr3.push(arr[i]);
+            else continue;
+        }
+        if (arr2.length != 0) {
+            arr2.sort(function (a, b) {
+                var fdtm = a.POD_REVISED_APDP_DATE + a.POD_REVISED_APDP_TM;
+                var sdtm = b.POD_REVISED_APDP_DATE + b.POD_REVISED_APDP_TM;
+                return fdtm < sdtm ? -1 : fdtm > sdtm ? 1 : 0;
+            });
+            result.arr2 = arr2;
+        }
+        if (arr3.length != 0) {
+            arr3.sort(function (a, b) {
+                var fdtm = a.POD_REVISED_APDP_DATE + a.POD_REVISED_APDP_TM;
+                var sdtm = b.POD_REVISED_APDP_DATE + b.POD_REVISED_APDP_TM;
+                return fdtm < sdtm ? -1 : fdtm > sdtm ? 1 : 0;
+            });
+            result.arr3 = arr3;
+        }
+
+        return result;
+    }
+
+    function getTSSchNo(apdp_dtm, arr) {
+        var result = {};
+        //result.POL_SCH_NO = '';
+        //result.POD_SCH_NO = '';
+        for (var i = 0; i < arr.length; i++) {
+            console.log(arr[i].POL_REVISED_APDP_DATE + arr[i].POL_REVISED_APDP_TM + ' ' + apdp_dtm);
+            if (arr[i].POL_REVISED_APDP_DATE + arr[i].POL_REVISED_APDP_TM >= apdp_dtm) {
+                //result.POL_SCH_NO = arr[i].POL_SCH_NO;
+                //result.POD_SCH_NO = arr[i].POD_SCH_NO;
+                return arr[i];
+            }
+        }
+        return result;
+    }
 </script>
-</head>
-
-<body>
-
-    <form name="aspnetForm" method="post" action="sailing_schedule.aspx?SiteID=1" id="aspnetForm">
-<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="E/Yi3a+hWX/rEJB7VvmY9ruPcaRTA7k/xa5ZfzchYyYlYJUdLGKprTHfZyayXDr13ZgkueFesd7AQxqoDmA+XPNDUQjAQkHiObiOJgOHt/nUubqfihoh38N5CjJLaM7FJzy/19gfiilKryGKpz/1MBl40AApgnC8Ki4M52rRKPFu9PNi3d26kBOJMlgzfE6VpKHP8IOcjHH/zOQkxsHWAOAiH0luSetlSxHkETTbLtNinoep2k1quZVzXtF0cZsy5FEuRJ+KlqeQAlhOBkpQB159Xe0Fvn4k09+5GfHw57mjCSn4E3xutK4IwmOUPC7VNderx4yM7YoHtUfsR7UwDt2ii8iUpQyqX9OJNf+qriDK7sH/jBBziJHZG4ZiRGpkbtHe4ra+pRqhVq+sG5+kGVzu5H5aMtRn01i8f/gWGoBTZayTp3xEL91sRFiAuhsSxJn3Fa4DQKYgqrqRJTc8VoDtvg7IiMaCmvUy7iFRMLzhNTmMpHGBUNuhzM3PrbETJSY8+2rbcPyMbps2hR8NuMDJ5NNJeZB3ikRkyrZSl9ea9zgcmMJW+VSzx6+flg4BOWTYskbLrIoZYLvCIhlZk7EAWc40hBCYZXB1lQ5Id1RfcLPz1fIkNhOJUX0ZB2UJZUcR2CXdJ7beGQXNJsqHVDFirJ8JDUsdonwP7hV4vUe5w5EkLCWlRp3eOEPSTvliVREjObTYppK8Wcr+oHyZ2ADpBJ5UsRa9Tx4OmDRpGKgczRdQJ/1yLkyXdWvpXHLQ4UTiS3NUPgC+OAzIQGiZPRAb5TnHV7JTrw24t5gETOzyZ8OnELbK3kiOQrU1KkpNXJxn60SipRCYgBUDWMO5uICuBJ7j4lyyCcECOrZv3vG1PCDI2j9gC8+HacmXvuSdumjBC0OlVg1xSegRlI+/jTBdw6oYh3BrUw0EPAOl720mpSqk/Mz7Crrkf2rYzDSnEEQpsBHb/CaaqqU5pnf2QEpR94Y9Hu62Vn6+28+S8KpXFd3LHbyaZzSkyefgyTa6xdeddRAX5VFs2+Q77c5ptDmHXK0OCFdYMCWMDv85pe7kq9h0BylywKB9fRCwnjYtZO+GcI/qCJ2E/dM1u6pu7oFDps0sRqTcPq8aktJYNjMYBVCZT0V5+lz+sXgflUgDPzuTjMd9//Y5NaLTfbprFMnKLOH+QKvCHXGix19v/AFb+r0SEH1czcLe4b0EVouz/WnQ6cQF0qFShyUJ+KqeU3cTPDUYaWXm+cioJtGiC9I9bD0eChbOtPezBbUon347rHptcqVUQRV1aS0LrGr6pgOcxLrMCvbnkwMcQDqMS2i2uch6uoAcghGBqbJn1aenKitUl4F1oTFaMSR0keSMCHlXavja69GWlpEHbiwjM6oc8i4ZTfU3boDl5buesmvvhhAXyUb/TjCGGN4wizXgsNd6Y9S+Yd0HLTDEEnoDza9D5gyvt08dIrg7pLFiz5x9tycUYsDPVoB4FvEfuHlF+pciLINZZK38afIXKrVaEepxogcXl3ykX+DDRp/Vve9InPVjgvdEQ6LkpiFGbjp3r8YfZ85JROY33QSQM2zWAaHuzR8+zfn+FYP8sYGmF8B1y0PSzBNnz4t6l2ZjS8r5GTzsE4oQOLXTOmXzHcHCmvMJp/1C1He8xQiyFUQE+XmuXuEJvkPNBuESzX/DlT8ijjjfzoEeZ5lWf70iXll6HhkYjkMomRxbSapnkc1QMA6rboM43RRuP3pLulUH9/x0UzxhBFXjQrsSY2qjAELw7wE28xjMAvW0AifRssPYx9tJF6l6WdvjIhmkaqTtCSZSJppI51kYXlPdg9L9zHVmXn7eZEYuPrsyleLPG0GDohgdZHn4hBR8WkIzKdyXsXqZVdReD1UTpRWcRlYANSKZrYtqJHmveHIBQ48zRucjoGX5aVwdf4Bxue6db9C8EZpqWVtTg1unX5X71GMIWwf4YJ7Vnu525eN9Fhsessih5E0pPZIrssD5FnFZupQ001tBXWBASle5Y/kwH2jtro3PhkC9eVGN5iPgu6te5V3355hkcbkTa4jFkjbvY++39jd1oHCekFAn81NoMYdNfnDSZk5w7S9DFCq2NPIMC35jK9oEEeXkZtSfIGji64U0CMZdBGkQl0pulRcCPNhKxzp6fB8mQEa3ygOu6T156aHKt8zBVXMa3n7JaOUAxeLeehL6p1ZSFxnnE2fZIg1J9cIhCBNOiPyyiZs/K4Qnzwycdv00lAqVbI+dKNWnoJTecB7jQHKPAUna4AC+v1VHHHeiUwFVjV+2KsA1ePBJpYO+yDc8CXqVwuuRVM09Av/EVAUBVtlbLnfbDTtf4huEqXiUNEJlqXG+jLgsDbEGQQa1lQ3AV/pvPm19Vg1DO49NgEq+1bx+AaLvXIafgsbblx8Qtn+OPuhjIPJKM7whmFbW9qDINtCBBBQD+3i7FdyPO/Z12xAWa905jjUZPVGg1+XffQjz3QrPHBdIPIL7KV2B5Fcmf+OAL+YMCgPVPeyncJvDuoQyO3TyAeffi0JXx8uTj8ItZ0d18iyWL0mWc0Goii+GQijoATBevP4gz7QxKkYkz5UDUf2Ca+iD7qRIv9IXFSBLRWA9D/cyyPaohsEpvzsvbqbz8IwoiiLGOpmKI93H3rYpXnnIaCEqo0X2J2jsiXLoP6l0MruVwUbmrVyzf0HeqMAnNivbxPr/PGLY6BC958xEXXAcDLc/oVBZDAPD+GxbXUx8i6h8auF9PS6CYURJUw6qQuH5vNKLvF3wCJblMlS0oXcrhc6dlE5aq2SZAJg/lotJQbDZ3iLE+zbBJvExi9d1Sr6szyh5VEIY9vn9w0/sXZaSr8fiPbMMpFKwliJ2DdoQx7XqTQrcAzLytfwQn3rXHcEHQWhsWyXvK3yesVOOXXOEN0T1LeQMtqgEVX0ZHYdkQL+YG4wjwXcLM42EZSp0MAiTikuuEI71/WQ7z3k6WSivt7w6CnPMZo68/BZGvBA6r36Q7PnWjAeLVHlXvE2ss4T2/XcArbgmVkt3bRZCX/zB1DRt9295cbxnPT+EUt2h2D1J9215+i+2jfA6DtCqOMj7K3aNXtFwBlIZe9rK7ioGMlHnhjXH/5CJR5aWC+xRitfwkgdmL93QgtI8A8bTGEErICB50iSFvVbtt9XnzGHg6OUhG185iUgFT860fIEK8ps/tpi60XDaljEl8LEUyg+dtJeyH99G8i3UeDm1nRAzEBZzTtanLOs+8h89yYyQ6egiXQJ2XCY66Ai8DD5KtLARY+sV2oQFBY6DvgWnmTO1qQUJQ9V2ICwEfh9GxEjEu/kpH+h7+/KxQflrDaWk4qVmIFo5iOHvlbujndrePkIUnYxGJjSP5WJra3WssYC1kKXlmJfy3uXMMhbDhjdfjcPWm1IPm8UJo5eAgrJNc4GXCMn3ROMEhXb/bpNepN2ZxoMLExPMUeluMyhK0jN0yWjQ51aJRXnCZKf0KrovkspQ2MDmPtZ6vNFbNRiW+9kh1rfaeOTYEE44RcMjGDzkbJaCR0gVuiuSLm0LR280VLSCYNhT2NdHMvFcik5UtUKDBl1Zu+FbWRz2GaUCI/RAyO07FxGLg1u0IVs7WiSbrvY4y8oYeqKIv9K5MhowyBm8ezdE4xuKFJhxL11BQT9YM4YbOglX+fNHE/nnSuZKsWW6Us2ts1sTG4wyOe8h25cboM7Vzx8lQIdZuCo4zaHbcy9xrqnjfMaS6awrJ/AfT6yXJF9ci7FDAvCixQVVFq8rrzcbKPDSdUmVyrMByJjY002jADuaC/wdysfivIP2SGF028a37Y9195uQyeMmcfYElexZMimaL0zgbyUOFutpqI8wCb2kkTdUTQzJiMthWl1PIYc1fpRxPV28L+vOWA69PvKwDpDZKek8Oejtoaej/SG5qeGpEOw7UQCAJKyf3J3BFBmK5epqjdfHPP/vuCla9qFLSspOECqRt7V7SAm4nxRtXXMHnv6uNH98eJm76Tkdv8FjR4sf2kmKd56Cnhe00Qus8L8hSnfv2vfXoEiIVlmTf1DoNZYIcn8xhAsXa0WtFj9AxoPcabFVq1w0RFfI+bQ5gVNnaOCANMl6v3V2N6ZQRoKGdf/Kuk34i8jSoLIDW3M8HJhbLUSennMgJo4mb0U7Iu3E8e4rYZuhtEsyEdoYrrGfGQ/Wyd8MpbI6BggDI0G0FyRFSTIZB7bAYShLvA6d4s2oDRaLAXIlxeEN6OR3BViLVP7lsnq23P1UTkrFJmOXtvtW6zSxzxXuAAPJHwVmJC2qrUd4mWvarYNwwGfBOtUKgU6mEchC/buY/JTs6mxKVUJjqd9k+On6tmTemFmPS72TCRpzG7Pu2BkvANvfRShnJq4AkEpOWRjCV43Gpws/EV1EZxNInQaaB+TjXBZDh+KtANdVimuQN/pD9mXwDMNaOJuGoLZZDzgPzC84uI6C9tIxZBByI6/DffqLMxcuBymF9BJCbmAfQFeCiwU4QDxVXjtEmg83Nk75BInFWDkrBYnijcbmL0QMiHo33j3Hi7qtCGbsykqNkIXWZKO8vf0kupFwORbhm9bKIIa1UuH2kU62zkwjIFjI7EJoG1Wa7OWYLWYWKAtAncZYTbHwFOJPeVD/dmZufCoO4BvqPbECoqrZVy8rvaY/n7dSj5NJRg8CZuOR3sGj2T8NikGUgK/85qxQkK+TIFyP8bSRHtql7/cg3jmJniFWofVJmcO/F2821TaTiY4myYbHVr3kl/wKjuoTgowH8c6ozJFaHrbpnXsaJYwy7VM++YzC3LQ3fznIcz5pCXEPAJIgBs7/jAGIRl3kpmIy9XJdbP5LQ0YZu+ejhozhAdIRTV1s/mv8BRHckhDE5DXZ4WWORYb/p2W0U/PPUiFG8aBnFlmgTQY2zB3XZPXcmXvhUXUULR0Hr3sPmX3I5wVi6o6LgVk8kNzRwzPmq7IjwmyQe8Mv7Vf6v2ijKDZKXPNtL+A0EmwGYUSIjfT8GmmSpTs4r/qHMigpuF23HI7l4wHUk62mSX6InbG1HZTIDMtuUyPkYK6UfeZUw4PUieOyuAiefX8ocvEzMZp0dux50ocBp82CTAkQ4jDn+Za+CroTBz6H4hTHnUJDsbrbEsM218v6M6iAz3PFw1o1q/X/AlQF7/j3FE5CU/aIH8FMg1QFYRmWjNsbq8G4ml3CbPhi9NA4C1a0Ms+z8dnh/JEBF5brXJNdwUIMRG40XkOCOwtCPQGsmKdSqihDU25bQrwK/SQg6FGRxXZDmXBNUsPg8UP41s3+/z1RORvJauaSEy5j1C3YitEG+69dW79fXzWRKtB0K7bhhT4Iro9D+3GC1wGQGq4STENssNXHOoNQwdok2/cPNPSdylfcZB4jvYeljW9pxDhZq5GdFKs4rcXmezd9+gY=" />
-
-<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="99DD0D69" />
-<input type="hidden" name="__VIEWSTATEENCRYPTED" id="__VIEWSTATEENCRYPTED" value="" />
-<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="bHKi/PyYmEHbui1YpD7PHPNl4ykuqkP+ZEHXVm+MXWtL7BbIumf3KKuzaJ+6A5TS6OPY/qxHn75v42ENXRXMoci5l2vpIPkW5u0Vq2t5hpTFbzTCuf1q0jcY+6Ehjems+nPvpw7sQSF5OVMIEOgj6nZpURsQJMbRKiquE+6UO0GGXCkKVRWI1urH7Zwfk7+bMQbbR5CTxS3xCebfNxoG7rfFBy3p1zHCb/UIygvFK0pedPukqCjTRc49pCAxvpSKhEo1vAIxksG5VhJlNYGjAkcwhdRAHvj3BXzSFLM4/Kw/00YC3Ilk+v7GS7UAYsckF3mMba7PdZTNwBkRxfn4lO/6QiaKRH7n5c+TqkonBHtuuAZ8ALdMpwXYaJzYL2tv5chFCzNIZUHTH6DvFSJNvRAGpNjEoPTsyY/xx07J7zdHt1aYrMoWmJYA8/heBOHU30NCLA==" />
-        
-        
-
-<script>
-    $(document).ready(function () {
-        $('.ONLY_SITE2').toggle(Boolean("1" == 2));
-        $('.NOT_ONLY_SITE3').toggle(Boolean("1" != 3));
-    });
-</script>
-<div class="header">
-    <div>
-        <a class="logo" href="../../index.aspx?SiteID=1">Interasia Lines Ltd.</a>
-        <div class="link">
-            <a href="../../index.aspx?SiteID=1">Home</a> │ <a href="../../index.aspx?SiteID=2">繁中</a> │ <a href="../../index.aspx?SiteID=3">日本語</a>
-        </div>
-        <div class="Search" accesskey="S">
-            <input name="ctl00$UCHeader$txtSearch" type="text" value="Search" id="ctl00_UCHeader_txtSearch" accesskey="S" class="hsInput" value="search" onfocus="if (this.value.indexOf('Search')!=-1) {this.value=''}" onblur="if (this.value=='') {this.value='Search'}" />
-            <input type="submit" name="ctl00$UCHeader$btnSearch" value="" id="ctl00_UCHeader_btnSearch" class="hsBtn" value="查詢" alt="查詢按鍵" />
-        </div>
-        <ul class="menu">
-            <li class="btn1">
-                <a href="../about/our_philosophy.aspx?SiteID=1">About Interasia</a>
-                <div class="area">
-                    <ul>
-                        <li><a href="../about/our_philosophy.aspx?SiteID=1">Our Philosophy</a></li>
-                        <li><a href="../about/customer_service.aspx?SiteID=1">Customer Service</a></li>
-                        <li><a href="../about/Company_profile.aspx?SiteID=1">Company Profile</a></li>
-                        <li><a href="../about/careers.aspx?SiteID=1">Careers</a></li>                        
-                    </ul>
-                    <ul>
-                        <li><a href="../about/corporate_message.aspx?SiteID=1">Corporate Message</a></li>
-                    </ul>
-                    <img src="../../images/en/pic/menu01.jpg" />
-                </div>
-            </li>
-            <li class="btn2">
-                <a href="../o_service/routes.aspx?SiteID=1">Our Service</a>
-                <div class="area">
-                    <ul>
-                        <li><a href="../o_service/routes.aspx?SiteID=1">Service Routes</a></li>
-                        <li><a href="../o_service/vessels.aspx?SiteID=1">Vessels</a></li>
-                        <li><a href="../o_service/containers.aspx?SiteID=1">Containers</a></li>
-                        <li><a href="../o_service/dg.aspx?SiteID=1">DG Cargo</a></li>                        
-                    </ul>
-                    <img src="../../images/en/pic/menu02.jpg" />
-                </div>
-            </li>
-            <li class="btn3">
-                <a href="../pressmedia/press_release.aspx?SiteID=1">Press / Media</a>
-                <div class="area">
-                    <ul>
-                        <li><a href="../pressmedia/press_release.aspx?SiteID=1">Press Releases</a></li>
-                        <li><a href="../pressmedia/photo_gallery.aspx?SiteID=1">Photo Gallery</a></li>
-                    </ul>
-                    <img src="../../images/en/pic/menu03.jpg" />
-                </div>
-            </li>
-            <li class="btn4">
-                <a href="../resource/cam.aspx?SiteID=1">Resource Center</a>
-                <div class="area">
-                    <ul>
-                        <li><a href="../resource/cam.aspx?SiteID=1">Customs Advance Manifest</a></li>
-                        <li><a href="../resource/vessel.aspx?SiteID=1">Vessel Certificate</a></li>                        
-                        <li><a href="../resource/bl_terms.aspx?SiteID=1">B/L Terms</a></li>
-                        <li><a href="../resource/shipping_glossary.aspx?SiteID=1">Shipping Glossary</a></li>
-                        <li><a href="../resource/free.aspx?SiteID=1">Free time, Surcharges</a></li>
-                        <li><a href="../resource/terminals.aspx?SiteID=1">Terminals / Facilities</a></li>
-                    </ul>
-                    <img src="../../images/en/pic/menu04.jpg" />
-                </div>
-            </li>
-            <li class="btn5">
-                <a href="#">Local Information</a>
-                <div class="area">
-                    <ul>   <li><a href="../local/about.aspx?SiteID=1&MenuID=707244704357151266">China</a></li>   <li><a href="../local/about.aspx?SiteID=1&MenuID=707244704414141107">Hong Kong</a></li>   <li><a href="../local/about.aspx?SiteID=1&MenuID=707244704416141576">India</a></li>   <li><a href="../local/about.aspx?SiteID=1&MenuID=707244704420416643">Indonesia</a></li>   <li><a href="../local/about.aspx?SiteID=1&MenuID=707043240553606605">Japan</a></li>   <li><a href="../local/about.aspx?SiteID=1&MenuID=707244704425335725">Korea</a></li>   <li><a href="../local/about.aspx?SiteID=1&MenuID=707244704367413454">Malaysia</a></li></ul><ul>   <li><a href="../local/about.aspx?SiteID=1&MenuID=707244704410560105">Myanmar</a></li>   <li><a href="../local/about.aspx?SiteID=1&MenuID=707244704363442241">Singapore</a></li>   <li><a href="../local/about.aspx?SiteID=1&MenuID=707043240550341104">Taiwan</a></li>   <li><a href="../local/about.aspx?SiteID=1&MenuID=707244704427407350">Thailand</a></li>   <li><a href="../local/about.aspx?SiteID=1&MenuID=707244704431470720">Vietnam</a></li></ul>
-                    <img src="../../images/en/pic/menu05.jpg" />
-                </div>
-            </li>
-            <li class="btn6">
-                <a href="../c_service/cargo_tracking.aspx?SiteID=1">Online Services</a>
-                <div class="area">
-                    <ul>
-                        <li><a href="../c_service/cargo_tracking.aspx?SiteID=1">Cargo Tracking</a></li>
-                        <li><a href="../c_service/SKD_NEW.aspx?SiteID=1">Shipping Schedule</a></li>
-                        <li><a href="../c_service/sailing_schedule.aspx?SiteID=1">Port-to-Port</a></li>
-                        <li class="hide"><a href="../c_service/rate_exchange.aspx?SiteID=1">Exchange Rate</a></li>
-                        <li><a href="../c_service/telex_release.aspx?SiteID=1">Telex Release</a></li>
-                        <li><a href="../c_service/e_inquiry.aspx?SiteID=1">E-Inquiry</a></li>
-                        <li><a href="../c_service/input_vgm.aspx?SiteID=1">Input VGM</a></li>
-                        <li class="ONLY_SITE2"><a href="../c_service/call_vsl_reg.aspx?SiteID=2">呼號掛號</a></li>
-                        <li class="ONLY_SITE2"><a href="../c_service/Outbound_Rate.aspx?SiteID=1">Issue BL Date / Rate</a></li>
-                        <li class="NOT_ONLY_SITE3"><a href="../c_service/Free_Time_Checking.aspx?SiteID=1">Free Time Checking</a></li>
-                    </ul>
-                    <img src="../../images/en/pic/menu06.jpg" />
-                </div>
-            </li>
-        </ul>
-    </div>
-</div>
-        <div class="content">
-           
-
-    
-<script>
-    $(document).ready(function () {
-        $('.btnN').toggle(Boolean("1" == 2));
-        $('.left_menu2 .btn6').toggle(Boolean("1" != 3));
-    });
-</script>
-    <div id="left">
-        <!-- InstanceBeginEditable name="左選單" -->
-        <ul class="left_menu">
-            <li><a href="cargo_tracking.aspx?SiteID=1">Cargo Tracking</a></li>
-            <li><a href="SKD_NEW.aspx?SiteID=1">Shipping Schedule</a></li>
-            <li><a href="sailing_schedule.aspx?SiteID=1">Port-to-Port</a></li>
-            <li class="hide"><a href="rate_exchange.aspx?SiteID=1">Exchange Rate</a></li>
-            <li><a href="telex_release.aspx?SiteID=1">Telex Release</a></li>
-            <li><a href="e_inquiry.aspx?SiteID=1">E-Inquiry</a></li>
-            <li><a href="input_vgm.aspx?SiteID=1">Input VGM</a></li>
-            <li class="btnN"><a href="call_vsl_reg.aspx?SiteID=2">呼號掛號</a></li>
-            <li class="btnN"><a href="Outbound_Rate.aspx?SiteID=1">Issue BL Date / Rate</a></li>
-        </ul>
-        <!-- InstanceEndEditable -->
-        <ul class="left_menu2">
-            <li class="btn1"><a href="../c_service/cargo_tracking.aspx?SiteID=1">Cargo Tracking</a></li>
-            <li class="btn5"><a href="../c_service/SKD_NEW.aspx?SiteID=1">Shipping Schedule</a></li>
-            <li class="btn2"><a href="../c_service/sailing_schedule.aspx?SiteID=1">Port-to-Port</a></li>
-            <li class="btn4"><a href="../c_service/telex_release.aspx?SiteID=1">Telex Release</a></li>
-            <li class="btnN" style="display:none"><a href="../c_service/call_vsl_reg.aspx?SiteID=2">呼號掛號</a></li>
-            <li class="btn6"><a href="../c_service/Free_Time_Checking.aspx?SiteID=1">Free Time Checking</a></li>
-        </ul>
-    </div>
-
-    <div id="column_center">
-        <!-- InstanceBeginEditable name="麵包列" -->
-        <div class="view">
-            <img src="../../images/en/pic/about.jpg" width="850" height="119" /></div>
-
-        <ul id="breadcrumbs">
-            <li><a href="../../index.aspx?1">Home</a><span>&gt;</span></li>
-            <li><a href="cargo_tracking.aspx?1">Online Services</a><span>&gt;</span></li>
-            <li class="last"><a>Port-to-Port</a></li>
-        </ul>
-        <!-- InstanceEndEditable -->
-
-        
-
-<div class="toolbar">
-    <div class="toolbar_left">
-        <span class="tool return"><a href="javascript:void(0);" onclick="javascript:window.history.go(-1);" title="Previous Page">Back</a></span>
-        <span class="tool mail"><a href="../forward.aspx?SiteID=1" target="_blank" title="Mail This Page to Friend(Open New Window)">Forward</a></span>
-        <span class="tool print"><a href="javascript:void(0);" onclick="javascript:window.print();" onkeypress="javascript:window.print();" title="Print(If this link can't work, use keyboard Ctrl+P to Print This Page)">Print</a></span>
-    </div>
-
-    <div class="toolbar_right">
-        <dl class="fontsize">
-            <dt>Font Size：</dt>
-
-            <dd class="font_small"><a href="javascript:void(0)" title="Small">Small</a></dd>
-            <dd class="font_medium"><a href="javascript:void(0)" title="Medium">Medium</a></dd>
-            <dd class="font_big"><a href="javascript:void(0)" title="Large">Large</a></dd>
-        </dl>
-        <noscript class="noscript">If click icon doesn't change the font size, You can also hold down <CTRL> and type "+" or "-" to change the font size></noscript>
-        <dl class="share">
-            <dt>Share To：</dt>
-            <dd class="twitter"><a title="Share to Twitter(Open New Window)" href="#" onclick="javascript:void(window.open('http://twitter.com/home/?status='.concat(encodeURIComponent(document.title)).concat(' ').concat(encodeURIComponent(location.href))));"
-                onkeypress="javascript:void(window.open('http://twitter.com/home/?status='.concat(encodeURIComponent(document.title)).concat(' ').concat(encodeURIComponent(location.href))));">Share to Twitter</a></dd>
-            <dd class="plurk"><a title="Share to Plurk(Open New Window)" href="#" onclick="javascript:void(window.open('http://www.plurk.com/?qualifier=shares&status='.concat(encodeURIComponent(location.href)).concat('').concat('&#40;').concat(encodeURIComponent(document.title)).concat('&#41;')));"
-                onkeypress="javascript:void(window.open('http://www.plurk.com/?qualifier=shares&status='.concat(encodeURIComponent(location.href)).concat('').concat('&#40;').concat(encodeURIComponent(document.title)).concat('&#41;')));">Share to Plurk</a></dd>
-            <dd class="facebook"><a title="Share to Facebook(Open New Window)" href="javascript:void(window.open('http://www.facebook.com/share.php?u='.concat(encodeURIComponent(location.href))));">Share to Facebook</a></dd>
-            <dd class="google_plus"><a title="Share to Google Plus(Open New Window)" href="javascript: void(window.open('https://plus.google.com/share?url='.concat(encodeURIComponent(location.href)), '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600'));">Share to Google Plus</a></dd>
-        </dl>
-        <noscript class="noscript">
-            Please use the following link.<a href="http://www.facebook.com/" target="_blank"
-                title="(Open New Window)">Facebook</a> <a href="http://www.plurk.com/"
-                    target="_blank" title="(Open New Window)">plurk</a> <a href="http://twitter.com/"
-                        target="_blank" title="(Open New Window)">twitter</a>
-        </noscript>
-    </div>
-</div>
-
-        <div id="content">
-            <!-- InstanceBeginEditable name="內容" -->
-            <h1 class="title1">Port-to-Port</h1>
-            <div id="ctl00_CPHContent_Panel1">
-	
-                <div class="areaInput">
-                    <h3 class="title2">The estimated schedule is for reference only and may be updated or revised without prior notice.</h3>
-                    <table class="table_input sailing_schedule">                    
-                        <tr>
-                            <td>Departure：</td>
-                            <td>
-                                <select name="ctl00$CPHContent$ddlDepartureC" id="ctl00_CPHContent_ddlDepartureC">
-		<option value="0">Select Country</option>
-		<option selected="selected" value="7">CHINA</option>
-		<option value="11">HONG KONG</option>
-		<option value="710202045201314334">INDIA</option>
-		<option value="710202045655171251">INDONESIA</option>
-		<option value="1">JAPAN</option>
-		<option value="18">MALAYSIA  </option>
-		<option value="23">MYANMAR   </option>
-		<option value="710202065066221005">PHILIPPINES</option>
-		<option value="710203400452714552">PAKISTAN</option>
-		<option value="21">SINGAPORE </option>
-		<option value="710202045756516143">SRI LANKA</option>
-		<option value="16">TAIWAN    </option>
-		<option value="710202044452704007">THAILAND</option>
-		<option value="13">VIETNAM   </option>
-		<option value="712156173552265444">KOREA</option>
-
-	</select>
-                                <br />
-                                <select name="ctl00$CPHContent$ddlDepartureL" id="ctl00_CPHContent_ddlDepartureL">
-		<option selected="selected" value="0">Select Location</option>
-		<option value="8">SHANGHAI  </option>
-		<option value="9">SHEKOU    </option>
-		<option value="10">XIAMEN    </option>
-		<option value="2016053011550668111">QINGDAO</option>
-		<option value="2016053011563192795">NANSHA</option>
-		<option value="2016053011571097764">NINGBO</option>
-
-	</select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Destination：</td>
-                            <td>
-                                <select name="ctl00$CPHContent$ddlDestinationC" id="ctl00_CPHContent_ddlDestinationC">
-		<option selected="selected" value="0">Select Country</option>
-		<option value="7">CHINA</option>
-		<option value="11">HONG KONG</option>
-		<option value="710202045201314334">INDIA</option>
-		<option value="710202045655171251">INDONESIA</option>
-		<option value="1">JAPAN</option>
-		<option value="18">MALAYSIA  </option>
-		<option value="23">MYANMAR   </option>
-		<option value="710202065066221005">PHILIPPINES</option>
-		<option value="710203400452714552">PAKISTAN</option>
-		<option value="21">SINGAPORE </option>
-		<option value="710202045756516143">SRI LANKA</option>
-		<option value="710202044452704007">THAILAND</option>
-		<option value="13">VIETNAM   </option>
-		<option value="712156173552265444">KOREA</option>
-
-	</select>
-                                <br />
-                                <select name="ctl00$CPHContent$ddlDestinationL" id="ctl00_CPHContent_ddlDestinationL">
-		<option selected="selected" value="0">Select Location</option>
-
-	</select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Code :</td>
-                            <td class="randomcode">
-                                <div>
-                                    <input name="ctl00$CPHContent$txtCode" type="text" maxlength="4" id="ctl00_CPHContent_txtCode" class="text_input w100" />
-                                    
-                                </div>
-                                <div>
-                                    <img id="ctl00_CPHContent_imgCode" src="../../WebTools/RandomCode.ashx?Code=ZFW7" alt="Enter the CaptchaZFW7" border="0" />
-                                </div>
-                                <div class="btn">
-                                    <input type="submit" name="ctl00$CPHContent$lbtnReCode" value="Refresh Captcha" id="ctl00_CPHContent_lbtnReCode" class="refresh" />
-                                    <noscript>如果無法更換認證碼，請按以下按鈕<input type="submit" name="ctl00$CPHContent$btnReCode" value="Refresh Captcha" id="ctl00_CPHContent_btnReCode" class="refresh" /></noscript>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td>
-                                <input type="submit" name="ctl00$CPHContent$btnSend" value="Search" id="ctl00_CPHContent_btnSend" class="btn1" />
-                            </td>
-                        </tr>
-                    </table>
-                    <p>For a look at our full service coverage, please refer to our <a href="../o_service/routes.aspx?SiteID=1">Service Routes</a>.</p>
-                </div>
-            
-</div>
-            
-
-            
-
-            <div class="ctBottom">
-                <a href="#" class="btn_top">Back to top</a>
-            </div> 
-            <!-- InstanceEndEditable -->
-        </div>
-    </div>
-
-        </div>
-       
-        
-
-<script>
-    $(document).ready(function () {
-        $('.ONLY_SITE2').toggle(Boolean("1" == 2));
-        $('.NOT_ONLY_SITE3').toggle(Boolean("1" != 3));
-    });
-</script>
-<div class="footer">
-    <div>
-        <div class="link">
-            <dl>
-                <dt>About Interasia</dt>
-                <dd><a href="../about/our_philosophy.aspx?SiteID=1">Our Philosophy</a></dd>
-                <dd><a href="../about/customer_service.aspx?SiteID=1">Customer Service</a></dd>
-                <dd><a href="../about/Company_profile.aspx?SiteID=1">Company Profile</a></dd>
-                <dd><a href="../about/careers.aspx?SiteID=1">Careers</a></dd>
-                <dd><a href="../about/corporate_message.aspx?SiteID=1">Corporate Message</a></dd>
-            </dl>
-            <dl>
-                <dt>Our Service</dt>
-                <dd><a href="../o_service/routes.aspx?SiteID=1">Service Routes</a></dd>
-                <dd><a href="../o_service/vessels.aspx?SiteID=1">Vessels</a></dd>
-                <dd><a href="../o_service/containers.aspx?SiteID=1">Containers</a></dd>
-                <dd><a href="../o_service/dg.aspx?SiteID=1">DG Cargo</a></dd>
-            </dl>
-            <dl>
-                <dt>Press / Media</dt>
-                <dd><a href="../pressmedia/press_release.aspx?SiteID=1">Press Releases</a></dd>
-                <dd><a href="../pressmedia/photo_gallery.aspx?SiteID=1">Photo Gallery</a></dd>
-            </dl>
-            <dl>
-                <dt>Resource Center</dt>
-                <dd><a href="../resource/cam.aspx?SiteID=1">Customs Advance Manifest</a></dd>
-                <dd><a href="../resource/vessel.aspx?SiteID=1">Vessel Certificate</a></dd>
-                <dd><a href="../resource/bl_terms.aspx?SiteID=1">B/L Terms</a></dd>
-                <dd><a href="../resource/shipping_glossary.aspx?SiteID=1">Shipping Glossary</a></dd>                
-                <dd><a href="../resource/free.aspx?SiteID=1">Free time, Surcharges</a></dd>
-                <dd><a href="../resource/terminals.aspx?SiteID=1">Terminals / Facilities</a></dd>
-            </dl>
-            <dl>
-                <dt>Local Information</dt>
-                <dd><a href="../local/about.aspx?SiteID=1&MenuID=707244704357151266">China</a></dd><dd><a href="../local/about.aspx?SiteID=1&MenuID=707244704414141107">Hong Kong</a></dd><dd><a href="../local/about.aspx?SiteID=1&MenuID=707244704416141576">India</a></dd><dd><a href="../local/about.aspx?SiteID=1&MenuID=707244704420416643">Indonesia</a></dd><dd><a href="../local/about.aspx?SiteID=1&MenuID=707043240553606605">Japan</a></dd><dd><a href="../local/about.aspx?SiteID=1&MenuID=707244704425335725">Korea</a></dd><dd><a href="../local/about.aspx?SiteID=1&MenuID=707244704367413454">Malaysia</a></dd><dd><a href="../local/about.aspx?SiteID=1&MenuID=707244704410560105">Myanmar</a></dd><dd><a href="../local/about.aspx?SiteID=1&MenuID=707244704363442241">Singapore</a></dd><dd><a href="../local/about.aspx?SiteID=1&MenuID=707043240550341104">Taiwan</a></dd><dd><a href="../local/about.aspx?SiteID=1&MenuID=707244704427407350">Thailand</a></dd><dd><a href="../local/about.aspx?SiteID=1&MenuID=707244704431470720">Vietnam</a></dd>
-            </dl>
-            <dl class="cs">
-                <dt>Online Services</dt>
-                <dd><a href="../c_service/cargo_tracking.aspx?SiteID=1" >Cargo Tracking</a></dd>
-                <dd><a href="../c_service/SKD_NEW.aspx?SiteID=1" >Shipping Schedule</a></dd>
-                <dd><a href="../c_service/sailing_schedule.aspx?SiteID=1">Port-to-Port</a></dd>
-                
-                <dd><a href="../c_service/telex_release.aspx?SiteID=1" >Telex Release</a></dd>                
-                <dd><a href="../c_service/e_inquiry.aspx?SiteID=1" >E-Inquiry</a></dd>
-                <dd><a href="../c_service/input_vgm.aspx?SiteID=1">Input VGM</a></dd>
-                <dd class="ONLY_SITE2"><a href="../c_service/call_vsl_reg.aspx?SiteID=2">呼號掛號</a></dd>
-                <dd class="ONLY_SITE2"><a href="../c_service/Outbound_Rate.aspx?SiteID=1">Issue BL Date / Rate</a></dd>
-                <dd class="NOT_ONLY_SITE3"><a href="../c_service/Free_Time_Checking.aspx?SiteID=1">Free Time Checking</a></dd>
-            </dl>          
-        </div>
-        <div class="copyright">
-            <p>Copyright © Interasia Lines,Ltd.8F, Number 123, Sec. 2 Nanjing E. Rd., Taipei 10485, Taiwan, R.O.C.<br />Tel: +886-2-2567-2833    Fax: +886-2-2567-2813</p>
-            <ul>
-                <!--
-                <li><a href="">Privacy Polycy</a></li>
-                <li><a href="">Links and Copyrights</a></li>
-                <li><a href="">Site Map</a></li>
-                -->
-            </ul>
-        </div>
-    </div>
-</div>
-		
-    </form>
-
-</body>
-<!-- InstanceEnd --></html>
