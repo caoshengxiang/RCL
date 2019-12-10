@@ -188,8 +188,8 @@ class PanconSpider(scrapy.Spider):
             try:
 
                 if item.get('SEC_SEQ') == 1:
-                    row['ETD'] = item.get('POL_ETD')
-                    row['ETA'] = item.get('POD_ETA', '')
+                    row['ETD'] = item.get('POL_ETD')[:8]
+                    row['ETA'] = item.get('POD_ETA', '')[:8]
                     row['POL_TERMINAL'] = item.get('POL', '').split(' / ')[1]
                     row['VESSEL'] = item.get('VSL_NM')
                     row['VOYAGE'] = item.get('IMP_VOY_NO')
