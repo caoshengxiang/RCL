@@ -132,6 +132,9 @@ class MysqlPipeline(object):
         """
         if param is None or param == '':
             return None
+        if re.match('\d{4,}/\d+\d+', param):
+            return datetime.strptime(param, '%Y/%m/%d')
+
         if re.match('\d+/\d+\d+', param):
             return datetime.strptime(param, '%d/%m/%Y')
         _search = re.findall('(\d+-\d+-\d+)', param)
