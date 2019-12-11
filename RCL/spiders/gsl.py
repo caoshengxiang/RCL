@@ -269,4 +269,5 @@ class GslSpider(scrapy.Spider):
                         yield gItem
 
             except Exception as e:
+                logging.error('gsl error')
                 logging.error(e)

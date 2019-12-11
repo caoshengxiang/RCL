@@ -128,6 +128,7 @@ class PanconSpider(scrapy.Spider):
                         callback=self.parse_list)
 
         except Exception as e:
+            logging.error('pancon error')
             logging.error(e)
 
     def parse_port(self, response, country):
@@ -143,6 +144,7 @@ class PanconSpider(scrapy.Spider):
             else:
                 self.global_other_port.extend(data['list'])
         except Exception as e:
+            logging.error('pancon error')
             logging.error(e)
 
     def parse_list(self, response):
@@ -256,4 +258,5 @@ class PanconSpider(scrapy.Spider):
                 #         'TRANS_VOYAGE': '',
                 #     })
             except Exception as e:
+                logging.error('pancon error')
                 logging.error(e)

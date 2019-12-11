@@ -149,6 +149,7 @@ class DysSpider(scrapy.Spider):
                                       formdata=data,
                                       callback=self.parse_group)
                 except Exception as e:
+                    logging.error('dys error')
                     logging.error(e)
 
     def parse_port(self, response, country):

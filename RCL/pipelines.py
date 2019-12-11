@@ -340,6 +340,7 @@ class MysqlPipeline(object):
                     CommonDao.add_one_normal(nddt)
                     log.info('写入中转数据成功')
                 except Exception as e:
+                    log.error(self._get_scac(spider))
                     log.error("添加中转数据错误 item[%s]出错e[%s]", str(transit_info), e)
             log.info('写入挂靠港口数据')
             docking_res_1 = CommonDao.check_repaet(NewSchedulesStaticDocking,
@@ -377,6 +378,7 @@ class MysqlPipeline(object):
                 CommonDao.add_one_normal(nssd)
                 log.info('写入挂靠港口数据成功')
         except Exception as e:
+            log.error(self._get_scac(spider))
             log.error("处理group_item[%s] 出错e[%s]", str(item), e)
 
     def _handle_group_item_v2(self, item, spider):
@@ -433,6 +435,7 @@ class MysqlPipeline(object):
                                      END_PORT=end_name,
                                      SCAC=scac)
             if port_res is None:
+                log.error(self._get_scac(spider))
                 log.error('error port_res is none start_name  %s end_name %s', start_name, end_name)
                 log.error('item is  %s', item)
                 return
@@ -544,6 +547,7 @@ class MysqlPipeline(object):
                     log.info('写入中转数据成功')
                 except Exception as e:
                     traceback.format_exc()
+                    log.error(self._get_scac(spider))
                     log.error("处理group_item[%s] 出错e[%s]", traceback.format_exc())
                     log.error("添加中转数据错误 item[%s]出错e[%s]", str(transit_info), e)
             log.info('写入挂靠港口数据')
@@ -585,6 +589,7 @@ class MysqlPipeline(object):
                 log.info('写入挂靠港口数据成功')
         except Exception as e:
             traceback.format_exc()
+            log.error(self._get_scac(spider))
             log.error("处理group_item[%s] 出错e[%s]", traceback.format_exc())
             log.error("处理group_item[%s] 出错e[%s]", str(item), e)
 

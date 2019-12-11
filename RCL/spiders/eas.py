@@ -68,6 +68,10 @@ class EasSpider(scrapy.Spider):
             yield pItem
             if index + 1 < len(portList):
                 for jItem in portList[index + 1:]:
+                    pItem['port'] = jItem
+                    pItem['portCode'] = jItem
+                    yield pItem
+
                     # 港口组合
                     pgItem['portPol'] = item
                     pgItem['portNamePol'] = item

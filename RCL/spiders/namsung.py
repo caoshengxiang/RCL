@@ -97,6 +97,7 @@ class NamsungSpider(scrapy.Spider):
                     #     yield request
 
         except Exception as e:
+            logging.error('namsung error')
             logging.error(e)
 
     def get_calendar(self, y, m, cn, other, isNextMonth):
@@ -132,16 +133,16 @@ class NamsungSpider(scrapy.Spider):
 
     def parse_calendar(self, response):
         try:
-            pItem = PortItem()
-            pgItem = PortGroupItem()
-            pItem['port'] = response.meta['polName']
-            pItem['portCode'] = response.meta['pol']
-            yield pItem
-            pgItem['portPol'] = response.meta['pol']
-            pgItem['portNamePol'] = response.meta['polName']
-            pgItem['portPod'] = response.meta['pod']
-            pgItem['portNamePod'] = response.meta['podName']
-            yield pgItem
+            # pItem = PortItem()
+            # pgItem = PortGroupItem()
+            # pItem['port'] = response.meta['polName']
+            # pItem['portCode'] = response.meta['pol']
+            # yield pItem
+            # pgItem['portPol'] = response.meta['pol']
+            # pgItem['portNamePol'] = response.meta['polName']
+            # pgItem['portPod'] = response.meta['pod']
+            # pgItem['portNamePod'] = response.meta['podName']
+            # yield pgItem
 
             doc = pq(response.text)
             table = doc('#schdulVO > div > div.calendar > table')
@@ -208,6 +209,7 @@ class NamsungSpider(scrapy.Spider):
                                           callback=self.parse_detail)
 
         except Exception as e:
+            logging.error('namsung error')
             logging.error(e)
 
     def parse_detail(self, response):
@@ -281,6 +283,7 @@ class NamsungSpider(scrapy.Spider):
                 yield gItem
 
         except Exception as e:
+            logging.error('namsung error')
             logging.error(e)
 
     def parse_port(self, response, country):
@@ -301,4 +304,5 @@ class NamsungSpider(scrapy.Spider):
             else:
                 self.global_other_port.extend(ports)
         except Exception as e:
+            logging.error('namsung error')
             logging.error(e)

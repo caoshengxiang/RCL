@@ -117,6 +117,7 @@ class TslSpider(scrapy.Spider):
                         c_h_port['value'])
                     time.sleep(1)
                 except Exception as e:
+                    logging.error('tsl error')
                     logging.error(e)
 
                 for o_h in o_h_c:
@@ -214,9 +215,10 @@ class TslSpider(scrapy.Spider):
                                 self.driver.back()
                                 time.sleep(1)
                             except Exception as e:
+                                logging.error('tsl error')
                                 logging.error(e)
                     except Exception as e:
-                        continue
+                        logging.error('tsl error')
 
     @staticmethod
     def close(spider, reason):

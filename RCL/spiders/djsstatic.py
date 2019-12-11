@@ -54,6 +54,7 @@ class DjsSpider(scrapy.Spider):
                               headers=self.headers,
                               callback=self.parse_code)
             except Exception as e:
+                logging.error('djs static error')
                 logging.error(e)
 
     def parse_code(self, response):
@@ -73,6 +74,7 @@ class DjsSpider(scrapy.Spider):
                               headers=self.headers,
                               callback=self.parse_list)
             except Exception as e:
+                logging.error('djs static error')
                 logging.error(e)
 
     def parse_list(self, response):
