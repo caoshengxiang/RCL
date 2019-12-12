@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 import re
 import traceback
 from datetime import datetime
@@ -49,7 +50,7 @@ class MysqlPipeline(object):
         :param spider:
         :return:
         """
-        log.warning('开始  spider[%s] start', spider.name)
+        logging.warning('开始  spider[%s] start', spider.name)
         SCAC = self._get_scac(spider)
         # 静态的不更新
         if 'static' in spider.name:

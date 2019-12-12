@@ -178,7 +178,7 @@ class DjsSpider(scrapy.Spider):
                                                       'polName': response.meta['polName'],
                                                       'pod': param[6],
                                                       'podName': response.meta['podName'],
-                                                      'ROUTE_CODE': param[2]
+                                                      'ROUTE_CODE': param[1]
                                                   },
                                                   # ['', 'CJ1', 'MS', '1924', 'E', 'CNSHA', 'HKHKG', '201911230630', 'Y', 'WGQ5', '', '', 'N']
                                                   formdata={

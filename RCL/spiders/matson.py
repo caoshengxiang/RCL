@@ -146,7 +146,7 @@ class MatsonSpider(scrapy.Spider):
                 'ROUTE_CODE': '',
                 'ETD': ETD,
                 'VESSEL': data.get('vessel'),
-                'VOYAGE': data.get('voyage'),
+                'VOYAGE': data.get('voyage') + data.get('dir'),
                 'ETA': ETA,
                 'TRANSIT_TIME': TRANSIT_TIME,
                 'TRANSIT_LIST': [],
@@ -164,6 +164,9 @@ class MatsonSpider(scrapy.Spider):
                         logging.info('起点站-不算为中转')
                         continue
                     logging.info('中转--')
+                    transporttation = data.get('transportaionList')[index]
+                    tsp_arr = transporttation.split(' ', 1)
+
                     row['TRANSIT_LIST'].append({
                         'TRANSIT_PORT_EN': fll,
                         'TRANSIT_ROUTE_CODE': data.get('transportaionList')[index],

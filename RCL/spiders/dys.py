@@ -103,6 +103,8 @@ class DysSpider(scrapy.Spider):
                     localtime = time.localtime(time.time())
                     year = str(localtime.tm_year)
                     month = str(localtime.tm_mon)
+                    if len(month) == 1:
+                        month = '0' + month
                     data = {
                         'syear': year,
                         'smonth': month,
@@ -122,6 +124,7 @@ class DysSpider(scrapy.Spider):
                                           'polName': cn['name'],
                                           'pod': other['value'],
                                           'podName': other['name'],
+                                          'data': data
                                       },
                                       formdata=data,
                                       callback=self.parse_group)
@@ -129,9 +132,11 @@ class DysSpider(scrapy.Spider):
                     nextYear = year
                     if int(month) + 1 > 12:
                         nextYear = str(int(nextYear) + 1)
-                        nextMonth = '1'
+                        nextMonth = '01'
                     else:
                         nextMonth = str(int(month) + 1)
+                        if len(nextMonth) == 1:
+                            nextMonth = '0' + nextMonth
 
                     data['syear'] = nextYear
                     data['smonth'] = nextMonth
@@ -145,6 +150,7 @@ class DysSpider(scrapy.Spider):
                                           'polName': cn['name'],
                                           'pod': other['value'],
                                           'podName': other['name'],
+                                          'data': data
                                       },
                                       formdata=data,
                                       callback=self.parse_group)
@@ -154,7 +160,7 @@ class DysSpider(scrapy.Spider):
 
     def parse_port(self, response, country):
         logging.info('解析港口')
-        logging.info(response.text)
+        # logging.info(response.text)
         doc = pq(response.text)
         portOptions = doc('select.main_select').find('option')
         ports = []
@@ -176,7 +182,7 @@ class DysSpider(scrapy.Spider):
     def parse_group(self, response):
         doc = pq(response.text)
         table = doc('#container1 > table:nth-child(1) > tr > td > table > tr > td.contents > table:nth-child(4)')
-        # logging.info(table)
+        logging.info(response.meta['data'])
         trs = table.find('tr')
         gItem = GroupItem()
         for index, tr in enumerate(trs.items()):
