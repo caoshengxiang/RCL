@@ -33,8 +33,8 @@ class IalSpider(scrapy.Spider):
     start_urls = ['http://www.interasia.cc/content/c_service/sailing_schedule.aspx?SiteID=1']
     custom_settings = {  # 指定配置的通道, 要对应找到每个爬虫指定的管道,settings里也要进行管道配置
         'ITEM_PIPELINES': {
-            # 'RCL.pipelines.MongoPipeline': 300
-            'RCL.pipelines.MysqlPipeline': 300
+            'RCL.pipelines.MongoPipeline': 300
+            # 'RCL.pipelines.MysqlPipeline': 300
         }
     }
 
@@ -49,6 +49,12 @@ class IalSpider(scrapy.Spider):
         # epath = "D:/work/chromedriver.exe"
         epath = "/usr/bin/chromedriver"
         self.driver = webdriver.Chrome(executable_path=epath, chrome_options=chrome_options)
+        # chrome_options.add_experimental_option("prefs", No_Image_loading)
+        # self.driver = webdriver.Chrome(chrome_options=chrome_options)
+
+        # chrome_options = Options()
+        # # chrome_options.add_argument('--headless')
+        # No_Image_loading = {"profile.managed_default_content_settings.images": 2}
         # chrome_options.add_experimental_option("prefs", No_Image_loading)
         # self.driver = webdriver.Chrome(chrome_options=chrome_options)
 
@@ -144,6 +150,7 @@ class IalSpider(scrapy.Spider):
                                         else:
                                             timeI = 0
                                         row = {
+                                            'ROUTE_CODE': tr.find('td').eq(3).text(),
                                             'ETD': tr.find('td').eq(0).text(),
                                             'VESSEL': tr.find('td').eq(1).text(),
                                             'VOYAGE': tr.find('td').eq(2).text(),

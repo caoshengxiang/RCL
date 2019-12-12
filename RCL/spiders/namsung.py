@@ -52,6 +52,8 @@ class NamsungSpider(scrapy.Spider):
             localtime = time.localtime(time.time())
             year = str(localtime.tm_year)
             month = str(localtime.tm_mon)
+            if len(month) == 1:
+                month = '0' + month
             day = str(localtime.tm_mday)
 
             for cnindex, cn in enumerate(self.global_cn_port):
@@ -82,12 +84,13 @@ class NamsungSpider(scrapy.Spider):
                         yield request
                     # next month
                     nextYear = year
-                    nextMonth = month
                     if int(month) + 1 > 12:
                         nextYear = str(int(nextYear) + 1)
-                        nextMonth = '1'
+                        nextMonth = '01'
                     else:
                         nextMonth = str(int(month) + 1)
+                        if len(nextMonth) == 1:
+                            nextMonth = '0' + nextMonth
 
                     for request in self.get_calendar(nextYear, nextMonth, cn, other, True):
                         yield request

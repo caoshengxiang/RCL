@@ -79,8 +79,8 @@ class PanconSpider(scrapy.Spider):
 
             for cnindex, cn in enumerate(self.global_cn_port):
                 # # 测试
-                # if cnindex != 7:
-                #     continue
+                if cnindex != 7: #DALIAN
+                    continue
                 pItem['port'] = cn['PLC_ENM']
                 pItem['portCode'] = cn['COUNTRY_PLC_CD']
                 yield pItem
@@ -88,8 +88,8 @@ class PanconSpider(scrapy.Spider):
                     # 测试
                     # if oincex != 19:
                     #     continue
-                    # if oincex != 34:  # HAIPHONG
-                    #     continue
+                    if oincex != 34:  # HAIPHONG
+                        continue
                     # 港口
                     pItem['port'] = other['PLC_ENM']
                     pItem['portCode'] = other['COUNTRY_PLC_CD']
@@ -168,7 +168,6 @@ class PanconSpider(scrapy.Spider):
                 if pod_t <= li['POL_REVISED_APDP_DATE'] + li['POL_REVISED_APDP_TM']:
                     return li
             return {}
-
         SEC_SEQ2 = list(filter(filter_seq2, Lists))
 
         if len(SEC_SEQ2) > 0:
@@ -188,7 +187,9 @@ class PanconSpider(scrapy.Spider):
         }
         for item in Lists:
             try:
-
+                pol = item.get('POL', '')
+                sp = pol.split(' / ')
+                logging.info(sp)
                 if item.get('SEC_SEQ') == 1:
                     row['ETD'] = item.get('POL_ETD')[:8]
                     row['ETA'] = item.get('POD_ETA', '')[:8]
@@ -198,11 +199,14 @@ class PanconSpider(scrapy.Spider):
                     row['TRANSIT_TIME'] = int(item.get('TT', '0'))
                     row['TRANSIT_LIST'] = []
                     row['IS_TRANSIT'] = 0  # 确认为中转为1，直达为0, 默认为0
+                    row['POD_TERMINAL'] = item.get('POD', '').split(' / ')[1]
                     if item.get('TS') == 'Y':
                         if len(SEC_SEQ2) > 0:
-                            row['POD_TERMINAL'] = item.get('POD', '').split(' / ')[1]
+                            logging.info(item)
+
                             POD_item = fitler_li(item.get('POD_REVISED_APDP_DATE') + item.get('POD_REVISED_APDP_TM'),
                                                  SEC_SEQ2)
+                            row['POD_TERMINAL'] = POD_item.get('POD', '').split(' / ')[1]
                             # row['ETA'] = item.get('POD_ETA', '')
                             row['IS_TRANSIT'] = 1
                             row['TRANSIT_TIME'] += int(POD_item.get('TT', '0'))
@@ -212,10 +216,11 @@ class PanconSpider(scrapy.Spider):
                                 'TRANS_VOYAGE': '',
                             })
                         if len(SEC_SEQ3) > 0:
-                            row['POD_TERMINAL'] = item.get('POD', '').split(' / ')[1]
+
                             POD_item = fitler_li(item.get('POD_REVISED_APDP_DATE') + item.get('POD_REVISED_APDP_TM'),
                                                  SEC_SEQ3)
                             # row['ETA'] = POD_item.get('POD_ETA', '')
+                            row['POD_TERMINAL'] = POD_item.get('POD', '').split(' / ')[1]
                             row['IS_TRANSIT'] = 1
                             row['TRANSIT_TIME'] += int(POD_item.get('TT', '0'))
                             row['TRANSIT_LIST'].append({
@@ -227,6 +232,12 @@ class PanconSpider(scrapy.Spider):
                         if field in row.keys():
                             gItem[field] = row.get(field)
                     yield gItem
+                    row = {
+                        'pol': response.meta['portPol'],
+                        'pod': response.meta['portPod'],
+                        'polName': response.meta['portNamePol'],
+                        'podName': response.meta['portNamePod'],
+                    }
 
                 # if item.get('TS') == 'N':
                 #     row['POD_TERMINAL'] = item.get('POD', '').split(' / ')[1]
