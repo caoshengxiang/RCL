@@ -396,7 +396,10 @@ class MysqlPipeline(object):
             log.info('查询静态航线')
             scac = self._get_scac(spider)
             boolean_none = self._boolean_none
-            item['ROUTE_CODE'] = self._getFirstRangeRouteCode(item, 0)
+            if scac == 'MATS':
+                item['ROUTE_CODE'] = 'UNDEFINED'
+            else:
+                item['ROUTE_CODE'] = self._getFirstRangeRouteCode(item, 0)
             route_code = item.get('ROUTE_CODE')
             ssql = """
                     SELECT ID FROM new_schedules_static
