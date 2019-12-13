@@ -18,7 +18,7 @@ def get_engine():
     }
     connect_str = "{}+pymysql://{}:{}@{}:{}/{}?charset=utf8mb4".format(args['db_type'], args['user'], args['password'],
                                                                        args['host'], args['port'], args['db_name'])
-    engine = create_engine(connect_str, encoding='utf-8', pool_size=200, max_overflow=-1, pool_recycle=3600)
+    engine = create_engine(connect_str, encoding='utf-8', pool_size=500, max_overflow=-1, pool_recycle=3600)
     return engine
 
 
