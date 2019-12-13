@@ -12,7 +12,7 @@ from RCL.items import PortGroupItem, PortItem, GroupItem
 
 
 class PanconSpider(scrapy.Spider):
-    name = 'PASU'
+    name = 'PASU_bak'
     allowed_domains = ['pancon.co.kr']
     start_urls = ['http://www.pancon.co.kr/pan/pageLink.pcl?link=COM/WEB_201&nationals=EN']
 
@@ -238,6 +238,36 @@ class PanconSpider(scrapy.Spider):
                         'polName': response.meta['portNamePol'],
                         'podName': response.meta['portNamePod'],
                     }
+
+                # if item.get('TS') == 'N':
+                #     row['POD_TERMINAL'] = item.get('POD', '').split(' / ')[1]
+                #     row['ETA'] = item.get('POD_ETA', '')
+                #     for field in gItem.fields:
+                #         if field in row.keys():
+                #             gItem[field] = row.get(field)
+                #     yield gItem
+                #     logging.info(row)
+                #     row = {
+                #         'pol': response.meta['portPol'],
+                #         'pod': response.meta['portPod'],
+                #         'polName': response.meta['portNamePol'],
+                #         'podName': response.meta['portNamePod'],
+                #     }
+                # else:
+                #     row['POD_TERMINAL'] = item.get('POD', '').split(' / ')[1]
+                #     POD_item = SEC_SEQ2[SEC_SEQ2_index]
+                #     if SEC_SEQ2_index + 1 > len(SEC_SEQ2):
+                #         logging.info('取完')
+                #         break
+                #
+                #     row['ETA'] = POD_item.get('POD_ETA', '')
+                #     row['IS_TRANSIT'] = 1
+                #     row['TRANSIT_TIME'] += int(item.get('TT', '0'))
+                #     row['TRANSIT_LIST'].append({
+                #         'TRANSIT_PORT_EN': item.get('POD', '').split(' / ')[0],
+                #         'TRANS_VESSEL': '',
+                #         'TRANS_VOYAGE': '',
+                #     })
             except Exception as e:
                 logging.error('pancon error')
                 logging.error(e)

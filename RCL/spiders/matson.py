@@ -122,6 +122,10 @@ class MatsonSpider(scrapy.Spider):
                 TRANSIT_TIME = int(data.get('totalTransitDays').split(' ')[0])
             else:
                 TRANSIT_TIME = 0
+                transitList = data.get('transitList')
+                for tstl in transitList:
+                    if 'days' in tstl:
+                        TRANSIT_TIME += int(tstl.split(' ')[0])
 
             today = datetime.datetime.now()
             current_month = today.month
@@ -145,8 +149,8 @@ class MatsonSpider(scrapy.Spider):
             row = {
                 'ROUTE_CODE': '',
                 'ETD': ETD,
-                'VESSEL': data.get('vessel'),
-                'VOYAGE': data.get('voyage') + data.get('dir'),
+                # 'VESSEL': data.get('vessel'),
+                # 'VOYAGE': data.get('voyage') + data.get('dir'),
                 'ETA': ETA,
                 'TRANSIT_TIME': TRANSIT_TIME,
                 'TRANSIT_LIST': [],
@@ -157,27 +161,28 @@ class MatsonSpider(scrapy.Spider):
                 'podName': data.get('destinationName'),
             }
             fromLocationList = data.get('fromLocationList')
-            if fromLocationList and len(fromLocationList) > 1:
-                row['IS_TRANSIT'] = 1
-                for index, fll in enumerate(fromLocationList):
-                    if fll == data.get('originName'):
-                        logging.info('起点站-不算为中转')
-                        continue
-                    logging.info('中转--')
-                    transporttation = data.get('transportaionList')[index]
-                    tsp_arr = transporttation.split(' ', 1)
-
+            for index, fll in enumerate(fromLocationList):
+                transporttation = data.get('transportaionList')[index]
+                tsp_arr = transporttation.split(' ', 1)
+                if index == 0:  # 第一个作为船名，航次
+                    row['VESSEL'] = tsp_arr[0]
+                    if len(tsp_arr) > 1:
+                        row['VOYAGE'] = tsp_arr[1]
+                    else:
+                        row['VOYAGE'] = ''
+                else:
                     row['TRANSIT_LIST'].append({
                         'TRANSIT_PORT_EN': fll,
-                        'TRANSIT_ROUTE_CODE': data.get('transportaionList')[index],
-                        'TRANS_VESSEL': '',
-                        'TRANS_VOYAGE': '',
+                        'TRANSIT_ROUTE_CODE': '',
+                        'TRANS_VESSEL': tsp_arr[0],
+                        'TRANS_VOYAGE': tsp_arr[1] if len(tsp_arr) > 1 else '',
                     })
 
             for field in gItem.fields:
                 if field in row.keys():
                     gItem[field] = row.get(field)
             yield gItem
+
         except Exception as e:
             logging.error('error 查询{}-{}'.format(data.get('originName'), data.get('destinationName')))
             logging.error(e)

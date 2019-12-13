@@ -194,6 +194,13 @@ class DysSpider(scrapy.Spider):
                     continue
 
                 if tr.find('td'):
+                    etd = tr.find('td').eq(3).text()
+                    if '2020-10' in etd:
+                        logging.info(response.meta['pol'])
+                        logging.info(response.meta['pod'])
+                        logging.info(etd)
+
+
                     row = {
                         'ETD': tr.find('td').eq(3).text(),
                         'VESSEL': tr.find('td').eq(1).text(),
