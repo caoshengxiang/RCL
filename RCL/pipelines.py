@@ -494,8 +494,8 @@ class MysqlPipeline(object):
                 nsd.SCAC = scac
                 nsd.VESSEL_RELATION_ID = support_vessl_sql_key
                 nsd.TRANSIT_ID = transit_id
-                nsd.POD_TERMINAL = item.get('podName') or ''
-                nsd.POL_TERMINAL = item.get('polName') or ''
+                nsd.POD_TERMINAL = item.get('POD_TERMINAL') if item.get('POD_TERMINAL') else None
+                nsd.POL_TERMINAL = item.get('POL_TERMINAL') if item.get('POL_TERMINAL') else None
                 nsd.ETA = self._covert_time(item['ETA'])
                 nsd.ETD = self._covert_time(item['ETD'])
                 nsd.IS_TRANSIT = str(item['IS_TRANSIT'])
@@ -505,8 +505,8 @@ class MysqlPipeline(object):
             else:
                 dynamic_res.UPDATE_TIME = DateTimeUtils.now()
                 dynamic_res.VERSION_NUMBER = dynamic_res.VERSION_NUMBER + 1
-                dynamic_res.POD_TERMINAL = item.get('podName') or ''
-                dynamic_res.POL_TERMINAL = item.get('polName') or ''
+                nsd.POD_TERMINAL = item.get('POD_TERMINAL') if item.get('POD_TERMINAL') else None
+                nsd.POL_TERMINAL = item.get('POL_TERMINAL') if item.get('POL_TERMINAL') else None
                 dynamic_res.ETA = self._covert_time(item['ETA'])
                 dynamic_res.ETD = self._covert_time(item['ETD'])
                 dynamic_res.IS_TRANSIT = str(item['IS_TRANSIT'])
