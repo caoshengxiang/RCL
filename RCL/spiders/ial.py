@@ -98,7 +98,7 @@ class IalSpider(scrapy.Spider):
                         c_h_port['value'])
                     time.sleep(1)
                 except Exception as e:
-                    logging.error('ial error')
+                    logging.error('ial error 1')
                     logging.error(e)
 
                 for o_h in o_h_c:
@@ -171,10 +171,11 @@ class IalSpider(scrapy.Spider):
                                 self.driver.back()
                                 time.sleep(1)
                             except Exception as e:
-                                logging.error('ial error')
+                                logging.error('ial error 2')
                                 logging.error(e)
                     except Exception as e:
-                        logging.error('ial error')
+                        logging.error('ial error 3')
+                        logging.error(e)
 
     @staticmethod
     def close(spider, reason):
