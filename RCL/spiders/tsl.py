@@ -49,7 +49,10 @@ class TslSpider(scrapy.Spider):
         next2_month = '0' + next2_month
     next2_year = (int((int(month) + 2) / 12) + int(year))
 
-    def __init__(self):
+    def __init__(self,**kwargs):
+        self._init_brower()
+
+    def _init_brower(self):
         chrome_options = Options()
         chrome_options.add_argument('--headless')
         chrome_options.add_argument("--no-sandbox")
@@ -60,7 +63,7 @@ class TslSpider(scrapy.Spider):
         # chrome_options.binary_location = r"D:\soft\googlechrome\Application\77.0.3865.120\chrome.exe"
         # epath = "D:/work/chromedriver.exe"
         epath = "/usr/bin/chromedriver"
-        self.driver = webdriver.Chrome(executable_path=epath,chrome_options=chrome_options)
+        self.driver = webdriver.Chrome(executable_path=epath, chrome_options=chrome_options)
         # 设置超时，双重保险,设置后derver 就死了
         self.driver.set_page_load_timeout(30)
         self.driver.set_script_timeout(30)
@@ -94,14 +97,16 @@ class TslSpider(scrapy.Spider):
         for c_h in c_h_c:
             # self.driver.find_element_by_id('DropDownList3').click()
             # time.sleep(1)
-            Select(self.driver.find_element_by_id('DropDownList3')).select_by_value(c_h['value'])
+            try:
+                Select(self.driver.find_element_by_id('DropDownList3')).select_by_value(c_h['value'])
 
-            time.sleep(1)
+                time.sleep(1)
 
-            c_h_options = self.driver.find_elements_by_css_selector('#DropDownList1 option')
+                c_h_options = self.driver.find_elements_by_css_selector('#DropDownList1 option')
 
-            c_h_ports = get_ports(c_h_options)
-
+                c_h_ports = get_ports(c_h_options)
+            except Exception as e:
+                continue
             for c_h_port in c_h_ports:
                 pItem['port'] = c_h_port['value']
                 pItem['portCode'] = c_h_port['name']
@@ -118,6 +123,7 @@ class TslSpider(scrapy.Spider):
                 except Exception as e:
                     logging.error('tsl error')
                     logging.error(e)
+                    continue
 
                 for o_h in o_h_c:
                     # # 测试
@@ -163,8 +169,8 @@ class TslSpider(scrapy.Spider):
                                     self.driver.find_element_by_id('Button2').click()
                                 except Exception as e:
                                     logging.debug('网站超时')
-                                    self.driver.close()
-                                    self.__init__()
+                                    self.driver.quit()
+                                    self._init_brower()
                                     self.driver.get(self.start_urls[0])
                                     time.sleep(1)
                                     Select(self.driver.find_element_by_id('DropDownList3')).select_by_value(
@@ -218,6 +224,7 @@ class TslSpider(scrapy.Spider):
                                 logging.error(e)
                     except Exception as e:
                         logging.error('tsl error')
+                        continue
 
     @staticmethod
     def close(spider, reason):

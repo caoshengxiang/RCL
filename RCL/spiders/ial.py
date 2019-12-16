@@ -38,7 +38,7 @@ class IalSpider(scrapy.Spider):
         }
     }
 
-    def __init__(self):
+    def __init__(self, name=None,**kwargs):
         chrome_options = Options()
         chrome_options.add_argument('--headless')
         chrome_options.add_argument("--no-sandbox")
@@ -80,13 +80,15 @@ class IalSpider(scrapy.Spider):
 
         self.driver.get(self.start_urls[0])
         for c_h in c_h_c:
-            time.sleep(1)
-            Select(self.driver.find_element_by_id('ctl00_CPHContent_ddlDepartureC')).select_by_value(c_h['value'])
-            time.sleep(1)
-            c_h_options = self.driver.find_elements_by_css_selector('#ctl00_CPHContent_ddlDepartureL option')
+            try:
+                time.sleep(1)
+                Select(self.driver.find_element_by_id('ctl00_CPHContent_ddlDepartureC')).select_by_value(c_h['value'])
+                time.sleep(1)
+                c_h_options = self.driver.find_elements_by_css_selector('#ctl00_CPHContent_ddlDepartureL option')
 
-            c_h_ports = get_ports(c_h_options)
-
+                c_h_ports = get_ports(c_h_options)
+            except Exception as e:
+                continue
             logging.info(c_h_ports)
             for c_h_port in c_h_ports:
                 pItem['port'] = c_h_port['name']
