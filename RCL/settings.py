@@ -9,6 +9,8 @@ import datetime
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+import os
+import sys
 
 BOT_NAME = 'RCL'
 
@@ -18,14 +20,13 @@ NEWSPIDER_MODULE = 'RCL.spiders'
 # mongo 配置
 MONGO_URI = '49.235.131.71:27017'
 MONGO_DB = 'rcltest'
-
 # 日志
 today = datetime.datetime.now()
 log_file_path = '/opt/logs/scrapy_{}_{}_{}.log'.format(today.year, today.month, today.day)
 LOG_LEVEL = 'WARNING' #WARNING DEBUG
 LOG_FILE = log_file_path
 LOG_ENCODING = 'utf-8'
-LOG_STDOUT = True
+LOG_STDOUT = False
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = 'RCL (+http://www.yourdomain.com)'
 
@@ -113,7 +114,7 @@ USER = 'a111222',
 PASSWORD = '!@#123QWEqwe',
 HOST = 'rm-bp19hl3624ib44ai5o.mysql.rds.aliyuncs.com',
 # USER = 'root',
-# PASSWORD = '1223456Lq!',
+# PASSWORD = '123456Lq!',
 # HOST = '120.79.92.101',
 PORT = 3306,
 DB_NAME = 'sp_out',
