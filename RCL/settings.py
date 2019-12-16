@@ -23,7 +23,7 @@ MONGO_DB = 'rcltest'
 # 日志
 today = datetime.datetime.now()
 log_file_path = '/opt/logs/scrapy_{}_{}_{}.log'.format(today.year, today.month, today.day)
-LOG_LEVEL = 'WARNING' #WARNING DEBUG
+LOG_LEVEL = 'DEBUG' #WARNING DEBUG
 LOG_FILE = log_file_path
 LOG_ENCODING = 'utf-8'
 LOG_STDOUT = False

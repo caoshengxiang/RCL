@@ -92,7 +92,7 @@ class RclgroupSpider(scrapy.Spider):
                                          formdata=self.data,
                                          callback=self.parse_group,
                                          headers=self.headers)
-        # 测试
+        # # 测试
         # yield scrapy.FormRequest(url=self.groupUrl, method='POST',
         #                          meta={
         #                              'polName': 'DALIAN',

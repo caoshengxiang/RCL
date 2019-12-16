@@ -166,10 +166,7 @@ class MatsonSpider(scrapy.Spider):
                 tsp_arr = transporttation.split(' ', 1)
                 if index == 0:  # 第一个作为船名，航次
                     row['VESSEL'] = tsp_arr[0]
-                    if len(tsp_arr) > 1:
-                        row['VOYAGE'] = tsp_arr[1]
-                    else:
-                        row['VOYAGE'] = ''
+                    row['VOYAGE'] = tsp_arr[1] if len(tsp_arr) > 1 else ''
                 else:
                     row['TRANSIT_LIST'].append({
                         'TRANSIT_PORT_EN': fll,

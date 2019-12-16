@@ -7,8 +7,12 @@ import requests
 import scrapy
 from pyquery import PyQuery as pq
 from scrapy import FormRequest, Request
+from selenium.common.exceptions import NoAlertPresentException
 
 from RCL.items import PortGroupItem, PortItem, GroupItem
+from selenium import webdriver
+from selenium.webdriver.support.select import Select
+from selenium.webdriver.chrome.options import Options
 
 
 class PanconSpider(scrapy.Spider):
@@ -27,6 +31,25 @@ class PanconSpider(scrapy.Spider):
     global_cn_port = []
     global_other_port = []
 
+    def __init__(self):
+        # chrome_options = Options()
+        # chrome_options.add_argument('--headless')
+        # chrome_options.add_argument("--no-sandbox")
+        # chrome_options.add_argument('--disable-gpu')
+        # chrome_options.add_argument('--disable-dev-shm-usage')
+        # No_Image_loading = {"profile.managed_default_content_settings.images": 2}
+        # chrome_options.add_experimental_option("prefs", No_Image_loading)
+        # epath = "/usr/bin/chromedriver"
+        # # chrome_options.binary_location = r"D:\soft\googlechrome\Application\77.0.3865.120\chrome.exe"
+        # # epath = "D:/work/chromedriver.exe"
+        # self.driver = webdriver.Chrome(executable_path=epath, chrome_options=chrome_options)
+
+        chrome_options = Options()
+        # chrome_options.add_argument('--headless')
+        No_Image_loading = {"profile.managed_default_content_settings.images": 2}
+        chrome_options.add_experimental_option("prefs", No_Image_loading)
+        self.driver = webdriver.Chrome(chrome_options=chrome_options)
+
     def start_requests(self):
         yield Request(
             url=self.start_url,
@@ -44,9 +67,20 @@ class PanconSpider(scrapy.Spider):
             dont_filter=True,
             callback=self.parse)
 
+    @staticmethod
+    def get_ports(options):
+        ports = []
+        for option in options:
+            value = option.get_attribute('value')
+            name = option.text
+            if not value:
+                continue
+            ports.append({'value': value, 'name': name})
+        return ports
+
     def parse(self, response):
-        data = json.loads(response.text)
         try:
+            data = json.loads(response.text)
             for item in data['list']:
                 country = {
                     'value': item['COUNTRY_CD'],
@@ -69,63 +103,86 @@ class PanconSpider(scrapy.Spider):
             logging.info(self.global_cn_port)
             logging.info(self.global_other_port)
 
-            pgItem = PortGroupItem()
-            pItem = PortItem()
+            self.driver.get(self.start_urls[0])
+            time.sleep(1)
 
-            localtime = time.localtime(time.time())
-            year = str(localtime.tm_year)
-            month = str(localtime.tm_mon)
-            day = str(localtime.tm_mday)
+            # global_cn_port 数据结构
+            # {'PORT_NM': 'BEIHAI(CNBHY) / CHINA', 'PLC_ENM': 'BEIHAI', 'PLC_NM': 'BEIHAI', 'COUNTRY_PLC_CD': 'CNBHY', 'KIND': 'PORT', 'PLC_CD': 'BHY', 'COUNTRY_NM': 'CHINA', 'COUNTRY_CD': 'CN'}
 
-            for cnindex, cn in enumerate(self.global_cn_port):
-                # # 测试
-                if cnindex != 7: #DALIAN
+            for cnindex, c_h_p in enumerate(self.global_cn_port):
+                # 测试
+                if cnindex != 7:  # DALIAN
                     continue
-                pItem['port'] = cn['PLC_ENM']
-                pItem['portCode'] = cn['COUNTRY_PLC_CD']
-                yield pItem
-                for oincex, other in enumerate(self.global_other_port):
-                    # 测试
-                    # if oincex != 19:
-                    #     continue
-                    if oincex != 34:  # HAIPHONG
-                        continue
-                    # 港口
-                    pItem['port'] = other['PLC_ENM']
-                    pItem['portCode'] = other['COUNTRY_PLC_CD']
-                    yield pItem
-                    # 港口组合
-                    pgItem['portPol'] = cn['COUNTRY_PLC_CD']
-                    pgItem['portNamePol'] = cn['PLC_ENM']
-                    pgItem['portPod'] = other['COUNTRY_PLC_CD']
-                    pgItem['portNamePod'] = other['PLC_ENM']
-                    yield pgItem
 
-                    yield Request(
-                        url='http://www.pancon.co.kr/pan/selectWeb201.pcl',
-                        method='POST',
-                        body=json.dumps({
-                            'I_AS_DATE': year + month,  # 接口返回就是最近两个月数据
-                            'I_AS_IN_OUT_CD': "O",
-                            'I_AS_POD_CD': other['PLC_CD'],
-                            'I_AS_POD_CTR': other['COUNTRY_CD'],
-                            'I_AS_POL_CD': cn['PLC_CD'],
-                            'I_AS_POL_CTR': cn['COUNTRY_CD'],
-                            'I_PROGRESS_GUID': "Web201",
-                            'I_REQUEST_IP_ADDRESS': "0.0.0.0",
-                            'I_REQUEST_PROGRAM_ID': "PMG",
-                            'I_REQUEST_USER_ID': "USER",
-                            'rd_apdpDate': "O",
-                        }),
-                        headers={'Content-Type': 'application/json'},
-                        meta={
-                            'portPol': cn['COUNTRY_PLC_CD'],
-                            'portNamePol': cn['PLC_ENM'],
-                            'portPod': other['COUNTRY_PLC_CD'],
-                            'portNamePod': other['PLC_ENM'],
-                        },
-                        dont_filter=True,
-                        callback=self.parse_list)
+                self.driver.find_element_by_id('btn_pol_port').click()
+                # 可删除 next line
+                # time.sleep(1)
+                self.driver.find_element_by_id('pol_country_cd').click()
+                # time.sleep(2)
+                Select(self.driver.find_element_by_id('pol_country_cd')).select_by_value(
+                    c_h_p['COUNTRY_CD'])  # 选择国家
+                time.sleep(2)  # 接口渲染 todo
+
+                # 可删除 next 2 line
+                self.driver.find_element_by_id('pol_port_cd').click()
+                # time.sleep(3)
+
+                Select(self.driver.find_element_by_id('pol_port_cd')).select_by_value(c_h_p['PLC_CD'])
+                # 可删除 next line
+                # time.sleep(3)
+
+                for ohindex, o_h_p in enumerate(self.global_other_port):
+                    if ohindex != 34:  # HAIPHONG
+                        continue
+
+                    self.driver.find_element_by_id('btn_pod_port').click()
+                    # 可删除 next line
+                    # time.sleep(1)
+                    self.driver.find_element_by_id('pod_country_cd').click()
+                    # time.sleep(2)
+                    Select(self.driver.find_element_by_id('pod_country_cd')).select_by_value(
+                        o_h_p['COUNTRY_CD'])  # 选择国家
+                    time.sleep(2)  # 接口渲染 todo
+
+                    # 可删除 next 2 line
+                    self.driver.find_element_by_id('pod_port_cd').click()
+                    # time.sleep(3)
+
+                    Select(self.driver.find_element_by_id('pod_port_cd')).select_by_value(o_h_p['PLC_CD'])
+
+                    self.driver.find_element_by_id('WEB_201_INQ').click()
+                    time.sleep(5)  # todo
+
+                    try:
+                        # 获取alert对话框
+                        dig_alert = self.driver.switch_to.alert
+                        time.sleep(1)
+                        t = dig_alert.text
+                        dig_alert.accept()
+                        time.sleep(1)
+                        continue
+                    except NoAlertPresentException:
+                        doc_1 = pq(self.driver.page_source)
+                        calTable = doc_1('#calTable')
+                        logging.info('日历')
+
+                        lis = calTable.find('li')
+                        for li in lis.items():
+                            li_id = li.attr('id')
+                            self.driver.find_element_by_id(li_id).click()
+                            time.sleep(1)
+                            source_2 = self.driver.page_source
+                            doc_2 = pq(self.driver.page_source)
+                            ex_detail = doc_2('#ex_detail')
+                            logging.info()
+
+
+
+
+
+
+
+
 
         except Exception as e:
             logging.error('pancon error')
@@ -148,96 +205,8 @@ class PanconSpider(scrapy.Spider):
             logging.error(e)
 
     def parse_list(self, response):
-        data = json.loads(response.text)
-        if not data['schedule'] or not data['schedule']['O_RESULT_CURSOR']:
-            logging.info('查询列表无数据')
-            return
-        if (data['schedule']['O_ERROR_FLAG'] == 'Y'):
-            logging.debug('查询接口返回错误日志')
-            return
-        Lists = data['schedule']['O_RESULT_CURSOR']
-
-        def filter_seq2(li):
-            return li['SEC_SEQ'] == 2
-
-        def filter_seq3(li):
-            return li['SEC_SEQ'] == 3
-
-        def fitler_li(pod_t, list):
-            for li in list:
-                if pod_t <= li['POL_REVISED_APDP_DATE'] + li['POL_REVISED_APDP_TM']:
-                    return li
-            return {}
-        SEC_SEQ2 = list(filter(filter_seq2, Lists))
-
-        if len(SEC_SEQ2) > 0:
-            SEC_SEQ2.sort(key=lambda x: x['POD_REVISED_APDP_DATE'] + x['POD_REVISED_APDP_TM'], reverse=True)
-
-        SEC_SEQ3 = list(filter(filter_seq3, Lists))
-        if len(SEC_SEQ3) > 0:
-            logging.info('存在 SEQ == 3')
-            SEC_SEQ3.sort(key=lambda x: x['POD_REVISED_APDP_DATE'] + x['POD_REVISED_APDP_TM'], reverse=True)
-
-        gItem = GroupItem()
-        row = {
-            'pol': response.meta['portPol'],
-            'pod': response.meta['portPod'],
-            'polName': response.meta['portNamePol'],
-            'podName': response.meta['portNamePod'],
-        }
-        for item in Lists:
-            try:
-                pol = item.get('POL', '')
-                sp = pol.split(' / ')
-                logging.info(sp)
-                if item.get('SEC_SEQ') == 1:
-                    row['ETD'] = item.get('POL_ETD')[:8]
-                    row['ETA'] = item.get('POD_ETA', '')[:8]
-                    row['POL_TERMINAL'] = item.get('POL', '').split(' / ')[1]
-                    row['VESSEL'] = item.get('VSL_NM')
-                    row['VOYAGE'] = item.get('IMP_VOY_NO')
-                    row['TRANSIT_TIME'] = int(item.get('TT', '0'))
-                    row['TRANSIT_LIST'] = []
-                    row['IS_TRANSIT'] = 0  # 确认为中转为1，直达为0, 默认为0
-                    row['POD_TERMINAL'] = item.get('POD', '').split(' / ')[1]
-                    if item.get('TS') == 'Y':
-                        if len(SEC_SEQ2) > 0:
-                            logging.info(item)
-
-                            POD_item = fitler_li(item.get('POD_REVISED_APDP_DATE') + item.get('POD_REVISED_APDP_TM'),
-                                                 SEC_SEQ2)
-                            row['POD_TERMINAL'] = POD_item.get('POD', '').split(' / ')[1]
-                            # row['ETA'] = item.get('POD_ETA', '')
-                            row['IS_TRANSIT'] = 1
-                            row['TRANSIT_TIME'] += int(POD_item.get('TT', '0'))
-                            row['TRANSIT_LIST'].append({
-                                'TRANSIT_PORT_EN': item.get('POD', '').split(' / ')[0],
-                                'TRANS_VESSEL': '',
-                                'TRANS_VOYAGE': '',
-                            })
-                        if len(SEC_SEQ3) > 0:
-
-                            POD_item = fitler_li(item.get('POD_REVISED_APDP_DATE') + item.get('POD_REVISED_APDP_TM'),
-                                                 SEC_SEQ3)
-                            # row['ETA'] = POD_item.get('POD_ETA', '')
-                            row['POD_TERMINAL'] = POD_item.get('POD', '').split(' / ')[1]
-                            row['IS_TRANSIT'] = 1
-                            row['TRANSIT_TIME'] += int(POD_item.get('TT', '0'))
-                            row['TRANSIT_LIST'].append({
-                                'TRANSIT_PORT_EN': item.get('POD', '').split(' / ')[0],
-                                'TRANS_VESSEL': '',
-                                'TRANS_VOYAGE': '',
-                            })
-                    for field in gItem.fields:
-                        if field in row.keys():
-                            gItem[field] = row.get(field)
-                    yield gItem
-                    row = {
-                        'pol': response.meta['portPol'],
-                        'pod': response.meta['portPod'],
-                        'polName': response.meta['portNamePol'],
-                        'podName': response.meta['portNamePod'],
-                    }
-            except Exception as e:
-                logging.error('pancon error')
-                logging.error(e)
+        try:
+            pass
+        except Exception as e:
+            logging.error('pancon error')
+            logging.error(e)

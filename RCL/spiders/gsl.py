@@ -143,16 +143,16 @@ class GslSpider(scrapy.Spider):
             day = '0' + day
 
         for cnindex, cn in enumerate(self.global_cn_port):
-            # 测试
-            if cnindex != 3:
-                continue
+            # # 测试
+            # if cnindex != 3:
+            #     continue
             pItem['port'] = cn['name']
             pItem['portCode'] = cn['value']
             yield pItem
             for oincex, other in enumerate(self.global_other_port):
-                #测试
-                if oincex > 2:
-                    continue
+                # #测试
+                # if oincex > 2:
+                #     continue
                 # 港口
                 pItem['port'] = other['name']
                 pItem['portCode'] = other['value']

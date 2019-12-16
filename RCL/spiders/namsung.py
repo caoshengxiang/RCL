@@ -95,7 +95,7 @@ class NamsungSpider(scrapy.Spider):
                     for request in self.get_calendar(nextYear, nextMonth, cn, other, True):
                         yield request
 
-                    # 测试
+                    ## 测试
                     # for request in self.get_calendar('2019', '12', cn, other, False):
                     #     yield request
 
@@ -120,7 +120,7 @@ class NamsungSpider(scrapy.Spider):
             dont_filter=True,
             callback=self.parse_calendar)
 
-        # 测试
+        ## 测试
         # yield Request(
         #     # url='http://www.namsung.co.kr/eng/biz/eService/selectSchdulList.do?searchYear=2019&searchMonth=11&searchDateOption=startdate&searchGuggaCdFrom=CN&searchPortCdFrom=CNJIA&searchGuggaCdTo=JP&searchPortCdTo=JPTBT',
         #     url='http://www.namsung.co.kr/eng/biz/eService/selectSchdulList.do?searchYear=2019&searchMonth=12&searchDateOption=startdate&searchGuggaCdFrom=HK&searchPortCdFrom=HKHKG&searchGuggaCdTo=VN&searchPortCdTo=VNHPH',
