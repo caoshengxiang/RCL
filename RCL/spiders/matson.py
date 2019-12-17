@@ -164,15 +164,29 @@ class MatsonSpider(scrapy.Spider):
             for index, fll in enumerate(fromLocationList):
                 transporttation = data.get('transportaionList')[index]
                 tsp_arr = transporttation.split(' ', 1)
+                tsp_arr_len = len(tsp_arr)
+                if tsp_arr_len < 1:
+                    continue
+                elif tsp_arr_len == 1:
+                    vessel = tsp_arr[0]
+                    voyage = ''
+                elif tsp_arr_len == 2:
+                    vessel = tsp_arr[0]
+                    voyage = tsp_arr[1]
+                elif tsp_arr_len > 2:
+                    vessel = tsp_arr[0:-2]
+                    voyage = tsp_arr[-2:]
+
                 if index == 0:  # 第一个作为船名，航次
-                    row['VESSEL'] = tsp_arr[0]
-                    row['VOYAGE'] = tsp_arr[1] if len(tsp_arr) > 1 else ''
+                    row['VESSEL'] = vessel
+                    row['VOYAGE'] = voyage
+
                 else:
                     row['TRANSIT_LIST'].append({
                         'TRANSIT_PORT_EN': fll,
                         'TRANSIT_ROUTE_CODE': '',
-                        'TRANS_VESSEL': tsp_arr[0],
-                        'TRANS_VOYAGE': tsp_arr[1] if len(tsp_arr) > 1 else '',
+                        'TRANS_VESSEL': vessel,
+                        'TRANS_VOYAGE': voyage,
                     })
 
             for field in gItem.fields:
