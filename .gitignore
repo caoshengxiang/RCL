@@ -170,3 +170,9 @@ lint/outputs/
 lint/tmp/
 # lint/reports/
 test*
+
+project.egg-info
+
+build
+
+outpu3t.egg
