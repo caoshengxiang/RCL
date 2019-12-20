@@ -34,7 +34,7 @@ LOG_STDOUT = False
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-# CONCURRENT_REQUESTS = 16
+CONCURRENT_REQUESTS = 1
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -110,12 +110,12 @@ ITEM_PIPELINES = {
 
 # mysql
 DB_TYPE = 'mysql',
-USER = 'a111222',
-PASSWORD = '!@#123QWEqwe',
-HOST = 'rm-bp19hl3624ib44ai5o.mysql.rds.aliyuncs.com',
-# USER = 'root',
-# PASSWORD = '123456Lq!',
-# HOST = '120.79.92.101',
+# USER = 'a111222',
+# PASSWORD = '!@#123QWEqwe',
+# HOST = 'rm-bp19hl3624ib44ai5o.mysql.rds.aliyuncs.com',
+USER = 'root',
+PASSWORD = '123456Lq!',
+HOST = '120.79.92.101',
 PORT = 3306,
 DB_NAME = 'sp_out',
 
