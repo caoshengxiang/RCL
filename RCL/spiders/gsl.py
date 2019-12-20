@@ -12,12 +12,12 @@ from RCL.items import PortGroupItem, PortItem, GroupItem
 class GslSpider(scrapy.Spider):
     name = 'GOSU'
     allowed_domains = ['https://www.gslltd.com.hk']
-    start_urls = ['https://www.gslltd.com.hk/point-to-point_g.php']
+    start_urls = ['https://www.gslltd.com.hk/index.php#schedule']
 
     custom_settings = {  # 指定配置的通道, 要对应找到每个爬虫指定的管道,settings里也要进行管道配置
         'ITEM_PIPELINES': {
-            # 'RCL.pipelines.MongoPipeline': 300
-            'RCL.pipelines.MysqlPipeline': 300
+            'RCL.pipelines.MongoPipeline': 300
+            # 'RCL.pipelines.MysqlPipeline': 300
         }
     }
 
@@ -143,15 +143,15 @@ class GslSpider(scrapy.Spider):
             day = '0' + day
 
         for cnindex, cn in enumerate(self.global_cn_port):
-            # # 测试
-            # if cnindex != 3:
+            # # # 测试
+            # if cn['value'] != 'CNSNH':
             #     continue
             pItem['port'] = cn['name']
             pItem['portCode'] = cn['value']
             yield pItem
             for oincex, other in enumerate(self.global_other_port):
-                # #测试
-                # if oincex > 2:
+                # # #测试
+                # if other['value'] != 'IDJKT':
                 #     continue
                 # 港口
                 pItem['port'] = other['name']
@@ -179,6 +179,9 @@ class GslSpider(scrapy.Spider):
                         dataFormat.format(day, month, year),
                         dataFormat.format('01', next2_month, next2_year),
                     ),
+                    headers={
+                        'Cookie': 'ASP.NET_SessionId=xb4oroxxllmm3dtxqo5nppwf; TS0118470f=01bbeceaf774b2a056d687493d9e8926132fc6d9587a963c0b7e676c4a38932b1f8004aee9254b3a1bfad2757e0c9ea319ddb7a0f368852bebc267878125c9f1bb7ee12569'
+                    },
                     method='GET',
                     meta={
                         'pol': cn['value'],
@@ -188,6 +191,25 @@ class GslSpider(scrapy.Spider):
                     },
                     dont_filter=True,
                     callback=self.parse_list)
+
+    @staticmethod
+    def deal_with_date(timeStr):
+        month_abb = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        arr_1 = timeStr.split(' , ')
+        date1 = arr_1[0]
+        date_arr = date1.split('-')
+
+        mon = date_arr[1]
+        if mon in month_abb:
+            index = month_abb.index(mon)
+            if index + 1 < 10:
+                date_arr[1] = '0' + str(index + 1)
+            else:
+                date_arr[1] = str(index + 1)
+        else:
+            logging.error('gsl  eta ted 月份转换出错')
+
+        return date_arr[2] + '-' + date_arr[1] + '-' + date_arr[0]
 
     def parse_list(self, response):
         doc = pq(response.text)
@@ -218,10 +240,10 @@ class GslSpider(scrapy.Spider):
                             tmp = tds.eq(7).text()
 
                             row = {
-                                'ETD': tds.eq(4).text().text().split(' , ')[0],
+                                'ETD': self.deal_with_date(tds.eq(4).text()),
                                 'VESSEL': tds.eq(0).text(),
                                 'VOYAGE': tds.eq(2).text(),
-                                'ETA': tds.eq(5).text().text().split(' , ')[0],
+                                'ETA': self.deal_with_date(tds.eq(5).text()),
                                 'ROUTE_CODE': tds.eq(6).text(),
                                 'TRANSIT_TIME': int(tds.eq(7).text().split(' ')[0]),
                                 'TRANSIT_LIST': [],
@@ -242,7 +264,7 @@ class GslSpider(scrapy.Spider):
                             tds = trB.find('td')
                             if bindex == 0:
                                 row = {
-                                    'ETD': tds.eq(4).text().split(' , ')[0],
+                                    'ETD': self.deal_with_date(tds.eq(4).text()),
                                     'VESSEL': tds.eq(0).text(),
                                     'VOYAGE': tds.eq(2).text(),
                                     # 'ETA': tds.eq(5).text(),
@@ -256,7 +278,7 @@ class GslSpider(scrapy.Spider):
                                     'podName': response.meta['podName'],
                                 }
                             else:
-                                row['ETA'] = tds.eq(5).text().split(' , ')[0]
+                                row['ETA'] = self.deal_with_date(tds.eq(5).text())
                                 row['TRANSIT_LIST'].append({
                                     'TRANSIT_PORT_EN': tds.eq(4).text().split(' , ')[1],
                                     'TRANS_VESSEL': '',
