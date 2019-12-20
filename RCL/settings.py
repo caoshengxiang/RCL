@@ -110,12 +110,12 @@ ITEM_PIPELINES = {
 
 # mysql
 DB_TYPE = 'mysql',
-# USER = 'a111222',
-# PASSWORD = '!@#123QWEqwe',
-# HOST = 'rm-bp19hl3624ib44ai5o.mysql.rds.aliyuncs.com',
-USER = 'root',
-PASSWORD = '123456Lq!',
-HOST = '120.79.92.101',
+USER = 'a111222',
+PASSWORD = '!@#123QWEqwe',
+HOST = 'rm-bp19hl3624ib44ai5o.mysql.rds.aliyuncs.com',
+# USER = 'root',
+# PASSWORD = '123456Lq!',
+# HOST = '120.79.92.101',
 PORT = 3306,
 DB_NAME = 'sp_out',
 
