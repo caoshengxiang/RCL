@@ -61,6 +61,8 @@ class NamsungSpider(scrapy.Spider):
                 # # 测试
                 # if cnindex != 13:
                 #     continue
+                if cn['name'] != 'SANSHUI':
+                    continue
                 pItem['port'] = cn['name']
                 pItem['portCode'] = cn['value']
                 yield pItem
@@ -69,6 +71,8 @@ class NamsungSpider(scrapy.Spider):
                     # if oincex != 0:
                     #     continue
                     # 港口
+                    if other['name'] != 'HONGKONG':
+                        continue
                     pItem['port'] = other['name']
                     pItem['portCode'] = other['value']
                     yield pItem
