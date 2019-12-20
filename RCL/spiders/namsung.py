@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime
 import logging
 import math
 import re
@@ -256,7 +257,17 @@ class NamsungSpider(scrapy.Spider):
                 'pod': response.meta['pod'],
                 'polName': response.meta['polName'],
                 'podName': response.meta['podName'],
+                # 'POL_TERMINAL': tables.eq(pol_table_index).find('tr:nth-child(6) > td:nth-child(2)').text(),
+                # 'POD_TERMINAL': tables.eq(pol_table_index).find('tr:nth-child(6) > td:nth-child(4)').text(),
             }
+
+            pol_tr_len = tables.eq(pol_table_index).find('tr').length
+            if pol_tr_len == 6:
+                row['POL_TERMINAL'] = tables.eq(pol_table_index).find('tr:nth-child(6) > td:nth-child(2)').text()
+                row['POD_TERMINAL'] = tables.eq(pol_table_index).find('tr:nth-child(6) > td:nth-child(4)').text()
+            if pol_tr_len == 7:
+                row['POL_TERMINAL'] = tables.eq(pol_table_index).find('tr:nth-child(7) > td:nth-child(2)').text()
+                row['POD_TERMINAL'] = tables.eq(pol_table_index).find('tr:nth-child(7) > td:nth-child(4)').text()
 
             transitTable = doc('table[id^=id_view_]')
             if transitTable:
@@ -268,22 +279,49 @@ class NamsungSpider(scrapy.Spider):
                         tra_time = float(tra_timeStr)
                     else:
                         tra_time = 0
+                    ter_tr_len = tab.find('tr').length
+                    if ter_tr_len == 6:
+                        row['POD_TERMINAL'] = tab.find('tr:nth-child(6) > td:nth-child(4)').text()
+                    if ter_tr_len == 7:
+                        row['POD_TERMINAL'] = tab.find('tr:nth-child(7) > td:nth-child(4)').text()
 
-                    row['TRANSIT_TIME'] = math.ceil(time + tra_time)
+                    # row['TRANSIT_TIME'] = math.ceil(time + tra_time)
                     row['IS_TRANSIT'] = 1
                     row['ETA'] = tab.find('tr:nth-child(3) > td:nth-child(4)').text()
+
+                    t_text_arr = tab.find('tr:nth-child(2) > td:nth-child(2)').text().split(' ')
+
+
                     row['TRANSIT_LIST'].append({
-                        'TRANSIT_PORT_EN': tab.find('tr:nth-child(2) > td:nth-child(2)').text().split(' ')[0],
+                        'TRANSIT_PORT_EN': ' '.join(t_text_arr[:2]),
                         'TRANS_VESSEL': vv_t.split(' / ')[0],
                         'TRANS_VOYAGE': vv_t.split(' / ')[1]
                     })
+
+                    etd_s = row['ETD']
+                    eta_s = row['ETA']
+                    date1 = datetime.datetime(int(etd_s[0:4]), int(etd_s[5:7]),
+                                              int(etd_s[8:10]))
+                    date2 = datetime.datetime(int(eta_s[0:4]), int(eta_s[5:7]),
+                                              int(eta_s[8:10]))
+                    logging.info(date1)
+                    logging.info(date2)
+                    row['TRANSIT_TIME'] = (date2 - date1).days
                     logging.info(row)
                     for field in gItem.fields:
                         if field in row.keys():
                             gItem[field] = row.get(field)
                     yield gItem
             else:
-                row['TRANSIT_TIME'] = math.ceil(time)
+                etd_s = row['ETD']
+                eta_s = row['ETA']
+                date1 = datetime.datetime(int(etd_s[0:4]), int(etd_s[5:7]),
+                                          int(etd_s[8:10]))
+                date2 = datetime.datetime(int(eta_s[0:4]), int(eta_s[5:7]),
+                                          int(eta_s[8:10]))
+                logging.info(date1)
+                logging.info(date2)
+                row['TRANSIT_TIME'] = (date2 - date1).days
                 for field in gItem.fields:
                     if field in row.keys():
                         gItem[field] = row.get(field)
