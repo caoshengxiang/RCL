@@ -26,6 +26,7 @@ log_file_path = '/opt/logs/scrapy_{}_{}_{}.log'.format(today.year, today.month, 
 LOG_LEVEL = 'WARNING' #WARNING DEBUG
 LOG_FILE = log_file_path
 LOG_ENCODING = 'utf-8'
+# 不能设置为true 否则会导致在scrapyd服务下无法运行
 LOG_STDOUT = False
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = 'RCL (+http://www.yourdomain.com)'
