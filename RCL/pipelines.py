@@ -620,21 +620,21 @@ class MysqlPipeline(object):
         mdd = '%s,%s,%s,%s' % (scac, "NULL", "NULL", ROUTE_CODE)
         main_id = EncrptUtils.md5_str(mdd)
         sns.ID = main_id
-        # 不重复插入
-        res = CommonDao.get(NewSchedulesStatic, ROUTE_CODE=ROUTE_CODE, ROUTE_PARENT=ROUTE_PARENT,
-                            ROUTE_NAME_EN=ROUTE_NAME_EN, SCAC=scac)
-        if res is not None:
-            log.info('收到static_item 重复')
-            return
+        # # 重复插入
+        # res = CommonDao.get(NewSchedulesStatic, ROUTE_CODE=ROUTE_CODE, ROUTE_PARENT=ROUTE_PARENT,
+        #                     ROUTE_NAME_EN=ROUTE_NAME_EN, SCAC=scac)
+        # if res is not None:
+        #     log.info('收到static_item 重复')
+        #     return
         CommonDao.add_one_normal(sns)
         log.info(' 插入new_schedules_static  成功')
         DOCKING_LIST = item.get('DOCKING_LIST')
         for index, docking in enumerate(DOCKING_LIST, start=1):
-            res = CommonDao.get(NewSchedulesStaticDocking, STATIC_ID=sns.ID, PORT=docking.get('PORT'),
-                                TERMINAL=docking.get('TERMINAL'))
-            if res:
-                log.info('NewSchedulesStaticDocking 重复')
-                continue
+            # res = CommonDao.get(NewSchedulesStaticDocking, STATIC_ID=sns.ID, PORT=docking.get('PORT'),
+            #                     TERMINAL=docking.get('TERMINAL'))
+            # if res:
+            #     log.info('NewSchedulesStaticDocking 重复')
+            #     continue
             sndocking = NewSchedulesStaticDocking()
             sndocking.STATIC_ID = sns.ID
             sndocking.PORT_NUMBER = index
