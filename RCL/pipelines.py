@@ -620,6 +620,7 @@ class MysqlPipeline(object):
         mdd = '%s,%s,%s,%s' % (scac, "NULL", "NULL", ROUTE_CODE)
         main_id = EncrptUtils.md5_str(mdd)
         sns.ID = main_id
+
         # # 重复插入
         # res = CommonDao.get(NewSchedulesStatic, ROUTE_CODE=ROUTE_CODE, ROUTE_PARENT=ROUTE_PARENT,
         #                     ROUTE_NAME_EN=ROUTE_NAME_EN, SCAC=scac)
