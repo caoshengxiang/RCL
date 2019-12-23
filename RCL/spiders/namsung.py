@@ -61,8 +61,8 @@ class NamsungSpider(scrapy.Spider):
                 # # 测试
                 # if cnindex != 13:
                 #     continue
-                if cn['name'] != 'SANSHUI':
-                    continue
+                # if cn['name'] != 'SANSHUI':
+                #     continue
                 pItem['port'] = cn['name']
                 pItem['portCode'] = cn['value']
                 yield pItem
@@ -71,8 +71,8 @@ class NamsungSpider(scrapy.Spider):
                     # if oincex != 0:
                     #     continue
                     # 港口
-                    if other['name'] != 'HONGKONG':
-                        continue
+                    # if other['name'] != 'HONGKONG':
+                    #     continue
                     pItem['port'] = other['name']
                     pItem['portCode'] = other['value']
                     yield pItem
@@ -110,7 +110,7 @@ class NamsungSpider(scrapy.Spider):
 
     def get_calendar(self, y, m, cn, other, isNextMonth):
         # logging.info(cn)
-        # logging.debug('时间；pol-pod:{}-{}; {}-{}'.format(y, m, cn['value'], other['value']))
+        logging.warning('时间；pol-pod:{}-{}; {}-{}'.format(y, m, cn['value'], other['value']))
         yield Request(
             url=self.calendar_url.format(y, m, 'startdate', cn['countryVa'], cn['value'], other['countryVa'],
                                          other['value']),

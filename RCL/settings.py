@@ -23,7 +23,7 @@ MONGO_DB = 'rcltest'
 # 日志
 today = datetime.datetime.now()
 log_file_path = '/opt/logs/scrapy_{}_{}_{}.log'.format(today.year, today.month, today.day)
-LOG_LEVEL = 'WARNING' #WARNING DEBUG
+LOG_LEVEL = 'DEBUG' #WARNING DEBUG
 LOG_FILE = log_file_path
 LOG_ENCODING = 'utf-8'
 # 不能设置为true 否则会导致在scrapyd服务下无法运行
@@ -112,12 +112,12 @@ ITEM_PIPELINES = {
 
 # mysql
 DB_TYPE = 'mysql',
-USER = 'a111222',
-PASSWORD = '!@#123QWEqwe',
-HOST = 'rm-bp19hl3624ib44ai5o.mysql.rds.aliyuncs.com',
-# USER = 'root',
-# PASSWORD = '123456Lq!',
-# HOST = '120.79.92.101',
+# USER = 'a111222',
+# PASSWORD = '!@#123QWEqwe',
+# HOST = 'rm-bp19hl3624ib44ai5o.mysql.rds.aliyuncs.com',
+USER = 'root',
+PASSWORD = '123456Lq!',
+HOST = '120.79.92.101',
 PORT = 3306,
 DB_NAME = 'sp_out',
 
