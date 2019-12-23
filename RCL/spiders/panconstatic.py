@@ -55,8 +55,8 @@ class PanconstaticSpider(scrapy.Spider):
                 headers={'Content-Type': 'application/json'},
                 meta={
                     'route': dtl['GRP_NM'],
-                    'routeCode': dtl['LINE_CD'],
-                    # 'service': service
+                    # 'routeCode': dtl['LINE_NM'],
+                    'service': dtl['LINE_NM']
                 },
                 dont_filter=True,
                 callback=self.parse_linecd)
@@ -75,8 +75,8 @@ class PanconstaticSpider(scrapy.Spider):
                 headers={'Content-Type': 'application/json'},
                 meta={
                     'route': response.meta['route'],
-                    'routeCode': response.meta['routeCode'],
-                    'service': row['LINE_NM']
+                    'routeCode': row['LINE_NM'],
+                    'service': response.meta['service']
                 },
                 dont_filter=True,
                 callback=self.parse_list)

@@ -39,7 +39,17 @@ class NamsungstaticSpider(scrapy.Spider):
 
     def parse_routecode(self, response):
         doc = pq(response.text)
-        alink = doc("#submenu1 a")
+        service = response.meta['service']
+        alink = ''
+        if service == 'KOREA - JAPAN':
+            alink = doc("#submenu1 a")
+        elif service == 'KOREA - CHINA':
+            alink = doc("#submenu2 a")
+        elif service == 'CHINA - JAPAN':
+            alink = doc("#submenu3 a")
+        elif service == 'KOREA - INTRA ASIA':
+            alink = doc("#submenu4 a")
+
         url = 'http://www.namsung.co.kr/frt/ko/business/road_table/screen.do?code1={}&code2={}'
         for a in alink.items():
             routeCode = a.text()
