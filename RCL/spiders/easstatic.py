@@ -68,11 +68,11 @@ class DysSpider(scrapy.Spider):
             item['ROUTE_NAME_EN'] = response.meta['ROUTE_NAME_EN']
             item['ROUTE_CODE'] = response.meta['ROUTE_NAME_EN']
             h3text = map.find('h3').text()
-            item['ROUTE_CODE'] = h3text
+            # item['ROUTE_CODE'] = h3text
             trs = map.find('table.data tr')
             list = []
-            for tr in trs.items():
-                if tr.find('th[scope="row"]') and tr.find('td[class="ac"]'):
+            for index, tr in enumerate(trs.items()):
+                if tr.find('td[class="ac"]'):
                     tds = tr.find('td')
                     list.append({
                         'PORT': tr.find('th').text(),
