@@ -38,6 +38,7 @@ class GroupItem(scrapy.Item):
         # TRANSIT_PORT_EN 中转港
         # TRANS_VESSEL 中转船名
         # TRANS_VOYAGE 中转航次
+    #TRANSIT_ROUTE_CODE 航向代码
 
 
 class PortGroupItem(scrapy.Item):

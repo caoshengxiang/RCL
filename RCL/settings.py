@@ -112,9 +112,12 @@ ITEM_PIPELINES = {
 
 # mysql
 DB_TYPE = 'mysql',
+#线上
 # USER = 'a111222',
 # PASSWORD = '!@#123QWEqwe',
 # HOST = 'rm-bp19hl3624ib44ai5o.mysql.rds.aliyuncs.com',
+
+# 本地mysql
 USER = 'root',
 PASSWORD = '123456Lq!',
 HOST = '120.79.92.101',

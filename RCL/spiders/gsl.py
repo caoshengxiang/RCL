@@ -144,15 +144,15 @@ class GslSpider(scrapy.Spider):
 
         for cnindex, cn in enumerate(self.global_cn_port):
             # # 测试
-            if cn['value'] != 'CNNTG':
-                continue
+            # if cn['value'] != 'CNNTG':
+            #     continue
             pItem['port'] = cn['name']
             pItem['portCode'] = cn['value']
             yield pItem
             for oincex, other in enumerate(self.global_other_port):
-                # #测试
-                if other['value'] != 'INCCU':
-                    continue
+                # # #测试
+                # if other['value'] != 'INCCU':
+                #     continue
                 #港口
                 pItem['port'] = other['name']
                 pItem['portCode'] = other['value']
@@ -283,6 +283,7 @@ class GslSpider(scrapy.Spider):
                                     'TRANSIT_PORT_EN': tds.eq(4).text().split(' , ')[1],
                                     'TRANS_VESSEL': tds.eq(0).text(),
                                     'TRANS_VOYAGE': tds.eq(2).text(),
+                                    'TRANSIT_ROUTE_CODE': tds.eq(6).text()
                                 })
                         logging.info(row)
                         for field in gItem.fields:
