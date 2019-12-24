@@ -79,9 +79,9 @@ class PanconSpider(scrapy.Spider):
             day = str(localtime.tm_mday)
 
             for cnindex, cn in enumerate(self.global_cn_port):
-                # # 测试
-                # if cnindex != 7:  # DALIAN
-                #     continue
+                # 测试
+                if cnindex != 7:  # DALIAN
+                    continue
                 pItem['port'] = cn['PLC_ENM']
                 pItem['portCode'] = cn['COUNTRY_PLC_CD']
                 yield pItem
@@ -89,8 +89,8 @@ class PanconSpider(scrapy.Spider):
                     # 测试
                     # if oincex != 19:
                     #     continue
-                    # if oincex != 34:  # HAIPHONG
-                    #     continue
+                    if oincex != 34:  # HAIPHONG
+                        continue
                     # 港口
                     pItem['port'] = other['PLC_ENM']
                     pItem['portCode'] = other['COUNTRY_PLC_CD']
@@ -217,8 +217,8 @@ class PanconSpider(scrapy.Spider):
                             # row['TRANSIT_TIME'] += int(POD_item.get('TT', '0'))
                             row['TRANSIT_LIST'].append({
                                 'TRANSIT_PORT_EN': item.get('POD', '').split(' / ')[0],
-                                'TRANS_VESSEL': '',
-                                'TRANS_VOYAGE': '',
+                                'TRANS_VESSEL': POD_item.get('VSL_NM'),
+                                'TRANS_VOYAGE': POD_item.get('IMP_VOY_NO'),
                             })
                         if len(SEC_SEQ3) > 0:
                             POD_item = fitler_li(item.get('POD_REVISED_APDP_DATE') + item.get('POD_REVISED_APDP_TM'),
@@ -229,8 +229,8 @@ class PanconSpider(scrapy.Spider):
                             # row['TRANSIT_TIME'] += int(POD_item.get('TT', '0'))
                             row['TRANSIT_LIST'].append({
                                 'TRANSIT_PORT_EN': item.get('POD', '').split(' / ')[0],
-                                'TRANS_VESSEL': '',
-                                'TRANS_VOYAGE': '',
+                                'TRANS_VESSEL': POD_item.get('VSL_NM'),
+                                'TRANS_VOYAGE': POD_item.get('IMP_VOY_NO'),
                             })
                     try:
                         etd_s = row['ETD']

@@ -65,10 +65,11 @@ class DysSpider(scrapy.Spider):
         for map in mapSet.items():
             item = StaticsItem()
             item['ROUTE_PARENT'] = response.meta['ROUTE_PARENT']
-            item['ROUTE_NAME_EN'] = response.meta['ROUTE_NAME_EN']
-            item['ROUTE_CODE'] = response.meta['ROUTE_NAME_EN']
+            # item['ROUTE_NAME_EN'] = response.meta['ROUTE_NAME_EN']
+            # item['ROUTE_CODE'] = response.meta['ROUTE_NAME_EN']
             h3text = map.find('h3').text()
-            # item['ROUTE_CODE'] = h3text
+            item['ROUTE_NAME_EN'] = h3text
+            item['ROUTE_CODE'] = h3text
             trs = map.find('table.data tr')
             list = []
             for index, tr in enumerate(trs.items()):
