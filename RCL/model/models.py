@@ -113,7 +113,9 @@ class NewSchedulesDynamicTransit(Base):
     DEL_FLAG = Column(INTEGER(2), server_default=text("'0'"),
                       comment='删除标识0不删除,1删除 (当为2 时候 ,作为下次更新数据的删除标识,删除 这条数据及以前的所有数据)')
     VERSION_NUMBER = Column(INTEGER(11), server_default=text("'0'"), comment='更新的版本，默认0')
+    TRANSIT_SORT = Column(INTEGER(1), server_default=text("'1'"))
     TRANSIT_ID = Column(CHAR(40), index=True)
+
 
 
 class NewSchedulesSpiderPort(Base):

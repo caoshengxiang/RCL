@@ -116,7 +116,7 @@ class MysqlPipeline(object):
 
     def _get_indenty(self, item):
         """
-        根据item的所有值获取主键编码 二版本已弃用
+        根据item的所有值获取主键编码 v2版本已弃用
         :param item:
         :return:
         """
@@ -618,6 +618,7 @@ class MysqlPipeline(object):
         sns.ROUTE_NAME_EN = ROUTE_NAME_EN
         sns.ROUTE_CODE = ROUTE_CODE
         mdd = '%s,%s,%s,%s' % (scac, "NULL", "NULL", ROUTE_CODE)
+        # mdd = '%s,%s,%s,%s' % (scac, ROUTE_PARENT, ROUTE_NAME_EN, ROUTE_CODE)
         main_id = EncrptUtils.md5_str(mdd)
         sns.ID = main_id
 
