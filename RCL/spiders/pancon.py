@@ -79,18 +79,16 @@ class PanconSpider(scrapy.Spider):
             day = str(localtime.tm_mday)
 
             for cnindex, cn in enumerate(self.global_cn_port):
-                # 测试
-                if cnindex != 7:  # DALIAN
-                    continue
+                # # 测试
+                # if cnindex != 7:  # DALIAN
+                #     continue
                 pItem['port'] = cn['PLC_ENM']
                 pItem['portCode'] = cn['COUNTRY_PLC_CD']
                 yield pItem
                 for oincex, other in enumerate(self.global_other_port):
                     # 测试
-                    # if oincex != 19:
+                    # if oincex != 34:  # HAIPHONG
                     #     continue
-                    if oincex != 34:  # HAIPHONG
-                        continue
                     # 港口
                     pItem['port'] = other['PLC_ENM']
                     pItem['portCode'] = other['COUNTRY_PLC_CD']
