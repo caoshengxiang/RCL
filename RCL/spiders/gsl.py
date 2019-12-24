@@ -143,17 +143,17 @@ class GslSpider(scrapy.Spider):
             day = '0' + day
 
         for cnindex, cn in enumerate(self.global_cn_port):
-            # # # 测试
-            # if cn['value'] != 'CNSNH':
-            #     continue
+            # # 测试
+            if cn['value'] != 'CNNTG':
+                continue
             pItem['port'] = cn['name']
             pItem['portCode'] = cn['value']
             yield pItem
             for oincex, other in enumerate(self.global_other_port):
-                # # #测试
-                # if other['value'] != 'IDJKT':
-                #     continue
-                # 港口
+                # #测试
+                if other['value'] != 'INCCU':
+                    continue
+                #港口
                 pItem['port'] = other['name']
                 pItem['portCode'] = other['value']
                 yield pItem
@@ -281,8 +281,8 @@ class GslSpider(scrapy.Spider):
                                 row['ETA'] = self.deal_with_date(tds.eq(5).text())
                                 row['TRANSIT_LIST'].append({
                                     'TRANSIT_PORT_EN': tds.eq(4).text().split(' , ')[1],
-                                    'TRANS_VESSEL': '',
-                                    'TRANS_VOYAGE': '',
+                                    'TRANS_VESSEL': tds.eq(0).text(),
+                                    'TRANS_VOYAGE': tds.eq(2).text(),
                                 })
                         logging.info(row)
                         for field in gItem.fields:
