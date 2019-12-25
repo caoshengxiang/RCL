@@ -5,6 +5,7 @@
 # Date:      2019/12/3
 # Desc:      there is a python file description
 # ------------------------------------------------------------------
+import importlib
 import json
 import re
 import time
@@ -128,15 +129,15 @@ class Spider:
         with open('test.json', 'w+') as f:
             json.dump(saves, f)
 
+class Tsn:
+    pass
 
 if __name__ == '__main__':
     # test_ial()
     # session = HTMLSession()
-    url = 'http://www.interasia.cc/content/c_service/sailing_schedule.aspx?SiteID=1'
-    s = Spider()
-    s.start(url)
-    time.sleep(2)
-    with open('test.json', 'r') as f:
-        res = json.load(f)
-    for k, v in res.items():
-        test_ial(v)
+    mod=importlib.import_module('RCL.items')
+    gg=getattr(mod,'GroupItem')
+    eval('GroupItem')
+    print(gg)
+
+    pass

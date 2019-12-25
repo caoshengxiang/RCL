@@ -2,6 +2,7 @@
 import datetime
 import json
 import logging
+import re
 
 import scrapy
 from pyquery import PyQuery as pq
@@ -126,11 +127,13 @@ class MatsonSpider(scrapy.Spider):
                 for tstl in transitList:
                     if 'days' in tstl:
                         TRANSIT_TIME += int(tstl.split(' ')[0])
-
             today = datetime.datetime.now()
             current_month = today.month
             etd = data.get('departure')
             eta = data.get('arrival')
+            _etdtime_suffix_str = etd.split(' ')[-1]
+            _etatime_suffix_str = eta.split(' ')[-1]
+
             etd_str = etd.split(' ')[3]
             eta_str = eta.split(' ')[3]
             etd_year = today.year
@@ -143,8 +146,8 @@ class MatsonSpider(scrapy.Spider):
                 etd_year = int(etd_year) + 1
             if int(current_month) > int(eta_month):
                 eta_year = int(eta_year) + 1
-            ETD = '{}-{}-{}'.format(etd_year, etd_month, etd_day)
-            ETA = '{}-{}-{}'.format(eta_year, eta_month, eta_day)
+            ETD = '{}-{}-{}'.format(etd_year, etd_month, etd_day) + ' ' + _etdtime_suffix_str
+            ETA = '{}-{}-{}'.format(eta_year, eta_month, eta_day) + ' ' + _etatime_suffix_str
 
             row = {
                 'ROUTE_CODE': '',

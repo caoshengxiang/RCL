@@ -6,6 +6,7 @@ import requests
 import scrapy
 from pyquery import PyQuery as pq
 from scrapy import FormRequest
+from scrapy.utils.project import get_project_settings
 
 from RCL.items import PortGroupItem, PortItem, GroupItem
 
@@ -49,8 +50,9 @@ class TslSpider(scrapy.Spider):
         next2_month = '0' + next2_month
     next2_year = (int((int(month) + 2) / 12) + int(year))
 
-    def __init__(self,**kwargs):
+    def __init__(self, *args, **kwargs):
         self._init_brower()
+        super(TslSpider, self).__init__(*args, **kwargs)
 
     def _init_brower(self):
         chrome_options = Options()
@@ -61,8 +63,8 @@ class TslSpider(scrapy.Spider):
         No_Image_loading = {"profile.managed_default_content_settings.images": 2}
         chrome_options.add_experimental_option("prefs", No_Image_loading)
         # chrome_options.binary_location = r"D:\soft\googlechrome\Application\77.0.3865.120\chrome.exe"
-        # epath = "D:/work/chromedriver.exe"
-        epath = "/usr/bin/chromedriver"
+        settings = get_project_settings()
+        epath = settings.get('EXECUTABLE_PATH')
         self.driver = webdriver.Chrome(executable_path=epath, chrome_options=chrome_options)
         # 设置超时，双重保险,设置后derver 就死了
         self.driver.set_page_load_timeout(30)
