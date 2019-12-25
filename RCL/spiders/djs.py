@@ -234,7 +234,7 @@ class DjsSpider(scrapy.Spider):
         logging.info(vv)
         row = {
             'ROUTE_CODE': response.meta['ROUTE_CODE'],
-            'ETD': table.find('tr:nth-child(4) > td:nth-child(2)').text(),
+            'ETD': table.find('tr:nth-child(4) > td:nth-child(2)').text().split('(')[0],
             'VESSEL': vv[0],
             'VOYAGE': vv[1],
             'ETA': '',
@@ -251,7 +251,7 @@ class DjsSpider(scrapy.Spider):
             row['IS_TRANSIT'] = 1
             for num in range(1, step_num):
                 eta = table.find('tr').eq(3 + base_num * num).find('td').eq(3).text()
-                row['ETA'] = eta
+                row['ETA'] = eta.split('(')[0]
                 transit_vv = table.find('tr').eq(1 + base_num * num).find('td').eq(1).text().split('\xa0')
                 row['TRANSIT_LIST'].append({
                     'TRANSIT_PORT_EN': table.find('tr').eq(1 + base_num * (num - 1)).find('td').eq(5).text(),
@@ -261,7 +261,7 @@ class DjsSpider(scrapy.Spider):
 
 
         else:
-            row['ETA'] = table.find('tr:nth-child(4) > td:nth-child(4)').text()
+            row['ETA'] = table.find('tr:nth-child(4) > td:nth-child(4)').text().split('(')[0]
         logging.info(row)
         for field in gItem.fields:
             if field in row.keys():

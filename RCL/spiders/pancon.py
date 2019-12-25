@@ -194,8 +194,17 @@ class PanconSpider(scrapy.Spider):
                 sp = pol.split(' / ')
                 logging.info(sp)
                 if item.get('SEC_SEQ') == 1:
-                    row['ETD'] = item.get('POL_REVISED_APDP_DATE', '')[:8]
-                    row['ETA'] = item.get('POD_REVISED_APDP_DATE', '')[:8]
+                    # POL_REVISED_APDP_DATE = item.get('POL_REVISED_APDP_DATE', '')
+                    # POL_REVISED_APDP_TM = item.get('POL_REVISED_APDP_TM', '')
+                    # POD_REVISED_APDP_DATE = item.get('POD_REVISED_APDP_DATE', '')
+                    # POD_REVISED_APDP_TM = item.get('POD_REVISED_APDP_TM', '')
+
+
+                    row['ETD'] = item.get('POL_REVISED_APDP_DATE', '') + item.get('POL_REVISED_APDP_TM', '')
+                    row['ETA'] = item.get('POD_REVISED_APDP_DATE', '') + item.get('POD_REVISED_APDP_TM', '')
+
+
+
                     row['POL_TERMINAL'] = item.get('POL', '').split(' / ')[1]
                     row['VESSEL'] = item.get('VSL_NM')
                     row['VOYAGE'] = item.get('IMP_VOY_NO')
@@ -210,7 +219,7 @@ class PanconSpider(scrapy.Spider):
                             POD_item = fitler_li(item.get('POD_REVISED_APDP_DATE') + item.get('POD_REVISED_APDP_TM'),
                                                  SEC_SEQ2)
                             row['POD_TERMINAL'] = POD_item.get('POD', '').split(' / ')[1]
-                            row['ETA'] = POD_item.get('POD_REVISED_APDP_DATE', '')[:8]
+                            row['ETA'] = POD_item.get('POD_REVISED_APDP_DATE', '') + item.get('POD_REVISED_APDP_TM', '')
                             row['IS_TRANSIT'] = 1
                             # row['TRANSIT_TIME'] += int(POD_item.get('TT', '0'))
                             row['TRANSIT_LIST'].append({
@@ -221,7 +230,7 @@ class PanconSpider(scrapy.Spider):
                         if len(SEC_SEQ3) > 0:
                             POD_item = fitler_li(item.get('POD_REVISED_APDP_DATE') + item.get('POD_REVISED_APDP_TM'),
                                                  SEC_SEQ3)
-                            # row['ETA'] = POD_item.get('POD_ETA', '')
+                            row['ETA'] = POD_item.get('POD_REVISED_APDP_DATE', '') + item.get('POD_REVISED_APDP_TM', '')
                             row['POD_TERMINAL'] = POD_item.get('POD', '').split(' / ')[1]
                             row['IS_TRANSIT'] = 1
                             # row['TRANSIT_TIME'] += int(POD_item.get('TT', '0'))
@@ -237,8 +246,9 @@ class PanconSpider(scrapy.Spider):
                                                   int(etd_s[6:8]))
                         date2 = datetime.datetime(int(eta_s[0:4]), int(eta_s[4:6]),
                                                   int(eta_s[6:8]))
-                        logging.info(date1)
-                        logging.info(date2)
+
+                        row['ETD'] = f'{etd_s[0:4]}-{etd_s[4:6]}-{etd_s[6:8]} {etd_s[8:10]}:{etd_s[10:]}:00'
+                        row['ETA'] = f'{eta_s[0:4]}-{eta_s[4:6]}-{eta_s[6:8]} {eta_s[8:10]}:{eta_s[10:]}:00'
                         row['TRANSIT_TIME'] = (date2 - date1).days
                     except Exception as e:
                         pass
