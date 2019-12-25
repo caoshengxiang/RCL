@@ -358,7 +358,6 @@ class MysqlPipeline(object):
                     "TRANSIT_PORT_CODE": boolean_none(transitInfo.get('TRANSIT_PORT_CODE')),
                     "TRANSIT_VESSEL": boolean_none(transitInfo.get('TRANS_VESSEL')),
                     "TRANSIT_VOYAGE": boolean_none(transitInfo.get('TRANS_VOYAGE')),
-
                 })
 
                 # 生成中转关联id

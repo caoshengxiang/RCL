@@ -3,6 +3,8 @@ import json
 import logging
 import math
 import time
+
+from scrapy.utils.project import get_project_settings
 from selenium import webdriver
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.chrome.options import Options
@@ -38,7 +40,7 @@ class IalSpider(scrapy.Spider):
         }
     }
 
-    def __init__(self, name=None,**kwargs):
+    def __init__(self, *args, **kwargs):
         chrome_options = Options()
         chrome_options.add_argument('--headless')
         chrome_options.add_argument("--no-sandbox")
@@ -46,16 +48,11 @@ class IalSpider(scrapy.Spider):
         chrome_options.add_argument('--disable-dev-shm-usage')
         No_Image_loading = {"profile.managed_default_content_settings.images": 2}
         chrome_options.add_experimental_option("prefs", No_Image_loading)
-        epath = "/usr/bin/chromedriver"
+        settings =get_project_settings()
+        epath=settings.get('EXECUTABLE_PATH')
         # chrome_options.binary_location = r"D:\soft\googlechrome\Application\77.0.3865.120\chrome.exe"
-        # epath = "D:/work/chromedriver.exe"
         self.driver = webdriver.Chrome(executable_path=epath, chrome_options=chrome_options)
-
-        # chrome_options = Options()
-        # # chrome_options.add_argument('--headless')
-        # No_Image_loading = {"profile.managed_default_content_settings.images": 2}
-        # chrome_options.add_experimental_option("prefs", No_Image_loading)
-        # self.driver = webdriver.Chrome(chrome_options=chrome_options)
+        super(IalSpider, self).__init__(*args, **kwargs)
 
     def parse(self, response):
         pgItem = PortGroupItem()

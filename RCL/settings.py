@@ -42,6 +42,9 @@ RETRY_HTTP_CODECS = [500, 502, 503, 504, 408, 401, 400, 403, 505,
 DEFAULT_REQUEST_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.62 Safari/537.36'
 }
+# chrome浏览器驱动位置
+# EXECUTABLE_PATH='D:/work/chromedriver.exe'
+EXECUTABLE_PATH='/usr/bin/chromedriver'
 
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
