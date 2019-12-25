@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import datetime
 
 BOT_NAME = 'RCL'
 SPIDER_MODULES = ['RCL.spiders']
@@ -8,6 +7,7 @@ NEWSPIDER_MODULE = 'RCL.spiders'
 MONGO_URI = '49.235.131.71:27017'
 MONGO_DB = 'rcltest'
 # 日志
+import datetime
 today = datetime.datetime.now()
 log_file_path = '/opt/logs/scrapy_{}_{}_{}.log'.format(today.year, today.month, today.day)
 LOG_LEVEL = 'WARNING'  # WARNING DEBUG
