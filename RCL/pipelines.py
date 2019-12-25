@@ -328,7 +328,7 @@ class MysqlPipeline(object):
             relation_id = insert_rel_sql_key
             log.info('写入静态航线和动态航线关联关系')
             insert_rel_sql = """
-                       insert into new_schedules_static_p2p values('%s','%s','%s','%s') on duplicate key update id=values(ID)
+                       insert into new_schedules_static_p2p values('%s','%s','%d','%s') on duplicate key update ID=values(ID)
                        """ % (relation_id, scac, port_res.ID, main_id)
             CommonDao.native_update(sql=insert_rel_sql)
 

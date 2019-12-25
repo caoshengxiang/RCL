@@ -114,13 +114,17 @@ class CommonDao:
         :param commit: 是否提交
         :return: 影响行数
         """
-        cls._check_params(sql, params)
-        sql = sql.strip()
-        stmt = text(sql)
-        res = db_session.execute(stmt, params) if params else db_session.execute(stmt)
-        if commit:
-            db_session.commit()
-        return res.rowcount if commit else 0
+        res = None
+        try:
+            cls._check_params(sql, params)
+            sql = sql.strip()
+            stmt = text(sql)
+            res = db_session.execute(stmt, params) if params else db_session.execute(stmt)
+            if commit:
+                db_session.commit()
+        except Exception as e:
+            db_session.rollback()
+        return res.rowcount if commit and res else 0
 
     @classmethod
     def _check_params(cls, sql, params):
