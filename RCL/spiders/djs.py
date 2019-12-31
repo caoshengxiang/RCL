@@ -78,13 +78,16 @@ class DjsSpider(scrapy.Spider):
 
         for request in self.get_calendar(year, month):
             yield request
+
         # next month
         nextYear = year
         if int(month) + 1 > 12:
             nextYear = str(int(nextYear) + 1)
-            nextMonth = '1'
+            nextMonth = '01'
         else:
             nextMonth = str(int(month) + 1)
+        if len(nextMonth) == 1:
+            nextMonth = '0' + nextMonth
 
         for request in self.get_calendar(nextYear, nextMonth):
             yield request
@@ -161,16 +164,19 @@ class DjsSpider(scrapy.Spider):
             for td in tds.items():
                 try:
                     day = td.children("font:first").text()
-                    logging.debug(day)
-                    if day and int(day) >= int(time.localtime().tm_mday):
+                    # logging.debug(day)
+                    # if day and int(day) >= int(time.localtime().tm_mday):
+                    if day:
                         aEles = td.find('a')
+                        if not aEles:
+                            logging.info('无数据')
                         for a in aEles.items():
                             paramHrefStr = a.attr('href')
                             # logging.info(paramHrefStr)
                             if paramHrefStr:
                                 reP = re.compile(r'[\'](.*?)[\']', re.S)
                                 param = re.findall(reP, paramHrefStr)
-                                logging.info(param)
+                                # logging.info(param)
                                 yield FormRequest(url=self.url,
                                                   method='POST',
                                                   meta={
@@ -206,7 +212,7 @@ class DjsSpider(scrapy.Spider):
                     pass
 
     def parse_detail(self, response):
-        # 港口和港口组合 如果连续连个月日历都没有数据 会不存。 待下次查询到数据补上（这样做原因是下拉得港口取不到五字码，只能在详情里面取）
+        # 港口和港口组合 如果连续两个月日历都没有数据 会不存。 待下次查询到数据补上（这样做原因是下拉得港口取不到五字码，只能在详情里面取）
         pItem = PortItem()
         pgItem = PortGroupItem()
 
@@ -231,7 +237,7 @@ class DjsSpider(scrapy.Spider):
         step_num = int((trs_len - 1) / base_num)
         gItem = GroupItem()
         vv = table.find('tr:nth-child(2) > td:nth-child(2)').text().split('\xa0')
-        logging.info(vv)
+        # logging.info(vv)
         row = {
             'ROUTE_CODE': response.meta['ROUTE_CODE'],
             'ETD': table.find('tr:nth-child(4) > td:nth-child(2)').text().split('(')[0],
