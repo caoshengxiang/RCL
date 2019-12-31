@@ -3,9 +3,7 @@
 BOT_NAME = 'RCL'
 SPIDER_MODULES = ['RCL.spiders']
 NEWSPIDER_MODULE = 'RCL.spiders'
-# mongo 配置
-MONGO_URI = '49.235.131.71:27017'
-MONGO_DB = 'rcltest'
+
 # 日志
 import datetime
 today = datetime.datetime.now()
@@ -22,7 +20,7 @@ CONCURRENT_REQUESTS = 100
 # Configure a delay for requests for the same website (default: 0)
 # 下载延迟
 RANDOMIZE_DOWNLOAD_DELAY = True
-DOWNLOAD_DELAY = 0.15
+DOWNLOAD_DELAY = 0.2
 # 默认： 8 将对任何单个域执行的并发（即，并发）请求的最大数量。
 CONCURRENT_REQUESTS_PER_DOMAIN = 32
 # 默认： 0,将对任何单个IP执行的并发（即，并发）请求的最大数量
@@ -83,6 +81,11 @@ HOST = 'rm-bp19hl3624ib44ai5o.mysql.rds.aliyuncs.com',
 # HOST = '120.79.92.101',
 PORT = 3306,
 DB_NAME = 'sp_out',
+
+# mongo  测试的
+MONGO_URI = '49.235.131.71:27017'
+MONGO_DB = 'rcltest'
+
 # 代理
 XDAILI_URL = 'http://dec.ip3366.net/api/?key=22249951182224995118&getnum=50&area=1&order=2&splits=%2C'
 
